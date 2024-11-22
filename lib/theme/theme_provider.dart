@@ -14,7 +14,7 @@ class ThemeProvider extends ChangeNotifier {
       primaryColor: Colors.blue,
       scaffoldBackgroundColor: Colors.white,
       textTheme: const TextTheme(
-        bodyMedium: TextStyle(color: Colors.black), // Main text in light theme
+        bodyMedium: TextStyle(color: Colors.black), 
       ),
     );
   }
@@ -22,10 +22,10 @@ class ThemeProvider extends ChangeNotifier {
   ThemeData get darkTheme {
     return ThemeData(
       brightness: Brightness.dark,
-      primaryColor: Colors.cyan[700], // Sea blue
-      scaffoldBackgroundColor: Colors.cyan[900], // Darker sea blue
+      primaryColor: Colors.cyan[700],
+      scaffoldBackgroundColor: Colors.cyan[900], 
       textTheme: const TextTheme(
-        bodyMedium: TextStyle(color: Colors.yellow), // Main text in dark theme
+        bodyMedium: TextStyle(color: Colors.black87), 
       ),
     );
   }

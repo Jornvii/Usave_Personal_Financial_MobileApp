@@ -36,7 +36,7 @@ class SettingsScreen extends StatelessWidget {
           ),
           SwitchListTile(
             title: const Text('Theme'),
-            subtitle: const Text('Light'),
+            // subtitle: const Text('Light'),
             value: themeProvider.isLightTheme,
             onChanged: (value) {
               themeProvider.toggleTheme();

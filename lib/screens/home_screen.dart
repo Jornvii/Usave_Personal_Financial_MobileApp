@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../widgets/transactions_screen.dart';
 import 'chat_bot.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -31,7 +32,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         body: const TabBarView(
           children: [
-            ReportTab(),
+            TransactionsScreen(),
             ChatBotTab(),
           ],
         ),

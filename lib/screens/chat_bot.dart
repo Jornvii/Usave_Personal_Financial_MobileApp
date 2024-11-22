@@ -63,7 +63,7 @@ class _ChatBotTabState extends State<ChatBotTab> {
               itemBuilder: (context, index) {
                 final isUser = textChat[index]["role"] == "user";
                 final isAnimated =
-                    textChat[index]["animated"] == "true"; // Check if animated
+                    textChat[index]["animated"] == "true"; 
                 return Align(
                   alignment:
                       isUser ? Alignment.centerRight : Alignment.centerLeft,
