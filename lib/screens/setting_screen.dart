@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../theme/theme_provider.dart';
+
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
@@ -11,7 +12,7 @@ class SettingsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
       ),
       body: ListView(
@@ -36,8 +37,8 @@ class SettingsScreen extends StatelessWidget {
           ),
           SwitchListTile(
             title: const Text('Theme'),
-            // subtitle: const Text('Light'),
-            value: themeProvider.isLightTheme,
+            subtitle: Text(themeProvider.isDarkTheme ?  'Dark' :'Light'),
+            value: themeProvider.isDarkTheme,
             onChanged: (value) {
               themeProvider.toggleTheme();
             },

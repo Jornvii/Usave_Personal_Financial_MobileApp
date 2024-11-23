@@ -52,7 +52,13 @@ class _ChatBotTabState extends State<ChatBotTab> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
+    final secondaryColor = theme.colorScheme.secondary;
+    final errorColor = theme.colorScheme.error;
+
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Column(
         children: [
           Expanded(
@@ -62,16 +68,14 @@ class _ChatBotTabState extends State<ChatBotTab> {
               padding: const EdgeInsets.all(10),
               itemBuilder: (context, index) {
                 final isUser = textChat[index]["role"] == "user";
-                final isAnimated =
-                    textChat[index]["animated"] == "true"; 
+                final isAnimated = textChat[index]["animated"] == "true";
                 return Align(
-                  alignment:
-                      isUser ? Alignment.centerRight : Alignment.centerLeft,
+                  alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
                   child: Container(
                     margin: const EdgeInsets.symmetric(vertical: 5),
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: isUser ? Colors.blue[100] : Colors.grey[300],
+                      color: isUser ? primaryColor.withOpacity(0.2) : secondaryColor.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     constraints: BoxConstraints(
@@ -84,14 +88,14 @@ class _ChatBotTabState extends State<ChatBotTab> {
                           isUser ? "You" : "Bot",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: isUser ? Colors.blue : Colors.black,
+                            color: isUser ? primaryColor : secondaryColor,
                           ),
                         ),
                         const SizedBox(height: 5),
                         isUser
                             ? Text(
                                 textChat[index]["text"] ?? "",
-                                style: const TextStyle(fontSize: 16),
+                                style: TextStyle(fontSize: 16, color: theme.textTheme.bodyMedium!.color),
                               )
                             : isAnimated
                                 ? AnimatedTextKit(
@@ -99,12 +103,11 @@ class _ChatBotTabState extends State<ChatBotTab> {
                                     animatedTexts: [
                                       TypewriterAnimatedText(
                                         textChat[index]["text"] ?? "",
-                                        textStyle: const TextStyle(
+                                        textStyle: TextStyle(
                                           fontSize: 16,
-                                          color: Colors.black,
+                                          color: theme.textTheme.bodyMedium!.color,
                                         ),
-                                        speed:
-                                            const Duration(milliseconds: 50),
+                                        speed: const Duration(milliseconds: 50),
                                       ),
                                     ],
                                     onFinished: () {
@@ -115,7 +118,7 @@ class _ChatBotTabState extends State<ChatBotTab> {
                                   )
                                 : Text(
                                     textChat[index]["text"] ?? "",
-                                    style: const TextStyle(fontSize: 16),
+                                    style: TextStyle(fontSize: 16, color: theme.textTheme.bodyMedium!.color),
                                   ),
                       ],
                     ),
@@ -134,7 +137,7 @@ class _ChatBotTabState extends State<ChatBotTab> {
                     decoration: InputDecoration(
                       hintText: "Type a message...",
                       filled: true,
-                      fillColor: Colors.grey[200],
+                      fillColor: theme.colorScheme.secondary.withOpacity(0.1),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(20),
                         borderSide: BorderSide.none,
@@ -155,9 +158,9 @@ class _ChatBotTabState extends State<ChatBotTab> {
                         },
                   child: CircleAvatar(
                     radius: 25,
-                    backgroundColor: Colors.blue,
+                    backgroundColor: loading ? errorColor : primaryColor,
                     child: loading
-                        ? const CircularProgressIndicator(color: Colors.white)
+                        ? CircularProgressIndicator(color: theme.scaffoldBackgroundColor)
                         : const Icon(Icons.send, color: Colors.white),
                   ),
                 ),

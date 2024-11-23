@@ -5,10 +5,16 @@ import 'screens/report_page.dart';
 import 'screens/setting_screen.dart';
 import 'theme/theme_provider.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize ThemeProvider and load the saved theme
+  final themeProvider = ThemeProvider();
+  await themeProvider.loadTheme(); // Load the saved theme preference
+
   runApp(
     ChangeNotifierProvider(
-      create: (context) => ThemeProvider(),
+      create: (_) => themeProvider,
       child: const MyApp(),
     ),
   );
@@ -23,8 +29,10 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: themeProvider.isLightTheme ? themeProvider.lightTheme : themeProvider.darkTheme,
       title: 'Financial Manager',
+      theme: themeProvider.lightTheme,
+      darkTheme: themeProvider.darkTheme,
+      themeMode: themeProvider.isDarkTheme ? ThemeMode.dark : ThemeMode.light,
       home: const MainScreen(),
     );
   }
