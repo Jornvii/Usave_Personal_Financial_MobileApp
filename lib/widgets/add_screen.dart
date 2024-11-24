@@ -13,7 +13,7 @@ class AddTransactionScreen extends StatefulWidget {
 class _AddTransactionScreenState extends State<AddTransactionScreen> {
   bool isIncome = true;
   String selectedCategory = '';
-  DateTime transactionDate = DateTime.now();
+  DateTime? transactionDate; // Nullable to track if a date is selected
   final TextEditingController amountController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
 
@@ -42,7 +42,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   void _pickDate() async {
     final pickedDate = await showDatePicker(
       context: context,
-      initialDate: transactionDate,
+      initialDate: transactionDate ?? DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
@@ -55,6 +55,16 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   void _addTransaction() {
     if (_formKey.currentState!.validate()) {
+      if (transactionDate == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please select a date for the transaction'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+        return;
+      }
+
       final newTransaction = {
         'category': selectedCategory,
         'amount': double.parse(amountController.text),
@@ -62,6 +72,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         'description': descriptionController.text,
         'date': transactionDate,
       };
+
       Navigator.pop(context, newTransaction);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -87,6 +98,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             key: _formKey,
             child: Column(
               children: [
+                // Toggle for Income/Expense
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -130,6 +142,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   ],
                 ),
                 const SizedBox(height: 20),
+
+                // Amount Field
                 TextFormField(
                   controller: amountController,
                   decoration: InputDecoration(
@@ -152,6 +166,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   },
                 ),
                 const SizedBox(height: 20),
+
+                // Category Dropdown
                 DropdownButtonFormField<String>(
                   value: selectedCategory.isEmpty ? null : selectedCategory,
                   decoration: InputDecoration(
@@ -183,6 +199,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   },
                 ),
                 const SizedBox(height: 20),
+
+                // Date Picker
                 TextFormField(
                   readOnly: true,
                   onTap: _pickDate,
@@ -192,10 +210,20 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    hintText: DateFormat('yyyy-MM-dd').format(transactionDate),
+                    hintText: transactionDate == null
+                        ? 'Select a date'
+                        : DateFormat('yyyy-MM-dd').format(transactionDate!),
                   ),
+                  validator: (value) {
+                    if (transactionDate == null) {
+                      return 'Date is required';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 20),
+
+                // Description Field
                 TextFormField(
                   controller: descriptionController,
                   decoration: InputDecoration(
@@ -209,6 +237,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   maxLines: 3,
                 ),
                 const SizedBox(height: 30),
+
+                // Add Transaction Button
                 ElevatedButton(
                   onPressed: _addTransaction,
                   style: ElevatedButton.styleFrom(

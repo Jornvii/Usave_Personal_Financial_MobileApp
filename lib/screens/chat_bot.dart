@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_gemini/google_gemini.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 
+import '../models/chat_db.dart'; // Ensure this file has ChatDB implemented.
+
 const apiKey = "AIzaSyDVxpqdwdpaP2lfWVF8XfNCv9fAcvxwmS8";
 
 class ChatBotTab extends StatefulWidget {
@@ -13,35 +15,88 @@ class ChatBotTab extends StatefulWidget {
 
 class _ChatBotTabState extends State<ChatBotTab> {
   bool loading = false;
-  final List<Map<String, String>> textChat = [];
+  List<Map<String, String>> textChat = [];
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final gemini = GoogleGemini(apiKey: apiKey);
+  final chatDatabase = ChatDB(); // Reference to ChatDB.
 
+  @override
+  void initState() {
+    super.initState();
+    _loadChatHistory();
+  }
+
+  /// Load saved messages from database.
+  Future<void> _loadChatHistory() async {
+    // Fetch messages from the database
+    final messages = await chatDatabase.fetchMessages();
+
+    setState(() {
+      textChat = messages
+          .map((message) => {
+                "role": message["role"] as String,
+                "text": message["text"] as String,
+                "animated": "false", // Reset animation when loading
+              })
+          .toList();
+    });
+  }
+
+  /// Save message to database.
+  Future<void> _saveMessage(Map<String, String> message) async {
+    final existingMessages = await chatDatabase.fetchMessages();
+    final isDuplicate = existingMessages.any((existingMessage) =>
+        existingMessage["role"] == message["role"] &&
+        existingMessage["text"] == message["text"]);
+
+    if (!isDuplicate) {
+      await chatDatabase.insertMessage(message);
+    }
+  }
+
+  /// Handle user input and bot response.
   void fromText({required String query}) {
+    if (loading) return; // Prevent duplicate bot responses during loading.
+
     setState(() {
       loading = true;
-      textChat.add({"role": "user", "text": query});
+      final userMessage = {"role": "user", "text": query, "animated": "false"};
+      textChat.add(userMessage);
+      _saveMessage(userMessage);
       _textController.clear();
     });
+
     scrollToTheEnd();
 
     gemini.generateFromText(query).then((value) {
       setState(() {
         loading = false;
-        final cleanText = value.text.replaceAll(RegExp(r'\*+'), '');
-        textChat.add({"role": "bot", "text": cleanText, "animated": "true"});
+        final botMessage = {
+          "role": "bot",
+          "text": value.text.replaceAll(RegExp(r'\*+'), ''),
+          "animated": "true",
+        };
+        textChat.add(botMessage);
+        _saveMessage(botMessage);
       });
       scrollToTheEnd();
     }).onError((error, stackTrace) {
       setState(() {
         loading = false;
-        textChat.add({"role": "bot", "text": error.toString(), "animated": "false"});
+        final errorMessage = {
+          "role": "bot",
+          "text": error.toString(),
+          "animated": "false",
+        };
+        textChat.add(errorMessage);
+        _saveMessage(errorMessage);
       });
       scrollToTheEnd();
     });
   }
 
+  /// Scroll to the latest message.
   void scrollToTheEnd() {
     _scrollController.animateTo(
       _scrollController.position.maxScrollExtent,
@@ -70,12 +125,15 @@ class _ChatBotTabState extends State<ChatBotTab> {
                 final isUser = textChat[index]["role"] == "user";
                 final isAnimated = textChat[index]["animated"] == "true";
                 return Align(
-                  alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+                  alignment:
+                      isUser ? Alignment.centerRight : Alignment.centerLeft,
                   child: Container(
                     margin: const EdgeInsets.symmetric(vertical: 5),
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: isUser ? primaryColor.withOpacity(0.2) : secondaryColor.withOpacity(0.2),
+                      color: isUser
+                          ? primaryColor.withOpacity(0.2)
+                          : secondaryColor.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     constraints: BoxConstraints(
@@ -95,7 +153,9 @@ class _ChatBotTabState extends State<ChatBotTab> {
                         isUser
                             ? Text(
                                 textChat[index]["text"] ?? "",
-                                style: TextStyle(fontSize: 16, color: theme.textTheme.bodyMedium!.color),
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    color: theme.textTheme.bodyMedium!.color),
                               )
                             : isAnimated
                                 ? AnimatedTextKit(
@@ -105,7 +165,8 @@ class _ChatBotTabState extends State<ChatBotTab> {
                                         textChat[index]["text"] ?? "",
                                         textStyle: TextStyle(
                                           fontSize: 16,
-                                          color: theme.textTheme.bodyMedium!.color,
+                                          color:
+                                              theme.textTheme.bodyMedium!.color,
                                         ),
                                         speed: const Duration(milliseconds: 50),
                                       ),
@@ -114,11 +175,16 @@ class _ChatBotTabState extends State<ChatBotTab> {
                                       setState(() {
                                         textChat[index]["animated"] = "false";
                                       });
+                                      _saveMessage(textChat[
+                                          index]); // Save updated message in database
                                     },
                                   )
                                 : Text(
                                     textChat[index]["text"] ?? "",
-                                    style: TextStyle(fontSize: 16, color: theme.textTheme.bodyMedium!.color),
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        color:
+                                            theme.textTheme.bodyMedium!.color),
                                   ),
                       ],
                     ),
@@ -160,7 +226,8 @@ class _ChatBotTabState extends State<ChatBotTab> {
                     radius: 25,
                     backgroundColor: loading ? errorColor : primaryColor,
                     child: loading
-                        ? CircularProgressIndicator(color: theme.scaffoldBackgroundColor)
+                        ? CircularProgressIndicator(
+                            color: theme.scaffoldBackgroundColor)
                         : const Icon(Icons.send, color: Colors.white),
                   ),
                 ),

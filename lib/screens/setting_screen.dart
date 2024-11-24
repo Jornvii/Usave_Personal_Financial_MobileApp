@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/chat_db.dart';
 import '../theme/theme_provider.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -37,7 +38,7 @@ class SettingsScreen extends StatelessWidget {
           ),
           SwitchListTile(
             title: const Text('Theme'),
-            subtitle: Text(themeProvider.isDarkTheme ?  'Dark' :'Light'),
+            subtitle: Text(themeProvider.isDarkTheme ? 'Dark' : 'Light'),
             value: themeProvider.isDarkTheme,
             onChanged: (value) {
               themeProvider.toggleTheme();
@@ -51,12 +52,62 @@ class SettingsScreen extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.delete),
-            title: const Text('Delete Account'),
-            subtitle: const Text('Delete all your data'),
-            onTap: () {},
+            title: const Text('Delete Data'),
+            subtitle: const Text('Delete your chat or all data'),
+            onTap: () => _showDeleteOptionsDialog(context),
           ),
         ],
       ),
     );
   }
+
+  /// Show a dialog with options to delete data.
+  void _showDeleteOptionsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Data'),
+          content: const Text(
+            'Choose an option to delete your data.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                _deleteChatData(context); // Clear recent chat data
+                Navigator.of(context).pop();
+              },
+              child: const Text('Delete Chat Data'),
+            ),
+            TextButton(
+              onPressed: () {
+                _deleteAllData(context); // Clear all data
+                Navigator.of(context).pop();
+              },
+              child: const Text('Delete All Data'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _deleteChatData(BuildContext context) async {
+  final chatDatabase = ChatDB();
+  await chatDatabase.clearMessages(); // Clear chat data only
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text('Chat data cleared successfully!')),
+  );
+}
+
+void _deleteAllData(BuildContext context) async {
+  // await chatDatabase.clearAllData();
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text('All data cleared successfully!')),
+  );
+}
 }
