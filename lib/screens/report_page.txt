@@ -1,28 +1,238 @@
-// screens/report_tab.dart
+import 'dart:io';
 import 'package:flutter/material.dart';
-import '../models/financial_data.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:csv/csv.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
+import '../models/transaction_db.dart';
 
-class ReportScreen  extends StatelessWidget {
-  final FinancialData? data;
-  final String? plan;
+class ReportScreen extends StatefulWidget {
+  const ReportScreen({Key? key}) : super(key: key);
 
-  const ReportScreen ({this.data, this.plan, super.key});
+  @override
+  _ReportScreenState createState() => _ReportScreenState();
+}
+
+class _ReportScreenState extends State<ReportScreen> {
+  List<Map<String, dynamic>> transactions = [];
+  DateTimeRange? selectedRange;
+  double totalIncome = 0;
+  double totalExpense = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    final db = TransactionDB();
+    final allTransactions = await db.getTransactions();
+
+    setState(() {
+      transactions = selectedRange == null
+          ? allTransactions
+          : allTransactions.where((transaction) {
+              final date = DateTime.parse(transaction['date']);
+              return date.isAfter(selectedRange!.start) &&
+                  date.isBefore(selectedRange!.end);
+            }).toList();
+
+      totalIncome = transactions
+          .where((t) => t['isIncome'] == 1)
+          .fold(0.0, (sum, t) => sum + t['amount']);
+      totalExpense = transactions
+          .where((t) => t['isIncome'] == 0)
+          .fold(0.0, (sum, t) => sum + t['amount']);
+    });
+  }
+
+  Future<void> _pickDateRange() async {
+    final range = await showDateRangePicker(
+      context: context,
+      initialDateRange: selectedRange ??
+          DateTimeRange(
+            start: DateTime.now().subtract(const Duration(days: 30)),
+            end: DateTime.now(),
+          ),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+
+    if (range != null) {
+      setState(() {
+        selectedRange = range;
+      });
+      _loadData();
+    }
+  }
+
+Future<void> _exportData() async {
+  List<List<String>> csvData = [
+    ['Date', 'Category', 'Description', 'Amount', 'Type'],
+    ...transactions.map<List<String>>((transaction) {
+      return [
+        transaction['date'] as String, // Ensure it's a string
+        transaction['category'] as String,
+        (transaction['description'] ?? '') as String,
+        transaction['amount'].toString(),
+        transaction['isIncome'] == 1 ? 'Income' : 'Expense',
+      ];
+    }).toList(), // Explicitly cast to List<String>
+  ];
+
+  String csv = const ListToCsvConverter().convert(csvData);
+
+  final directory = await getApplicationDocumentsDirectory();
+  final path = "${directory.path}/report.csv";
+  final file = File(path);
+  await file.writeAsString(csv);
+
+  // Use Share with a corrected method for sharing files
+  Share.shareXFiles([XFile(path)], text: "My Transaction Report");
+}
+
+
+  Widget _buildChart() {
+    final chartData = [
+      ChartData(Colors.greenAccent, 'Income', totalIncome),
+      ChartData(Colors.redAccent, 'Expense', totalExpense),
+    ];
+
+    return SfCircularChart(
+      legend: Legend(isVisible: true, position: LegendPosition.bottom),
+      series: <PieSeries<ChartData, String>>[
+        PieSeries<ChartData, String>(
+          dataSource: chartData,
+          pointColorMapper: (ChartData data, _) => data.color,
+          xValueMapper: (ChartData data, _) => data.name,
+          yValueMapper: (ChartData data, _) => data.value,
+          dataLabelSettings: const DataLabelSettings(isVisible: true),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMonthlyComparisonChart() {
+    final groupedData = <String, Map<String, double>>{};
+
+    for (var transaction in transactions) {
+      final date = DateTime.parse(transaction['date']);
+      final monthKey = "${date.year}-${date.month.toString().padLeft(2, '0')}";
+
+      groupedData[monthKey] ??= {'income': 0, 'expense': 0};
+      if (transaction['isIncome'] == 1) {
+        groupedData[monthKey]!['income'] =
+            (groupedData[monthKey]!['income'] ?? 0) + transaction['amount'];
+      } else {
+        groupedData[monthKey]!['expense'] =
+            (groupedData[monthKey]!['expense'] ?? 0) + transaction['amount'];
+      }
+    }
+
+    final chartData = groupedData.entries.map((entry) {
+      return ChartData(
+        Colors.green,
+        entry.key,
+        entry.value['income']!,
+        entry.value['expense']!,
+      );
+    }).toList();
+
+    return SfCartesianChart(
+      primaryXAxis: CategoryAxis(),
+      legend: Legend(isVisible: true),
+      series: <CartesianSeries>[
+        ColumnSeries<ChartData, String>(
+          dataSource: chartData,
+          xValueMapper: (ChartData data, _) => data.name,
+          yValueMapper: (ChartData data, _) => data.income,
+          name: 'Income',
+          color: Colors.green,
+        ),
+        ColumnSeries<ChartData, String>(
+          dataSource: chartData,
+          xValueMapper: (ChartData data, _) => data.name,
+          yValueMapper: (ChartData data, _) => data.expense,
+          name: 'Expense',
+          color: Colors.red,
+        ),
+      ],
+    );
+  }
+
+Widget _buildInsights() {
+  final expenses = transactions.where((t) => t['isIncome'] == 0).toList();
+
+  final highestExpense = expenses.isNotEmpty
+      ? expenses.reduce((curr, next) => curr['amount'] > next['amount'] ? curr : next)
+      : null; // Handle no expenses case
+
+  final averageSavings = transactions.isEmpty
+      ? 0
+      : (totalIncome - totalExpense) / (selectedRange?.duration.inDays ?? 30);
+
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      if (highestExpense != null)
+        Text(
+          "Highest Expense: ${highestExpense['category']} - \$${highestExpense['amount']}",
+          style: const TextStyle(fontSize: 16),
+        )
+      else
+        const Text(
+          "No expenses recorded.",
+          style: TextStyle(fontSize: 16),
+        ),
+      Text(
+        "Average Monthly Savings: \$${averageSavings.toStringAsFixed(2)}",
+        style: const TextStyle(fontSize: 16),
+      ),
+    ],
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: data != null
-          ? Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text("Income: ${data!.income}"),
-                Text("Expenses: ${data!.expenses}"),
-                Text("Savings Goal: ${data!.savingsGoal}"),
-                const SizedBox(height: 20),
-                Text("Plan: $plan"),
-              ],
-            )
-          : const Text("No financial data available."),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Report'),
+        backgroundColor: Colors.blueAccent,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.calendar_today),
+            onPressed: _pickDateRange,
+          ),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            _buildInsights(),
+            Expanded(child: _buildChart()),
+            const SizedBox(height: 20),
+            Expanded(child: _buildMonthlyComparisonChart()),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _exportData,
+        backgroundColor: Colors.blueAccent,
+        child: const Icon(Icons.share),
+      ),
     );
   }
+}
+
+class ChartData {
+  final Color color;
+  final String name;
+  final double value;
+  final double? income;
+  final double? expense;
+
+  ChartData(this.color, this.name, this.value, [this.income, this.expense]);
 }
