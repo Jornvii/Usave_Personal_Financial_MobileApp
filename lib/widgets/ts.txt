@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
-import '../models/transaction_db.dart';
 import 'add_ddtransaction.dart';
 
 class TransactionsScreen extends StatefulWidget {
@@ -14,20 +12,6 @@ class TransactionsScreen extends StatefulWidget {
 class _TransactionsScreenState extends State<TransactionsScreen> {
   DateTime selectedDate = DateTime.now();
   List<Map<String, dynamic>> transactions = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _loadTransactions();
-  }
-
-  Future<void> _loadTransactions() async {
-    final db = TransactionDB();
-    final data = await db.getTransactions();
-    setState(() {
-      transactions = data;
-    });
-  }
 
   void _pickMonth() async {
     final newDate = await showDatePicker(
@@ -52,42 +36,38 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     );
 
     if (newTransaction != null) {
-      final db = TransactionDB();
-      await db.addTransaction({
-        ...newTransaction,
-        'date': DateFormat('yyyy-MM-dd').format(newTransaction['date']),
-        'isIncome': newTransaction['isIncome'] ? 1 : 0, // Convert bool to int
+      setState(() {
+        transactions.add(newTransaction);
       });
-      _loadTransactions(); // Reload transactions
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // Group transactions by date and sort by descending order
     Map<String, List<Map<String, dynamic>>> groupedTransactions = {};
     for (var transaction in transactions) {
-      final dateKey = transaction['date'];
+      final dateKey = DateFormat('yyyy-MM-dd').format(transaction['date']);
       if (groupedTransactions[dateKey] == null) {
         groupedTransactions[dateKey] = [];
       }
       groupedTransactions[dateKey]?.add(transaction);
     }
 
+    // Filter and sort transactions for the selected month
     final filteredTransactions = groupedTransactions.entries.where((entry) {
       final transactionDate = DateTime.parse(entry.key);
       return transactionDate.year == selectedDate.year &&
           transactionDate.month == selectedDate.month;
     }).toList()
       ..sort((a, b) => DateTime.parse(b.key)
-          .compareTo(DateTime.parse(a.key))); // Sort dates descending
+          .compareTo(DateTime.parse(a.key))); 
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Center(child: Text('Transactions')),
-        backgroundColor: Colors.redAccent,
-      ),
+     
       body: Column(
         children: [
+          // Month navigation row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -134,12 +114,14 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                       final dailyTransactions =
                           filteredTransactions[index].value;
 
+                      // Sort transactions by time within the same day
                       dailyTransactions.sort((a, b) =>
                           b['date'].compareTo(a['date'])); // Descending order
 
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          // Date header
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Text(
@@ -155,13 +137,14 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                               ),
                             ),
                           ),
+                          // Transactions for the date
                           ...dailyTransactions.map((transaction) {
                             return ListTile(
                               leading: Icon(
-                                transaction['isIncome'] == 1
+                                transaction['isIncome']
                                     ? Icons.arrow_upward
                                     : Icons.arrow_downward,
-                                color: transaction['isIncome'] == 1
+                                color: transaction['isIncome']
                                     ? Colors.green
                                     : Colors.red,
                               ),
@@ -170,7 +153,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                               trailing: Text(
                                 '${transaction['amount']} USD',
                                 style: TextStyle(
-                                  color: transaction['isIncome'] == 1
+                                  color: transaction['isIncome']
                                       ? Colors.green
                                       : Colors.red,
                                 ),

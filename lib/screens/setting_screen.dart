@@ -74,17 +74,17 @@ class SettingsScreen extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () {
-                _deleteChatData(context); // Clear recent chat data
-                Navigator.of(context).pop();
-              },
-              child: const Text('Delete Chat Data'),
-            ),
-            TextButton(
-              onPressed: () {
                 _deleteAllData(context); // Clear all data
                 Navigator.of(context).pop();
               },
               child: const Text('Delete All Data'),
+            ),
+            TextButton(
+              onPressed: () {
+                _deleteChatData(context); // Clear recent chat data
+                Navigator.of(context).pop();
+              },
+              child: const Text('Delete Chat Data'),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -97,17 +97,17 @@ class SettingsScreen extends StatelessWidget {
   }
 
   void _deleteChatData(BuildContext context) async {
-  final chatDatabase = ChatDB();
-  await chatDatabase.clearMessages(); // Clear chat data only
-  ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(content: Text('Chat data cleared successfully!')),
-  );
-}
+    final chatDatabase = ChatDB();
+    await chatDatabase.clearMessages(); // Clear chat data only
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Chat data cleared successfully!')),
+    );
+  }
 
-void _deleteAllData(BuildContext context) async {
-  // await chatDatabase.clearAllData();
-  ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(content: Text('All data cleared successfully!')),
-  );
-}
+  void _deleteAllData(BuildContext context) async {
+    // await chatDatabase.clearAllData();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('All data cleared successfully!')),
+    );
+  }
 }

@@ -38,13 +38,13 @@ dependencies:
   google_gemini: ^0.1.2
   image_picker: ^1.1.2
   sqflite: ^2.4.1
-  path: ^1.9.0
-  fl_chart: ^0.69.1
   animated_text_kit: ^4.2.2
   provider: ^6.1.2
   table_calendar: ^3.1.2
   intl: ^0.19.0
   shared_preferences: ^2.3.3
+  path_provider: ^2.1.5
+  pie_chart: ^5.4.0
 
 
 dev_dependencies:

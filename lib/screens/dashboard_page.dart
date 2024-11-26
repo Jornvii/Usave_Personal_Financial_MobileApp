@@ -1,50 +1,81 @@
-// screens/dashboard_screen.dart
 import 'package:flutter/material.dart';
-import '../models/financial_data.dart';
+import 'package:pie_chart/pie_chart.dart';
+import 'package:sqflite/sqflite.dart'; // Ensure you've added the sqflite package in pubspec.yaml
 
-class DashboardScreen extends StatelessWidget {
-  final FinancialData? financialData;
+class ReportScreen extends StatefulWidget {
+  const ReportScreen({super.key});
 
-  const DashboardScreen({this.financialData, super.key});
+  @override
+  ReportScreenState createState() => ReportScreenState();
+}
+
+class ReportScreenState extends State<ReportScreen> {
+  final Map<String, double> dataMap = {"Income": 0, "Expense": 0};
+
+  final List<Color> colorList = [
+    Colors.green, // Income
+    Colors.red,   // Expense
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchTransactionData();
+  }
+
+  Future<void> _fetchTransactionData() async {
+    // Replace with your actual database initialization and transaction table structure
+    final database = await openDatabase('transactiondb.db');
+    final List<Map<String, dynamic>> transactions =
+        await database.query('transactions');
+
+    double incomeTotal = 0;
+    double expenseTotal = 0;
+
+    for (var transaction in transactions) {
+      if (transaction['isIncome'] == 1) {
+        incomeTotal += transaction['amount'];
+      } else {
+        expenseTotal += transaction['amount'];
+      }
+    }
+
+    setState(() {
+      dataMap['Income'] = incomeTotal;
+      dataMap['Expense'] = expenseTotal;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Dashboard")),
-      body: financialData != null
-          ? Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Welcome back!",
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  const SizedBox(height: 20),
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          Text("Income: \$${financialData!.income}"),
-                          Text("Expenses: \$${financialData!.expenses}"),
-                          Text("Savings Goal: \$${financialData!.savingsGoal}"),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/report');
-                    },
-                    child: const Text("View Detailed Report"),
-                  ),
-                ],
+      appBar: AppBar(
+        title: const Text("Transaction Report"),
+        backgroundColor: Colors.redAccent,
+      ),
+      body: Center(
+        child: dataMap['Income'] == 0 && dataMap['Expense'] == 0
+            ? const Text(
+                "No data available.",
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+              )
+            : PieChart(
+                dataMap: dataMap,
+                animationDuration: const Duration(milliseconds: 800),
+                chartRadius: MediaQuery.of(context).size.width / 2.5,
+                colorList: colorList,
+                chartType: ChartType.disc,
+                legendOptions: const LegendOptions(
+                  legendPosition: LegendPosition.bottom,
+                  showLegendsInRow: true,
+                ),
+                chartValuesOptions: const ChartValuesOptions(
+                  showChartValueBackground: false,
+                  showChartValues: true,
+                  showChartValuesInPercentage: true,
+                ),
               ),
-            )
-          : const Center(child: Text("No financial data available.")),
+      ),
     );
   }
 }

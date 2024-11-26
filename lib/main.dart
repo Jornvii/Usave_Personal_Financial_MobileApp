@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'screens/dashboard_page.dart';
 import 'screens/home_screen.dart';
-import 'screens/report_page.dart';
 import 'screens/setting_screen.dart';
 import 'theme/theme_provider.dart';
 

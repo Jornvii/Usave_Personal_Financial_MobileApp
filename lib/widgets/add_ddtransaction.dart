@@ -12,8 +12,9 @@ class AddTransactionScreen extends StatefulWidget {
 
 class _AddTransactionScreenState extends State<AddTransactionScreen> {
   bool isIncome = true;
+  bool hasTransactionBeenAdded = false;
   String selectedCategory = '';
-  DateTime? transactionDate; // Nullable to track if a date is selected
+  DateTime? transactionDate;
   final TextEditingController amountController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
 
@@ -37,7 +38,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     'Transportation',
   ];
 
-  final _formKey = GlobalKey<FormState>(); // Key for form validation
+  final _formKey = GlobalKey<FormState>();
 
   void _pickDate() async {
     final pickedDate = await showDatePicker(
@@ -73,6 +74,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         'date': transactionDate,
       };
 
+      setState(() {
+        hasTransactionBeenAdded = true;
+      });
+
       Navigator.pop(context, newTransaction);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -81,6 +86,26 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           backgroundColor: Colors.redAccent,
         ),
       );
+    }
+  }
+
+  void _resetFields() {
+    selectedCategory = '';
+    transactionDate = null;
+    amountController.clear();
+    descriptionController.clear();
+  }
+
+  void _handleToggle(bool incomeSelected) {
+    if (isIncome != incomeSelected && !hasTransactionBeenAdded) {
+      setState(() {
+        isIncome = incomeSelected;
+        _resetFields(); // Reset fields only if no transaction has been added
+      });
+    } else {
+      setState(() {
+        isIncome = incomeSelected;
+      });
     }
   }
 
@@ -103,7 +128,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     GestureDetector(
-                      onTap: () => setState(() => isIncome = true),
+                      onTap: () => _handleToggle(true),
                       child: Container(
                         decoration: BoxDecoration(
                           color: isIncome ? Colors.redAccent : Colors.grey[200],
@@ -121,11 +146,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                       ),
                     ),
                     GestureDetector(
-                      onTap: () => setState(() => isIncome = false),
+                      onTap: () => _handleToggle(false),
                       child: Container(
                         decoration: BoxDecoration(
-                          color:
-                              !isIncome ? Colors.redAccent : Colors.grey[200],
+                          color: !isIncome ? Colors.redAccent : Colors.grey[200],
                           borderRadius: BorderRadius.circular(8),
                         ),
                         padding: const EdgeInsets.symmetric(

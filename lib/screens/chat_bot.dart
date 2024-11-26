@@ -4,7 +4,7 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 
 import '../models/chat_db.dart'; // Ensure this file has ChatDB implemented.
 
-const apiKey = "AIzaSyDVxpqdwdpaP2lfWVF8XfNCv9fAcvxwmS8";
+const apiKey = "AIzaSyDISHUkyGSIRJjt5pb9uGICZpFQbB9o6DA";
 
 class ChatBotTab extends StatefulWidget {
   const ChatBotTab({super.key});
