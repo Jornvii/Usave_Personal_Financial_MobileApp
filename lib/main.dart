@@ -4,7 +4,6 @@ import 'screens/home_screen.dart';
 import 'screens/report_page.dart';
 import 'screens/setting_screen.dart';
 import 'theme/theme_provider.dart';
-import 'widgets/transactions_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

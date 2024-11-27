@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../models/transaction_db.dart';
-import 'add_ddtransaction.dart';
+import '../widgets/add_ddtransaction.dart';
 
 class TransactionsScreen extends StatefulWidget {
   const TransactionsScreen({super.key});
@@ -25,7 +25,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     final db = TransactionDB();
     final data = await db.getTransactions();
     setState(() {
-      transactions = data;
+      transactions = List<Map<String, dynamic>>.from(data); // Make it mutable
     });
   }
 
@@ -82,10 +82,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           .compareTo(DateTime.parse(a.key))); // Sort dates descending
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Center(child: Text('Transactions')),
-        backgroundColor: Colors.redAccent,
-      ),
       body: Column(
         children: [
           Row(
@@ -156,23 +152,73 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                             ),
                           ),
                           ...dailyTransactions.map((transaction) {
-                            return ListTile(
-                              leading: Icon(
-                                transaction['isIncome'] == 1
-                                    ? Icons.arrow_upward
-                                    : Icons.arrow_downward,
-                                color: transaction['isIncome'] == 1
-                                    ? Colors.green
-                                    : Colors.red,
+                            return Dismissible(
+                              key: Key(transaction['id']
+                                  .toString()), // Ensure a unique key
+                              direction: DismissDirection
+                                  .endToStart, // Swipe left-to-right
+                              confirmDismiss: (direction) async {
+                                return await showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text('Confirm Deletion'),
+                                    content: const Text(
+                                        'Are you sure you want to delete this transaction?'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.of(context)
+                                            .pop(false), // Cancel
+                                        child: const Text('Cancel'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () => Navigator.of(context)
+                                            .pop(true), // Confirm
+                                        child: const Text('Delete'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                              onDismissed: (direction) async {
+                                final db = TransactionDB();
+                                await db.deleteTransaction(
+                                    transaction['id']); // Delete from database
+                                setState(() {
+                                  transactions = List.from(
+                                      transactions); // Ensure mutable list
+                                  transactions.removeWhere((t) =>
+                                      t['id'] ==
+                                      transaction['id']); // Remove item
+                                });
+                              },
+
+                              background: Container(
+                                color: Colors.red,
+                                alignment: Alignment.centerRight,
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 20),
+                                child: const Icon(Icons.delete,
+                                    color: Colors.white),
                               ),
-                              title: Text(transaction['category']),
-                              subtitle: Text(transaction['description'] ?? ''),
-                              trailing: Text(
-                                '${transaction['amount']} USD',
-                                style: TextStyle(
+                              child: ListTile(
+                                leading: Icon(
+                                  transaction['isIncome'] == 1
+                                      ? Icons.arrow_upward
+                                      : Icons.arrow_downward,
                                   color: transaction['isIncome'] == 1
                                       ? Colors.green
                                       : Colors.red,
+                                ),
+                                title: Text(transaction['category']),
+                                subtitle:
+                                    Text(transaction['description'] ?? ''),
+                                trailing: Text(
+                                  '${transaction['amount']} USD',
+                                  style: TextStyle(
+                                    color: transaction['isIncome'] == 1
+                                        ? Colors.green
+                                        : Colors.red,
+                                  ),
                                 ),
                               ),
                             );
@@ -186,7 +232,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _openAddTransactionScreen,
-        backgroundColor: Colors.redAccent,
+        backgroundColor: Colors.green,
         child: const Icon(Icons.add),
       ),
     );
