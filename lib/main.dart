@@ -51,7 +51,7 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _screens = [
     const MyHomePage(),
-      ReportScreen(),
+      const ReportScreen(),
     const SettingsScreen(),
   ];
 

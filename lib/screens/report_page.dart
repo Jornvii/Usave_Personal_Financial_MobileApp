@@ -120,9 +120,9 @@ class _ReportScreenState extends State<ReportScreen> {
             child: Card(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15),
-                side: BorderSide(color: Colors.blueGrey, width: 0.5),
+                side: const BorderSide(color: Colors.blueGrey, width: 0.5),
               ),
-              child: Container(
+              child: SizedBox(
                 height: MediaQuery.of(context).size.height * .75,
                 width: MediaQuery.of(context).size.width * .90,
                 child: Column(
@@ -139,7 +139,7 @@ class _ReportScreenState extends State<ReportScreen> {
                         ),
                       ),
                     ),
-                    Divider(
+                    const Divider(
                       color: Colors.grey,
                       thickness: 0.3,
                       endIndent: 10,
@@ -230,9 +230,9 @@ Widget _buildChart() {
 
   if (selectedChartType == 'Line') {
     return SfCartesianChart(
-      primaryXAxis: CategoryAxis(),
-      title: ChartTitle(text: 'Income vs Expense'),
-      legend: Legend(isVisible: true),
+      primaryXAxis: const CategoryAxis(),
+      title: const ChartTitle(text: 'Income vs Expense'),
+      legend: const Legend(isVisible: true),
       series: <CartesianSeries>[
         LineSeries<ChartData, String>(
           dataSource: data,
@@ -244,7 +244,7 @@ Widget _buildChart() {
     );
   } else {
     return SfCircularChart(
-      legend: Legend(
+      legend: const Legend(
         isVisible: true,
         overflowMode: LegendItemOverflowMode.wrap,
         position: LegendPosition.bottom,
