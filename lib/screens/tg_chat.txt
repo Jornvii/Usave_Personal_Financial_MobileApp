@@ -3,14 +3,14 @@ import 'package:google_gemini/google_gemini.dart';
 
 const apiKey = "AIzaSyDISHUkyGSIRJjt5pb9uGICZpFQbB9o6DA";
 
-class ChatBotScreen extends StatefulWidget {
-  const ChatBotScreen({super.key});
+class TgChatBotScreen extends StatefulWidget {
+  const TgChatBotScreen({super.key});
 
   @override
-  State<ChatBotScreen> createState() => _ChatBotScreenState();
+  State<TgChatBotScreen> createState() => _TgChatBotScreenState();
 }
 
-class _ChatBotScreenState extends State<ChatBotScreen> {
+class _TgChatBotScreenState extends State<TgChatBotScreen> {
   final gemini = GoogleGemini(apiKey: apiKey);
   bool loading = false;
   List<Map<String, String>> chatMessages = [];

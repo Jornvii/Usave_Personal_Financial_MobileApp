@@ -82,7 +82,7 @@ Future<void> _loadData() async {
     }
   }
 
-  Future<void> _exportToCSV() async {
+ Future<void> _exportToCSV() async {
     final db = TransactionDB();
     final transactions = await db.getTransactions();
 

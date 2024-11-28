@@ -12,3 +12,5 @@ class FinancialData {
 
   double calculateSavings() => income - expenses;
 }
+
+///note to calculate for bot 

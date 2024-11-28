@@ -1,0 +1,48 @@
+import 'dart:io';
+
+import 'package:csv/csv.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
+
+import '../models/transaction_db.dart';
+
+Future<void> _exportToCSV() async {
+  final db = TransactionDB();
+  final transactions = await db.getTransactions();
+
+  List<List<String>> rows = [];
+  rows.add(['Date', 'Description', 'Amount', 'Type']); // Headers
+
+  for (var transaction in transactions) {
+    rows.add([
+      DateFormat('yyyy-MM-dd').format(DateTime.parse(transaction['date'])),
+      transaction['description'],
+      transaction['amount'].toString(),
+      transaction['isIncome'] == 1 ? 'Income' : 'Expense',
+    ]);
+  }
+
+  String csv = const ListToCsvConverter().convert(rows);
+  final directory = await getExternalStorageDirectory();
+  final path = '${directory!.path}/transactions_report.csv';
+  final file = File(path);
+
+  try {
+    await file.writeAsString(csv);
+    print('Exported to: $path');
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('Data exported to $path'),
+    ));
+
+    // Share the file
+    await Share.shareFiles([file.path], text: 'Here is your transactions report.');
+  } catch (e) {
+    print('Error exporting file: $e');
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      content: Text('Failed to export file'),
+    ));
+  }
+}
