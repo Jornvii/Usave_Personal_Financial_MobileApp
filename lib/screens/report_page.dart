@@ -113,8 +113,8 @@ Future<void> _loadData() async {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Report'),
-        backgroundColor: Colors.blueAccent,
+        title: const Text('Report', style: TextStyle(fontWeight: FontWeight.bold),),
+        // backgroundColor: Colors.blueAccent,
         actions: [
           IconButton(
             icon: const Icon(Icons.date_range),

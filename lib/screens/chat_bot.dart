@@ -253,11 +253,12 @@ Let show the details, calculation...through $inputs to me reach my $category and
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("AI Chat Bot"),
+        title: const Text("AI Chat Bot", style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         actions: [
           Row(
             children: [
-              Text('$selectLanguage'),
+              Text(selectLanguage),
               PopupMenuButton<String>(
                 onSelected: (String value) {
                   if (value != 'Other') {
