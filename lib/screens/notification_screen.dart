@@ -126,7 +126,7 @@ class NotificationCard extends StatelessWidget {
                   radius: 12,
                   backgroundColor: Colors.blueAccent,
                   child: Icon(
-                    Icons.account_circle,
+                    Icons.smart_toy,
                     size: 15,
                     color: Colors.white,
                   ),
