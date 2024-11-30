@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -29,34 +28,51 @@ class UserDB {
         await db.execute('''
           CREATE TABLE user_profile (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT,
-            profile_photo TEXT
+            username TEXT
           )
         ''');
       },
     );
   }
 
-  Future<void> saveUserProfile(String username, String profilePhotoPath) async {
+  // Save or update user profile
+  Future<void> saveOrUpdateUserProfile(String username) async {
     final db = await database;
 
-    await db.insert(
-      'user_profile',
-      {
-        'username': username,
-        'profile_photo': profilePhotoPath,
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    try {
+      await db.insert(
+        'user_profile',
+        {
+          'username': username,
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    } catch (e) {
+      print('Error saving user profile: $e');
+    }
   }
 
+  // Fetch user profile
   Future<Map<String, dynamic>?> fetchUserProfile() async {
     final db = await database;
-    final result = await db.query('user_profile', limit: 1);
 
-    if (result.isNotEmpty) {
-      return result.first;
+    try {
+      final result = await db.query('user_profile', limit: 1);
+      return result.isNotEmpty ? result.first : null;
+    } catch (e) {
+      print('Error fetching user profile: $e');
+      return null;
     }
-    return null;
+  }
+
+  // Delete user profile
+  Future<void> deleteUserProfile() async {
+    final db = await database;
+
+    try {
+      await db.delete('user_profile');
+    } catch (e) {
+      print('Error deleting user profile: $e');
+    }
   }
 }

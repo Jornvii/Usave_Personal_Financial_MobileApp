@@ -386,7 +386,7 @@ Let show the details, calculation...through $inputs to me reach my $category and
                   onPressed: _startChat,
                   label: const Text("Start Chat"),
                   icon: const Icon(Icons.play_arrow),
-                  backgroundColor: Colors.deepPurple,
+                  backgroundColor: const Color.fromARGB(255, 17, 215, 119),
                 ),
               ),
             ],

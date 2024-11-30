@@ -232,7 +232,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _openAddTransactionScreen,
-        backgroundColor: Colors.green,
+        backgroundColor:  const Color.fromARGB(255, 17, 215, 119),
         child: const Icon(Icons.add),
       ),
     );
