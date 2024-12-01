@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_bot/screens/chat_bot.dart';
 import 'package:provider/provider.dart';
+
+import 'provider/langguages_provider.dart'; // Ensure this points to your LanguageProvider
+import 'theme/theme_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/report_page.dart';
+import 'screens/chat_bot.dart';
 import 'screens/setting_screen.dart';
-import 'theme/theme_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,9 +15,17 @@ void main() async {
   final themeProvider = ThemeProvider();
   await themeProvider.loadTheme(); // Load the saved theme preference
 
+  // Initialize LanguageProvider and load the saved language preference
+  final languageProvider = LanguageProvider();
+  await languageProvider.loadLanguage(); // Load the saved language preference
+
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => themeProvider,
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => themeProvider),
+        ChangeNotifierProvider(
+            create: (_) => languageProvider), // Add LanguageProvider
+      ],
       child: const MyApp(),
     ),
   );
@@ -27,6 +37,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final languageProvider = Provider.of<LanguageProvider>(context);
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -35,6 +46,14 @@ class MyApp extends StatelessWidget {
       darkTheme: themeProvider.darkTheme,
       themeMode: themeProvider.isDarkTheme ? ThemeMode.dark : ThemeMode.light,
       home: const MainScreen(),
+      localizationsDelegates: const [], // Add localization if using intl
+      supportedLocales: const [
+        Locale('en'),
+        Locale('th'),
+        Locale('km')
+      ], // Add more as needed
+      locale: Locale(languageProvider.selectedLanguage
+          .toLowerCase()), // Dynamically set locale
     );
   }
 }
@@ -58,6 +77,8 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final languageProvider = Provider.of<LanguageProvider>(context);
+
     return Scaffold(
       body: _screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
@@ -77,22 +98,22 @@ class _MainScreenState extends State<MainScreen> {
         selectedFontSize: 14, // Font size for active item labels
         unselectedFontSize: 12, // Font size for inactive item labels
         type: BottomNavigationBarType.fixed, // Ensures proper label alignment
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: "Home",
+            icon: const Icon(Icons.home),
+            label: languageProvider.translate('home'), // Use translations
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
-            label: "Report",
+            icon: const Icon(Icons.bar_chart),
+            label: languageProvider.translate('report'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.smart_toy),
-            label: "ChatBot",
+            icon: const Icon(Icons.smart_toy),
+            label: languageProvider.translate('chatbot'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: "Settings",
+            icon: const Icon(Icons.settings),
+            label: languageProvider.translate('settings'),
           ),
         ],
       ),

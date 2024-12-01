@@ -4,7 +4,9 @@ import 'package:intl/intl.dart'; // To format dates
 import 'package:path_provider/path_provider.dart'; // To get the local storage path
 import 'package:csv/csv.dart'; // For exporting data to CSV
 import 'dart:io';
+import 'package:provider/provider.dart';
 import '../models/transaction_db.dart';
+import '../provider/langguages_provider.dart'; // Import LanguageProvider
 
 class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});
@@ -19,7 +21,7 @@ class _ReportScreenState extends State<ReportScreen> {
   String selectedChartType = 'Doughnut';
   DateTime? startDate;
   DateTime? endDate;
-  bool isLoading = true; // Added a loading state
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -27,39 +29,37 @@ class _ReportScreenState extends State<ReportScreen> {
     _loadData();
   }
 
-Future<void> _loadData() async {
-  setState(() {
-    isLoading = true; // Show loading spinner
-  });
+  Future<void> _loadData() async {
+    setState(() {
+      isLoading = true;
+    });
 
-  final db = TransactionDB();
+    final db = TransactionDB();
 
-  // Fetch transactions based on the selected date range
-  List<Map<String, dynamic>> transactions;
-  if (startDate != null && endDate != null) {
-    transactions = await db.getTransactionsByDateRange(startDate!, endDate!);
-  } else {
-    transactions = await db.getTransactions(); // Fetch all transactions if no range is selected
-  }
-
-  double income = 0;
-  double expense = 0;
-
-  for (var transaction in transactions) {
-    if (transaction['isIncome'] == 1) {
-      income += transaction['amount'];
+    List<Map<String, dynamic>> transactions;
+    if (startDate != null && endDate != null) {
+      transactions = await db.getTransactionsByDateRange(startDate!, endDate!);
     } else {
-      expense += transaction['amount'];
+      transactions = await db.getTransactions();
     }
+
+    double income = 0;
+    double expense = 0;
+
+    for (var transaction in transactions) {
+      if (transaction['isIncome'] == 1) {
+        income += transaction['amount'];
+      } else {
+        expense += transaction['amount'];
+      }
+    }
+
+    setState(() {
+      totalIncome = income;
+      totalExpense = expense;
+      isLoading = false;
+    });
   }
-
-  setState(() {
-    totalIncome = income;
-    totalExpense = expense;
-    isLoading = false; // Data loading complete
-  });
-}
-
 
   Future<void> _selectDateRange() async {
     final selectedDateRange = await showDateRangePicker(
@@ -77,17 +77,16 @@ Future<void> _loadData() async {
         endDate = selectedDateRange.end;
       });
 
-      // Reload data filtered by date range if needed
-      _loadData(); // Add filtering logic if necessary
+      _loadData();
     }
   }
 
- Future<void> _exportToCSV() async {
+  Future<void> _exportToCSV() async {
     final db = TransactionDB();
     final transactions = await db.getTransactions();
 
     List<List<String>> rows = [];
-    rows.add(['Date', 'Description', 'Amount', 'Type']); // Headers
+    rows.add(['Date', 'Description', 'Amount', 'Type']);
 
     for (var transaction in transactions) {
       rows.add([
@@ -105,16 +104,21 @@ Future<void> _loadData() async {
 
     await file.writeAsString(csv);
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('Data exported to $path'),
+      content: Text(
+          '${Provider.of<LanguageProvider>(context, listen: false).translate('data_exported')} $path'),
     ));
   }
 
   @override
   Widget build(BuildContext context) {
+    final languageProvider = Provider.of<LanguageProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Report', style: TextStyle(fontWeight: FontWeight.bold),),
-        // backgroundColor: Colors.blueAccent,
+        title: Text(
+          languageProvider.translate('report'),
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.date_range),
@@ -128,7 +132,7 @@ Future<void> _loadData() async {
       ),
       body: Center(
         child: isLoading
-            ? const CircularProgressIndicator() // Display loading indicator
+            ? const CircularProgressIndicator()
             : SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -147,13 +151,12 @@ Future<void> _loadData() async {
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Text(
-                              "Balance: \$${(totalIncome - totalExpense).toStringAsFixed(2)}",
+                              "${languageProvider.translate('balance')}: \$${(totalIncome - totalExpense).toStringAsFixed(2)}",
                               style: TextStyle(
                                 fontSize: 20,
                                 color: (totalIncome - totalExpense) < 0
                                     ? Colors.red
                                     : Colors.green,
-                                letterSpacing: 0.3,
                               ),
                             ),
                           ),
@@ -163,11 +166,11 @@ Future<void> _loadData() async {
                             endIndent: 10,
                             indent: 10,
                           ),
-                          _buildSummary(),
+                          _buildSummary(languageProvider),
                           const SizedBox(height: 20),
-                          _buildChartTypeSelector(),
+                          _buildChartTypeSelector(languageProvider),
                           const SizedBox(height: 20),
-                          Expanded(child: _buildChart()),
+                          Expanded(child: _buildChart(languageProvider)),
                         ],
                       ),
                     ),
@@ -178,7 +181,7 @@ Future<void> _loadData() async {
     );
   }
 
-  Widget _buildSummary() {
+  Widget _buildSummary(LanguageProvider languageProvider) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Row(
@@ -186,9 +189,10 @@ Future<void> _loadData() async {
         children: [
           Column(
             children: [
-              const Text(
-                "Income",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              Text(
+                languageProvider.translate('income'),
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               Text(
                 "\$${totalIncome.toStringAsFixed(2)}",
@@ -201,9 +205,10 @@ Future<void> _loadData() async {
           ),
           Column(
             children: [
-              const Text(
-                "Expense",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              Text(
+                languageProvider.translate('expense'),
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               Text(
                 "\$${totalExpense.toStringAsFixed(2)}",
@@ -219,7 +224,7 @@ Future<void> _loadData() async {
     );
   }
 
-  Widget _buildChartTypeSelector() {
+  Widget _buildChartTypeSelector(LanguageProvider languageProvider) {
     return DropdownButton<String>(
       value: selectedChartType,
       onChanged: (value) {
@@ -227,29 +232,31 @@ Future<void> _loadData() async {
           selectedChartType = value!;
         });
       },
-      items: const [
+      items: [
         DropdownMenuItem(
           value: 'Doughnut',
-          child: Text('Donut Chart'),
+          child: Text(languageProvider.translate('donut_chart')),
         ),
         DropdownMenuItem(
           value: 'Line',
-          child: Text('Line Chart'),
+          child: Text(languageProvider.translate('line_chart')),
         ),
       ],
     );
   }
 
-  Widget _buildChart() {
+  Widget _buildChart(LanguageProvider languageProvider) {
     final data = [
-      ChartData(Colors.greenAccent, 'Income', totalIncome),
-      ChartData(Colors.redAccent, 'Expense', totalExpense),
+      ChartData(Colors.greenAccent, languageProvider.translate('income'),
+          totalIncome),
+      ChartData(Colors.redAccent, languageProvider.translate('expense'),
+          totalExpense),
     ];
 
     if (selectedChartType == 'Line') {
       return SfCartesianChart(
         primaryXAxis: const CategoryAxis(),
-        title: const ChartTitle(text: 'Income vs Expense'),
+        title: ChartTitle(text: languageProvider.translate('income_vs_expense')),
         legend: const Legend(isVisible: true),
         series: <CartesianSeries>[
           LineSeries<ChartData, String>(

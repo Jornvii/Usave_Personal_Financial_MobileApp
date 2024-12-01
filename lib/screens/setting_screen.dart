@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/chat_db.dart';
 import '../models/saving_db.dart';
+import '../provider/langguages_provider.dart';
 import '../theme/theme_provider.dart';
 import '../widgets/profile_widget.dart';
 
@@ -22,7 +23,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _fetchSavingGoal();
   }
 
-  /// Fetch the saving goal from the database.
   Future<void> _fetchSavingGoal() async {
     final goal = await _savingGoalDB.fetchSavingGoal();
     setState(() {
@@ -30,7 +30,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
   }
 
-  /// Save or update the saving goal in the database.
   Future<void> _saveSavingGoal(double goal) async {
     await _savingGoalDB.saveSavingGoal(goal);
     setState(() {
@@ -41,116 +40,132 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final languageProvider = Provider.of<LanguageProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Settings',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          languageProvider.translate('settings'),
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
       ),
       body: ListView(
         children: [
-
-
-UserProfileWidget (),
-
-          // ListTile(
-          //   leading: const Icon(Icons.person),
-          //   title: const Text('Profile'),
-          //   onTap: () {},
-          // ),
-
-
-
-
+          const UserProfileWidget(),
           ListTile(
             leading: const Icon(Icons.category),
-            title: const Text('Category'),
-            subtitle: const Text('View your categories'),
+            title: Text(languageProvider.translate('category')),
+            subtitle: Text(languageProvider.translate('view_categories')),
             onTap: () {},
           ),
           ListTile(
             leading: const Icon(Icons.savings),
-            title: const Text('Saving Goal'),
+            title: Text(languageProvider.translate('saving_goal')),
             subtitle: Text(
               _savingGoal == null
-                  ? 'Not set'
-                  : 'Your saving goal: $_savingGoal',
+                  ? languageProvider.translate('not_set')
+                  : '${languageProvider.translate('your_saving_goal')}: $_savingGoal',
             ),
             onTap: () async {
               if (_savingGoal != null) {
-                // Ask the user if they want to edit the saving goal
-                final shouldEdit = await _showEditConfirmationDialog(context);
+                final shouldEdit = await _showEditConfirmationDialog(context, languageProvider);
                 if (shouldEdit == true) {
-                  await _showSavingGoalDialog(context);
+                  await _showSavingGoalDialog(context, languageProvider);
                 }
               } else {
-                // Prompt to set saving goal directly
-                await _showSavingGoalDialog(context);
+                await _showSavingGoalDialog(context, languageProvider);
               }
             },
           ),
           ListTile(
             leading: const Icon(Icons.language),
-            title: const Text('Language'),
-            subtitle: const Text('English'),
-            onTap: () {},
+            title: Text(languageProvider.translate('language')),
+            subtitle: Text(languageProvider.translate(languageProvider.selectedLanguage.toLowerCase())),
+            onTap: () => _showLanguageSelectionDialog(context, languageProvider),
           ),
           SwitchListTile(
-            title: const Text('Theme'),
-            subtitle: Text(themeProvider.isDarkTheme ? 'Dark' : 'Light'),
+            title: Text(languageProvider.translate('theme')),
+            subtitle: Text(
+              themeProvider.isDarkTheme
+                  ? languageProvider.translate('dark')
+                  : languageProvider.translate('light'),
+            ),
             value: themeProvider.isDarkTheme,
-            onChanged: (value) {
-              themeProvider.toggleTheme();
-            },
+            onChanged: (value) => themeProvider.toggleTheme(),
           ),
           ListTile(
             leading: const Icon(Icons.download),
-            title: const Text('Export data'),
-            subtitle: const Text('Export data to excel'),
+            title: Text(languageProvider.translate('export_data')),
+            subtitle: Text(languageProvider.translate('export_to_excel')),
             onTap: () {},
           ),
           ListTile(
             leading: const Icon(Icons.delete),
-            title: const Text('Delete Data'),
-            subtitle: const Text('Delete your chat or all data'),
-            onTap: () => _showDeleteOptionsDialog(context),
+            title: Text(languageProvider.translate('delete_data')),
+            subtitle: Text(languageProvider.translate('delete_chat_or_all')),
+            onTap: () => _showDeleteOptionsDialog(context, languageProvider),
           ),
         ],
       ),
     );
   }
 
-  /// Show a dialog with options to delete data.
-  void _showDeleteOptionsDialog(BuildContext context) {
+  void _showLanguageSelectionDialog(BuildContext context, LanguageProvider languageProvider) {
+    final languages = ['English', 'Thai', 'Khmer'];
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Delete Data'),
-          content: const Text(
-            'Choose an option to delete your data.',
+          title: Text(languageProvider.translate('select_language')),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: languages.map((language) {
+              return RadioListTile<String>(
+                title: Text(languageProvider.translate(language.toUpperCase())),
+                value: language,
+                groupValue: languageProvider.selectedLanguage,
+                onChanged: (value) {
+                  if (value != null) {
+                    languageProvider.setLanguage(value);
+                    Navigator.of(context).pop();
+                  }
+                },
+              );
+            }).toList(),
           ),
+        );
+      },
+    );
+  }
+
+  void _showDeleteOptionsDialog(BuildContext context, LanguageProvider languageProvider) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(languageProvider.translate('delete_data')),
+          content: Text(languageProvider.translate('choose_delete_option')),
           actions: [
             TextButton(
               onPressed: () {
-                _deleteAllData(context); // Clear all data
+                _deleteAllData(context, languageProvider);
                 Navigator.of(context).pop();
               },
-              child: const Text('Delete All Data'),
+              child: Text(languageProvider.translate('delete_all')),
             ),
             TextButton(
               onPressed: () {
-                _deleteChatData(context); // Clear recent chat data
+                _deleteChatData(context, languageProvider);
                 Navigator.of(context).pop();
               },
-              child: const Text('Delete Chat Data'),
+              child: Text(languageProvider.translate('delete_chat')),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
+              child: Text(languageProvider.translate('cancel')),
             ),
           ],
         );
@@ -158,37 +173,36 @@ UserProfileWidget (),
     );
   }
 
-  void _deleteChatData(BuildContext context) async {
+  void _deleteChatData(BuildContext context, LanguageProvider languageProvider) async {
     final chatDatabase = ChatDB();
-    await chatDatabase.clearMessages(); // Clear chat data only
+    await chatDatabase.clearMessages();
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Chat data cleared successfully!')),
+      SnackBar(content: Text(languageProvider.translate('chat_data_cleared'))),
     );
   }
 
-  void _deleteAllData(BuildContext context) async {
-    // await chatDatabase.clearAllData();
+  void _deleteAllData(BuildContext context, LanguageProvider languageProvider) async {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('All data cleared successfully!')),
+      SnackBar(content: Text(languageProvider.translate('all_data_cleared'))),
     );
   }
 
-  /// Show a dialog asking the user if they want to edit the saving goal.
-  Future<bool?> _showEditConfirmationDialog(BuildContext context) async {
+  Future<bool?> _showEditConfirmationDialog(
+      BuildContext context, LanguageProvider languageProvider) async {
     return showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Edit Saving Goal'),
-          content: const Text('Do you want to edit your saving goal?'),
+          title: Text(languageProvider.translate('edit_saving_goal')),
+          content: Text(languageProvider.translate('edit_saving_goal_question')),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(false), // Don't edit
-              child: const Text('No'),
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(languageProvider.translate('no')),
             ),
             TextButton(
-              onPressed: () => Navigator.of(context).pop(true), // Edit
-              child: const Text('Yes'),
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(languageProvider.translate('yes')),
             ),
           ],
         );
@@ -196,27 +210,26 @@ UserProfileWidget (),
     );
   }
 
-  /// Show a dialog to set or update the saving goal.
-  Future<void> _showSavingGoalDialog(BuildContext context) async {
+  Future<void> _showSavingGoalDialog(
+      BuildContext context, LanguageProvider languageProvider) async {
     final TextEditingController controller = TextEditingController();
 
     await showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Set Your Saving Goal'),
+          title: Text(languageProvider.translate('set_saving_goal')),
           content: TextField(
             controller: controller,
             keyboardType: TextInputType.number,
-            decoration:
-                const InputDecoration(hintText: 'Enter saving goal amount'),
+            decoration: InputDecoration(
+              hintText: languageProvider.translate('enter_saving_goal'),
+            ),
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: const Text('Cancel'),
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(languageProvider.translate('cancel')),
             ),
             TextButton(
               onPressed: () async {
@@ -224,12 +237,12 @@ UserProfileWidget (),
                 if (input.isNotEmpty) {
                   final goal = double.tryParse(input);
                   if (goal != null) {
-                    await _saveSavingGoal(goal); // Save to database
+                    await _saveSavingGoal(goal);
                   }
                 }
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
               },
-              child: const Text('Submit'),
+              child: Text(languageProvider.translate('submit')),
             ),
           ],
         );
