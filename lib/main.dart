@@ -7,6 +7,7 @@ import 'screens/home_screen.dart';
 import 'screens/report_page.dart';
 import 'screens/chat_bot.dart';
 import 'screens/setting_screen.dart';
+import 'widgets/list_totalamount.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,14 +47,14 @@ class MyApp extends StatelessWidget {
       darkTheme: themeProvider.darkTheme,
       themeMode: themeProvider.isDarkTheme ? ThemeMode.dark : ThemeMode.light,
       home: const MainScreen(),
+      // home: const ListSummaryScreen(),
       localizationsDelegates: const [], // Add localization if using intl
       supportedLocales: const [
         Locale('en'),
         Locale('th'),
         Locale('km')
       ], // Add more as needed
-      locale: Locale(languageProvider.selectedLanguage
-          .toLowerCase()), // Dynamically set locale
+      locale: Locale(languageProvider.selectedLanguage.toLowerCase()),
     );
   }
 }

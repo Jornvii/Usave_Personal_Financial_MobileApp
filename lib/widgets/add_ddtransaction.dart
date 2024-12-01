@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../models/category_db.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   final DateTime selectedDate;
@@ -18,13 +19,17 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   final TextEditingController amountController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
 
-  final List<String> incomeCategories = [
+  List<String> incomeCategories = []; // Will store Income categories
+  List<String> expenseCategories = []; // Will store Expense categories
+
+  // Default categories
+  final List<String> defaultIncomeCategories = [
     'Interests',
     'Sales',
     'Bonus',
-    'Salary'
+    'Salary',
   ];
-  final List<String> expenseCategories = [
+  final List<String> defaultExpenseCategories = [
     'Miscellaneous',
     'Childcare',
     'Business Expense',
@@ -39,6 +44,37 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   ];
 
   final _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCategories();
+  }
+
+  // Load categories from the database and merge with default categories
+  Future<void> _loadCategories() async {
+    final db = CategoryDB();
+    final allCategories = await db.getCategories();
+
+    setState(() {
+      // Combine default categories with those fetched from the database
+      incomeCategories = [
+        ...defaultIncomeCategories,
+        ...allCategories
+            .where((cat) => cat['type'] == 'Income')
+            .map((cat) => cat['name'] as String)
+            .toList()
+      ];
+
+      expenseCategories = [
+        ...defaultExpenseCategories,
+        ...allCategories
+            .where((cat) => cat['type'] == 'Expense')
+            .map((cat) => cat['name'] as String)
+            .toList()
+      ];
+    });
+  }
 
   void _pickDate() async {
     final pickedDate = await showDatePicker(
@@ -149,7 +185,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                       onTap: () => _handleToggle(false),
                       child: Container(
                         decoration: BoxDecoration(
-                          color: !isIncome ? Colors.redAccent : Colors.grey[200],
+                          color:
+                              !isIncome ? Colors.redAccent : Colors.grey[200],
                           borderRadius: BorderRadius.circular(8),
                         ),
                         padding: const EdgeInsets.symmetric(

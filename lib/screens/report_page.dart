@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:intl/intl.dart'; // To format dates
@@ -6,7 +7,8 @@ import 'package:csv/csv.dart'; // For exporting data to CSV
 import 'dart:io';
 import 'package:provider/provider.dart';
 import '../models/transaction_db.dart';
-import '../provider/langguages_provider.dart'; // Import LanguageProvider
+import '../provider/langguages_provider.dart';
+import '../widgets/list_totalamount.dart'; // Import LanguageProvider
 
 class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});
@@ -125,9 +127,19 @@ class _ReportScreenState extends State<ReportScreen> {
             onPressed: _selectDateRange,
           ),
           IconButton(
-            icon: const Icon(Icons.file_copy),
-            onPressed: _exportToCSV,
-          ),
+  icon: const Icon(Icons.view_list),
+  onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ListSummaryScreen()),
+    );
+  },
+),
+
+          // IconButton(
+          //   icon: const Icon(Icons.file_copy),
+          //   onPressed: _exportToCSV,
+          // ),
         ],
       ),
       body: Center(
@@ -139,8 +151,6 @@ class _ReportScreenState extends State<ReportScreen> {
                   child: Card(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15),
-                      side:
-                          const BorderSide(color: Colors.blueGrey, width: 0.5),
                     ),
                     child: SizedBox(
                       height: MediaQuery.of(context).size.height * .75,

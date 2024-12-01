@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/chat_db.dart';
 import '../models/saving_db.dart';
+import '../models/transaction_db.dart';
 import '../provider/langguages_provider.dart';
 import '../theme/theme_provider.dart';
 import '../widgets/profile_widget.dart';
+import 'category_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -58,7 +60,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leading: const Icon(Icons.category),
             title: Text(languageProvider.translate('category')),
             subtitle: Text(languageProvider.translate('view_categories')),
-            onTap: () {},
+            onTap: () {
+              // Navigate to CategoryScreen
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => CategoryScreen()),
+              );
+            },
           ),
           ListTile(
             leading: const Icon(Icons.savings),
@@ -70,7 +78,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             onTap: () async {
               if (_savingGoal != null) {
-                final shouldEdit = await _showEditConfirmationDialog(context, languageProvider);
+                final shouldEdit = await _showEditConfirmationDialog(
+                    context, languageProvider);
                 if (shouldEdit == true) {
                   await _showSavingGoalDialog(context, languageProvider);
                 }
@@ -82,8 +91,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ListTile(
             leading: const Icon(Icons.language),
             title: Text(languageProvider.translate('language')),
-            subtitle: Text(languageProvider.translate(languageProvider.selectedLanguage.toLowerCase())),
-            onTap: () => _showLanguageSelectionDialog(context, languageProvider),
+            subtitle: Text(languageProvider
+                .translate(languageProvider.selectedLanguage.toLowerCase())),
+            onTap: () =>
+                _showLanguageSelectionDialog(context, languageProvider),
           ),
           SwitchListTile(
             title: Text(languageProvider.translate('theme')),
@@ -112,7 +123,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _showLanguageSelectionDialog(BuildContext context, LanguageProvider languageProvider) {
+  void _showLanguageSelectionDialog(
+      BuildContext context, LanguageProvider languageProvider) {
     final languages = ['English', 'Thai', 'Khmer'];
 
     showDialog(
@@ -141,7 +153,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _showDeleteOptionsDialog(BuildContext context, LanguageProvider languageProvider) {
+  void _showDeleteOptionsDialog(
+      BuildContext context, LanguageProvider languageProvider) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -173,7 +186,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _deleteChatData(BuildContext context, LanguageProvider languageProvider) async {
+  void _deleteChatData(
+      BuildContext context, LanguageProvider languageProvider) async {
     final chatDatabase = ChatDB();
     await chatDatabase.clearMessages();
     ScaffoldMessenger.of(context).showSnackBar(
@@ -181,10 +195,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _deleteAllData(BuildContext context, LanguageProvider languageProvider) async {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(languageProvider.translate('all_data_cleared'))),
-    );
+ void _deleteAllData(BuildContext context, LanguageProvider languageProvider) async {
+  // Clear all data from the database
+  await TransactionDB().clearTransactions();
+// Show a confirmation message after clearing data
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(languageProvider.translate('all_data_cleared'))),
+  );
   }
 
   Future<bool?> _showEditConfirmationDialog(
@@ -194,7 +211,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(languageProvider.translate('edit_saving_goal')),
-          content: Text(languageProvider.translate('edit_saving_goal_question')),
+          content:
+              Text(languageProvider.translate('edit_saving_goal_question')),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
