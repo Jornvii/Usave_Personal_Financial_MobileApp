@@ -150,7 +150,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add Transaction'),
-        backgroundColor: Colors.redAccent,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -160,47 +159,50 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             child: Column(
               children: [
                 // Toggle for Income/Expense
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    GestureDetector(
-                      onTap: () => _handleToggle(true),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: isIncome ? Colors.redAccent : Colors.grey[200],
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
-                        child: Text(
-                          'Income',
-                          style: TextStyle(
-                            color: isIncome ? Colors.white : Colors.black54,
-                            fontWeight: FontWeight.bold,
+                Padding(
+                  padding: const EdgeInsets.only(top: 15,bottom: 15),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      GestureDetector(
+                        onTap: () => _handleToggle(true),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: isIncome ? const Color.fromARGB(255, 0, 255, 8) : Colors.grey[200],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
+                          child: Text(
+                            'Income',
+                            style: TextStyle(
+                              color: isIncome ? Colors.black87 : Colors.black54,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    GestureDetector(
-                      onTap: () => _handleToggle(false),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color:
-                              !isIncome ? Colors.redAccent : Colors.grey[200],
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
-                        child: Text(
-                          'Expense',
-                          style: TextStyle(
-                            color: !isIncome ? Colors.white : Colors.black54,
-                            fontWeight: FontWeight.bold,
+                      GestureDetector(
+                        onTap: () => _handleToggle(false),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color:
+                                !isIncome ? const Color.fromARGB(255, 244, 26, 11) : Colors.grey[200],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
+                          child: Text(
+                            'Expense',
+                            style: TextStyle(
+                              color: !isIncome ? Colors.white : Colors.black54,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 20),
 
@@ -295,15 +297,15 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  maxLines: 3,
+                  maxLines: 4,
                 ),
-                const SizedBox(height: 30),
+                const SizedBox(height: 40),
 
                 // Add Transaction Button
                 ElevatedButton(
                   onPressed: _addTransaction,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.redAccent,
+                    backgroundColor:const Color.fromARGB(255, 52, 214, 136),
                     padding: const EdgeInsets.symmetric(
                         horizontal: 32, vertical: 12),
                     shape: RoundedRectangleBorder(
@@ -312,7 +314,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   ),
                   child: const Text(
                     'Add Transaction',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold,color: Colors.black),
                   ),
                 ),
               ],

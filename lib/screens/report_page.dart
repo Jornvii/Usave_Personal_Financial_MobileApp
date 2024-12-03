@@ -1,14 +1,13 @@
-
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:intl/intl.dart'; // To format dates
-import 'package:path_provider/path_provider.dart'; // To get the local storage path
-import 'package:csv/csv.dart'; // For exporting data to CSV
+import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:csv/csv.dart';
 import 'dart:io';
 import 'package:provider/provider.dart';
 import '../models/transaction_db.dart';
 import '../provider/langguages_provider.dart';
-import '../widgets/list_totalamount.dart'; // Import LanguageProvider
+import '../widgets/list_totalamount.dart';
 
 class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});
@@ -127,19 +126,15 @@ class _ReportScreenState extends State<ReportScreen> {
             onPressed: _selectDateRange,
           ),
           IconButton(
-  icon: const Icon(Icons.view_list),
-  onPressed: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => ListSummaryScreen()),
-    );
-  },
-),
-
-          // IconButton(
-          //   icon: const Icon(Icons.file_copy),
-          //   onPressed: _exportToCSV,
-          // ),
+            icon: const Icon(Icons.view_list),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const ListSummaryScreen()),
+              );
+            },
+          ),
         ],
       ),
       body: Center(
@@ -177,9 +172,7 @@ class _ReportScreenState extends State<ReportScreen> {
                             indent: 10,
                           ),
                           _buildSummary(languageProvider),
-                          const SizedBox(height: 20),
-                          _buildChartTypeSelector(languageProvider),
-                          const SizedBox(height: 20),
+                          // const SizedBox(height: 20),
                           Expanded(child: _buildChart(languageProvider)),
                         ],
                       ),
@@ -234,27 +227,6 @@ class _ReportScreenState extends State<ReportScreen> {
     );
   }
 
-  Widget _buildChartTypeSelector(LanguageProvider languageProvider) {
-    return DropdownButton<String>(
-      value: selectedChartType,
-      onChanged: (value) {
-        setState(() {
-          selectedChartType = value!;
-        });
-      },
-      items: [
-        DropdownMenuItem(
-          value: 'Doughnut',
-          child: Text(languageProvider.translate('donut_chart')),
-        ),
-        DropdownMenuItem(
-          value: 'Line',
-          child: Text(languageProvider.translate('line_chart')),
-        ),
-      ],
-    );
-  }
-
   Widget _buildChart(LanguageProvider languageProvider) {
     final data = [
       ChartData(Colors.greenAccent, languageProvider.translate('income'),
@@ -263,39 +235,23 @@ class _ReportScreenState extends State<ReportScreen> {
           totalExpense),
     ];
 
-    if (selectedChartType == 'Line') {
-      return SfCartesianChart(
-        primaryXAxis: const CategoryAxis(),
-        title: ChartTitle(text: languageProvider.translate('income_vs_expense')),
-        legend: const Legend(isVisible: true),
-        series: <CartesianSeries>[
-          LineSeries<ChartData, String>(
-            dataSource: data,
-            xValueMapper: (ChartData data, _) => data.name,
-            yValueMapper: (ChartData data, _) => data.value,
-            color: Colors.blue,
-          ),
-        ],
-      );
-    } else {
-      return SfCircularChart(
-        legend: const Legend(
-          isVisible: true,
-          overflowMode: LegendItemOverflowMode.wrap,
-          position: LegendPosition.bottom,
+    return SfCircularChart(
+      legend: const Legend(
+        isVisible: true,
+        overflowMode: LegendItemOverflowMode.wrap,
+        position: LegendPosition.bottom,
+      ),
+      series: <CircularSeries>[
+        DoughnutSeries<ChartData, String>(
+          dataSource: data,
+          pointColorMapper: (ChartData data, _) => data.color,
+          xValueMapper: (ChartData data, _) => data.name,
+          yValueMapper: (ChartData data, _) => data.value,
+          radius: '70%',
+          dataLabelSettings: const DataLabelSettings(isVisible: true),
         ),
-        series: <CircularSeries>[
-          DoughnutSeries<ChartData, String>(
-            dataSource: data,
-            pointColorMapper: (ChartData data, _) => data.color,
-            xValueMapper: (ChartData data, _) => data.name,
-            yValueMapper: (ChartData data, _) => data.value,
-            radius: '70%',
-            dataLabelSettings: const DataLabelSettings(isVisible: true),
-          ),
-        ],
-      );
-    }
+      ],
+    );
   }
 }
 

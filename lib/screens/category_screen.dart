@@ -38,13 +38,11 @@ class _CategoryScreenState extends State<CategoryScreen> {
     _loadCategories();
   }
 
-  // Load categories from the database
   Future<void> _loadCategories() async {
     List<Map<String, dynamic>> categories = await CategoryDB().getCategories();
     List<Map<String, dynamic>> income = [];
     List<Map<String, dynamic>> expense = [];
 
-    // Separate default and new categories
     for (var category in categories) {
       if (category['type'] == 'Income') {
         income.add(category);
@@ -153,7 +151,33 @@ class _CategoryScreenState extends State<CategoryScreen> {
                 ...newCategories.map((category) => Dismissible(
                       key: Key(category['id'].toString()),
                       direction: DismissDirection.endToStart,
-                      onDismissed: (direction) => _deleteCategory(category),
+                      confirmDismiss: (direction) async {
+                        return await showDialog<bool>(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: const Text('Delete Category'),
+                              content: const Text(
+                                  'Are you sure you want to delete this category?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.of(context).pop(false),
+                                  child: const Text('Cancel'),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () =>
+                                      Navigator.of(context).pop(true),
+                                  child: const Text('Delete'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                      onDismissed: (direction) async {
+                        _deleteCategory(category);
+                      },
                       background: Container(
                         color: Colors.red,
                         alignment: Alignment.centerRight,
@@ -181,10 +205,9 @@ class _CategoryScreenState extends State<CategoryScreen> {
     );
   }
 
-  // Show dialog to add new category
   void _showAddCategoryDialog(BuildContext context) {
     final TextEditingController categoryController = TextEditingController();
-    String selectedType = 'Income'; // Default selection
+    String selectedType = 'Income';
 
     showDialog(
       context: context,
@@ -235,7 +258,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                     'name': newCategory,
                     'type': selectedType,
                   });
-                  _loadCategories(); // Refresh the list
+                  _loadCategories();
                   Navigator.pop(context);
                 }
               },
@@ -247,34 +270,11 @@ class _CategoryScreenState extends State<CategoryScreen> {
     );
   }
 
-  // Delete category with confirmation dialog
   void _deleteCategory(Map<String, dynamic> category) async {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Delete Category'),
-          content: const Text('Are you sure you want to delete this category?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                await CategoryDB().deleteCategory(category['id']);
-                _loadCategories(); // Refresh the list
-                Navigator.pop(context);
-              },
-              child: const Text('Delete'),
-            ),
-          ],
-        );
-      },
-    );
+    await CategoryDB().deleteCategory(category['id']);
+    _loadCategories();
   }
 
-  // Show dialog to edit category
   void _showEditCategoryDialog(
       BuildContext context, Map<String, dynamic> category) {
     final TextEditingController categoryController =
@@ -330,7 +330,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                     'name': updatedCategory,
                     'type': selectedType,
                   });
-                  _loadCategories(); // Refresh the list
+                  _loadCategories();
                   Navigator.pop(context);
                 }
               },
