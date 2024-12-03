@@ -64,7 +64,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               // Navigate to CategoryScreen
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => CategoryScreen()),
+                MaterialPageRoute(builder: (context) => const CategoryScreen()),
               );
             },
           ),
@@ -107,17 +107,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onChanged: (value) => themeProvider.toggleTheme(),
           ),
           ListTile(
-            leading: const Icon(Icons.download),
-            title: Text(languageProvider.translate('export_data')),
-            subtitle: Text(languageProvider.translate('export_to_excel')),
-            onTap: () {},
-          ),
-          ListTile(
             leading: const Icon(Icons.delete),
             title: Text(languageProvider.translate('delete_data')),
-            subtitle: Text(languageProvider.translate('delete_chat_or_all')),
+            // subtitle: Text(languageProvider.translate('delete_chat_or_all')),
             onTap: () => _showDeleteOptionsDialog(context, languageProvider),
           ),
+          ListTile(
+            leading: const Icon(Icons.error),
+            title: Text(languageProvider.translate('About Us')),
+            onTap: () {},
+          ),
+          const Padding(
+            padding: EdgeInsets.all(20),
+            child: Text(
+              "version 1.0.1",
+              style: TextStyle(color: Colors.grey),
+            ),
+          )
         ],
       ),
     );
@@ -195,13 +201,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
- void _deleteAllData(BuildContext context, LanguageProvider languageProvider) async {
-  // Clear all data from the database
-  await TransactionDB().clearTransactions();
+  void _deleteAllData(
+      BuildContext context, LanguageProvider languageProvider) async {
+    // Clear all data from the database
+    await TransactionDB().clearTransactions();
 // Show a confirmation message after clearing data
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text(languageProvider.translate('all_data_cleared'))),
-  );
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(languageProvider.translate('all_data_cleared'))),
+    );
   }
 
   Future<bool?> _showEditConfirmationDialog(

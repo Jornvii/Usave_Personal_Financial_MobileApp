@@ -7,25 +7,23 @@ import 'screens/home_screen.dart';
 import 'screens/report_page.dart';
 import 'screens/chat_bot.dart';
 import 'screens/setting_screen.dart';
-import 'widgets/list_totalamount.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize ThemeProvider and load the saved theme
-  final themeProvider = ThemeProvider();
-  await themeProvider.loadTheme(); // Load the saved theme preference
 
-  // Initialize LanguageProvider and load the saved language preference
+  final themeProvider = ThemeProvider();
+  await themeProvider.loadTheme();
+  
   final languageProvider = LanguageProvider();
-  await languageProvider.loadLanguage(); // Load the saved language preference
+  await languageProvider.loadLanguage(); 
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => themeProvider),
         ChangeNotifierProvider(
-            create: (_) => languageProvider), // Add LanguageProvider
+            create: (_) => languageProvider),
       ],
       child: const MyApp(),
     ),
@@ -47,8 +45,8 @@ class MyApp extends StatelessWidget {
       darkTheme: themeProvider.darkTheme,
       themeMode: themeProvider.isDarkTheme ? ThemeMode.dark : ThemeMode.light,
       home: const MainScreen(),
-      // home: const ListSummaryScreen(),
-      localizationsDelegates: const [], // Add localization if using intl
+      // home: const LineChartSample10(),
+      localizationsDelegates: const [], 
       supportedLocales: const [
         Locale('en'),
         Locale('th'),
@@ -90,15 +88,16 @@ class _MainScreenState extends State<MainScreen> {
           });
         },
         backgroundColor: Theme.of(context).brightness == Brightness.dark
-            ? Colors.grey[850] // Dark background color for dark mode
-            : Colors.white, // Light background color for light mode
-        selectedItemColor: Colors.blueAccent, // Highlight color for active item
-        unselectedItemColor: Colors.grey, // Color for inactive items
-        showSelectedLabels: true, // Show labels for active items
-        showUnselectedLabels: true, // Show labels for inactive items
-        selectedFontSize: 14, // Font size for active item labels
-        unselectedFontSize: 12, // Font size for inactive item labels
-        type: BottomNavigationBarType.fixed, // Ensures proper label alignment
+            ? Colors.grey[850] 
+            : Colors.white, 
+            
+        selectedItemColor: const Color.fromARGB(255, 52, 214, 136), 
+        unselectedItemColor: Colors.grey, 
+        showSelectedLabels: true, 
+        showUnselectedLabels: true, 
+        selectedFontSize: 14, 
+        unselectedFontSize: 12,
+        type: BottomNavigationBarType.fixed,
         items: [
           BottomNavigationBarItem(
             icon: const Icon(Icons.home),

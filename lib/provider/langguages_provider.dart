@@ -9,7 +9,8 @@ class LanguageProvider with ChangeNotifier {
   // Load the language from SharedPreferences when the app starts
   Future<void> loadLanguage() async {
     final prefs = await SharedPreferences.getInstance();
-    _selectedLanguage = prefs.getString('selectedLanguage') ?? 'English'; // Default to 'English'
+    _selectedLanguage = prefs.getString('selectedLanguage') ??
+        'English'; // Default to 'English'
     notifyListeners();
   }
 
@@ -24,21 +25,22 @@ class LanguageProvider with ChangeNotifier {
   // Get translations for the current language
   String translate(String key) {
     final translations = _translations[_selectedLanguage] ?? {};
-    return translations[key] ?? key; // Return the key if no translation is found
+    return translations[key] ??
+        key; // Return the key if no translation is found
   }
 
   // Translations for different languages
   static const Map<String, Map<String, String>> _translations = {
     'English': {
-     // ReportScreen
-    'report': 'Report',
-    'income': 'Income',
-    'expense': 'Expense',
-    'balance': 'Balance',
-    'income_vs_expense': 'Income vs Expense',
-    'donut_chart': 'Doughnut Chart',
-    'line_chart': 'Line Chart',
-    'data_exported': 'Data exported to',
+      // ReportScreen
+      'report': 'Report',
+      'income': 'Income',
+      'expense': 'Expense',
+      'balance': 'Balance',
+      'income_vs_expense': 'Income vs Expense',
+      'donut_chart': 'Doughnut Chart',
+      'line_chart': 'Line Chart',
+      'data_exported': 'Data exported to',
 
       // bot screen
       'chat_bot_title': 'AI Chat Bot',
@@ -71,9 +73,10 @@ class LanguageProvider with ChangeNotifier {
       'theme': 'Theme',
       'dark': 'Dark',
       'light': 'Light',
-      'export_data': 'Export Data',
-      'export_data_subtitle': 'Export data to excel',
+     
       'delete_data': 'Delete Data',
+    'choose_delete_option': 'Please choose to delete',
+
       'delete_data_subtitle': 'Delete your chat or all data',
       'edit_saving_goal': 'Edit Saving Goal',
       'delete_all_data': 'Delete All Data',
@@ -81,14 +84,14 @@ class LanguageProvider with ChangeNotifier {
     },
     'Thai': {
       // ReportScreen
-    'report': 'รายงาน',
-    'income': 'รายรับ',
-    'expense': 'รายจ่าย',
-    'balance': 'ยอดคงเหลือ',
-    'income_vs_expense': 'รายรับเทียบกับรายจ่าย',
-    'donut_chart': 'กราฟโดนัท',
-    'line_chart': 'กราฟเส้น',
-    'data_exported': 'ข้อมูลถูกส่งออกไปยัง',
+      'report': 'รายงาน',
+      'income': 'รายรับ',
+      'expense': 'รายจ่าย',
+      'balance': 'ยอดคงเหลือ',
+      'income_vs_expense': 'รายรับเทียบกับรายจ่าย',
+      'donut_chart': 'กราฟโดนัท',
+      'line_chart': 'กราฟเส้น',
+      'data_exported': 'ข้อมูลถูกส่งออกไปยัง',
       // bot screen
       'chat_bot_title': 'บอท AI',
       'start_chat': 'เริ่ม',
@@ -120,25 +123,25 @@ class LanguageProvider with ChangeNotifier {
       'theme': 'ธีม',
       'dark': 'มืด',
       'light': 'สว่าง',
-      'export_data': 'ส่งออกข้อมูล',
-      'export_data_subtitle': 'ส่งออกข้อมูลไปยัง Excel',
+      
       'delete_data': 'ลบข้อมูล',
+    'choose_delete_option': 'กรุณาเลือกลบ',
       'delete_data_subtitle': 'ลบการหรือข้อมูลทั้งหมด',
       'edit_saving_goal': 'แก้ไขเป้าหมายการออม',
-      'delete_all_data': 'ลบข้อมูลทั้งหมด',
-      'delete_chat_data': 'ลบข้อมูล',
+      'delete_all': 'ลบข้อมูลทั้งหมด',
+      'delete_chat': 'ลบข้อมูล bot',
     },
     'Khmer': {
-       // ReportScreen
-    'report': 'របាយការណ៍',
-    'income': 'ចំណូល',
-    'expense': 'ចំណាយ',
-    'balance': 'សមតុល្យ',
-    'income_vs_expense': 'ចំណូលប្រកួតប្រជែងចំណាយ',
-    'donut_chart': 'គំនូសតួអង្កាំ',
-    'line_chart': 'គំនូសបន្ទាត់',
-    'data_exported': 'ទិន្នន័យត្រូវបាននាំចេញទៅ',
-      
+      // ReportScreen
+      'report': 'របាយការណ៍',
+      'income': 'ចំណូល',
+      'expense': 'ចំណាយ',
+      'balance': 'សមតុល្យ',
+      'income_vs_expense': 'ចំណូលប្រកួតប្រជែងចំណាយ',
+      'donut_chart': 'គំនូសតួអង្កាំ',
+      'line_chart': 'គំនូសបន្ទាត់',
+      'data_exported': 'ទិន្នន័យត្រូវបាននាំចេញទៅ',
+
       // bot screen
       'chat_bot_title': 'បូត AI',
       'start_chat': 'ចាប់ផ្ដើម',
@@ -175,8 +178,8 @@ class LanguageProvider with ChangeNotifier {
       'delete_data': 'លុបទិន្នន័យ',
       'delete_data_subtitle': 'លុបសារឬទិន្នន័យទាំងអស់',
       'edit_saving_goal': 'កែសម្រួលគោលដៅសន្សំ',
-      'delete_all_data': 'លុបទិន្នន័យទាំងអស់',
-      'delete_chat_data': 'លុបទិន្នន័យសារ',
+      'delete_all': 'លុបទិន្នន័យទាំងអស់',
+      'delete_chat': 'លុបទិន្នន័យសារ',
     },
   };
 }

@@ -108,7 +108,7 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
         ),
         const SizedBox(height: 20),
         ListTile(
-          leading: const Icon(Icons.person),
+          leading: const Icon(Icons.account_box),
           title: Text(languageProvider.translate('name')),
           subtitle: Text(
             _username ?? languageProvider.translate('default_username'),

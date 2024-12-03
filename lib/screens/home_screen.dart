@@ -20,7 +20,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _fetchSavingGoal();
   }
 
-  /// Fetch the saving goal using `SavingGoalDB`.
+  /// Fetch the saving goal from  `SavingGoalDB`.
   Future<void> _fetchSavingGoal() async {
     final goal = await _savingGoalDB.fetchSavingGoal();
     setState(() {
@@ -38,6 +38,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         elevation: 4,
         actions: [
+          IconButton(onPressed: (){},  icon: const Icon(Icons.add),),
           IconButton(
             icon: const Icon(Icons.notifications),
             onPressed: () async {
@@ -76,8 +77,9 @@ class _MyHomePageState extends State<MyHomePage> {
           content: TextField(
             controller: controller,
             keyboardType: TextInputType.number,
-            decoration:
-                const InputDecoration(hintText: 'Enter saving goal amount'),
+            decoration: const InputDecoration(
+                hintText:
+                    'Enter saving goal amount to get daily notification from ai'),
           ),
           actions: [
             TextButton(
@@ -92,7 +94,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 if (input.isNotEmpty) {
                   final goal = double.tryParse(input);
                   if (goal != null) {
-                    await _savingGoalDB.saveSavingGoal(goal); // Save to database
+                    await _savingGoalDB
+                        .saveSavingGoal(goal); // Save to database
                     setState(() {
                       _savingGoal = goal;
                     });
