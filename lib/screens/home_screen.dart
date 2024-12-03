@@ -13,6 +13,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   double? _savingGoal;
   final SavingGoalDB _savingGoalDB = SavingGoalDB();
+  int _notificationCount = 0;
 
   @override
   void initState() {
@@ -20,7 +21,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _fetchSavingGoal();
   }
 
-  /// Fetch the saving goal from  `SavingGoalDB`.
+  /// Fetch the saving goal from `SavingGoalDB`.
   Future<void> _fetchSavingGoal() async {
     final goal = await _savingGoalDB.fetchSavingGoal();
     setState(() {
@@ -38,23 +39,62 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         elevation: 4,
         actions: [
-          IconButton(onPressed: (){},  icon: const Icon(Icons.add),),
           IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: () async {
-              if (_savingGoal == null) {
-                // Show dialog to input saving goal
-                await _showSavingGoalDialog(context);
-              }
-              if (_savingGoal != null) {
-                // Navigate to NotificationScreen
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const NotificationScreen()),
-                );
-              }
+            onPressed: () {
+              setState(() {
+                _notificationCount++;
+              });
             },
+            icon: const Icon(Icons.add),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Stack(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.notifications),
+                  onPressed: () async {
+                    if (_savingGoal == null) {
+                      // Show dialog to input saving goal
+                      await _showSavingGoalDialog(context);
+                    }
+                    if (_savingGoal != null) {
+                      // Navigate to NotificationScreen
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const NotificationScreen()),
+                      );
+                    }
+                  },
+                ),
+                if (_notificationCount > 0)
+                  Positioned(
+                    right: 4,
+                    top: 4,
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 16,
+                        minHeight: 16,
+                      ),
+                      child: Text(
+                        '$_notificationCount',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ],
       ),

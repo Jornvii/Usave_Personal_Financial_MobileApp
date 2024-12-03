@@ -69,7 +69,7 @@ class _ListSummaryScreenState extends State<ListSummaryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Category Summary'),
+        title: const Text('Summary'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -133,7 +133,7 @@ class _ListSummaryScreenState extends State<ListSummaryScreen> {
                   fontWeight: FontWeight.bold,
                   color: isIncome
                       ? Colors.green
-                      : Colors.red, // Green for income, red for expense
+                      : Colors.red, 
                 ),
               ),
             ],

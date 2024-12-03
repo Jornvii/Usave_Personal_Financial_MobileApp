@@ -38,6 +38,30 @@ class TransactionDB {
     );
   }
 
+  
+
+// *****************
+  // Calculate total income
+  Future<double> getTotalIncome() async {
+    final db = await database;
+    var result = await db.rawQuery(
+        'SELECT SUM(amount) as totalIncome FROM transactions WHERE isIncome = 1');
+    return result.isNotEmpty && result.first['totalIncome'] != null
+        ? result.first['totalIncome'] as double
+        : 0.0;
+  }
+
+  // Calculate total expenses
+  Future<double> getTotalExpenses() async {
+    final db = await database;
+    var result = await db.rawQuery(
+        'SELECT SUM(amount) as totalExpenses FROM transactions WHERE isIncome = 0');
+    return result.isNotEmpty && result.first['totalExpenses'] != null
+        ? result.first['totalExpenses'] as double
+        : 0.0;
+  }
+  // ++++++++++++++++++++++++
+
   Future<int> addTransaction(Map<String, dynamic> transaction) async {
     final db = await database;
     return await db.insert('transactions', transaction);

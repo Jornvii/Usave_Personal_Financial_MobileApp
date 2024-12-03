@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import '../models/saving_db.dart';
+import '../models/transaction_db.dart'; // Your transaction database model
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -8,28 +11,64 @@ class NotificationScreen extends StatefulWidget {
 }
 
 class _NotificationScreenState extends State<NotificationScreen> {
-  List<Map<String, String>> notifications = [
-    {
-      "message": "Your chatbot has some suggestions for you. I want to thank Lena for being very careful and attentive with all documents during the process. Lena makes her job perfect. I got my work permit and visa.",
-      "time": "2 hours ago",
-    },
-    {
-      "message": "Don't forget to review your monthly budget.",
-      "time": "1 day ago",
-    },
-    {
-      "message": "New feature available in the app. Check it out!",
-      "time": "3 days ago",
-    },
-    {
-      "message": "Your subscription is about to expire.",
-      "time": "5 days ago",
-    },
-    {
-      "message": "Reminder: Update your profile for better suggestions.",
-      "time": "1 week ago",
-    },
-  ];
+  bool loading = false;
+  List<Map<String, String>> notifications = [];
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  // Function to generate financial notifications
+  Future<void> _generateFinancialNotification() async {
+    setState(() {
+      loading = true;
+    });
+
+    // Fetch income, expenses, and savings goal from the DBs
+    double income = await TransactionDB().getTotalIncome();
+    double expenses = await TransactionDB().getTotalExpenses();
+    double? savingsGoal = await SavingGoalDB().fetchSavingGoal();
+
+    if (savingsGoal == null) {
+      savingsGoal = 0.0;
+    }
+
+    // Calculate savings progress
+    double savingsProgress = income - expenses;
+
+    // Generate financial advice
+    String message =
+        _generateAdvice(income, expenses, savingsGoal, savingsProgress);
+
+    // Get the current time formatted as "hour:minute AM/PM"
+    String time = _formatCurrentTime();
+
+    setState(() {
+      loading = false;
+      notifications.add({
+        "message": message,
+        "time": time,
+      });
+    });
+  }
+
+  String _generateAdvice(double income, double expenses, double savingsGoal,
+      double savingsProgress) {
+    double percentageSaved = (savingsProgress / savingsGoal) * 100;
+
+    if (savingsProgress < savingsGoal) {
+      return "Based on your income of \$${income.toStringAsFixed(2)}, expenses of \$${expenses.toStringAsFixed(2)}, and a savings goal of \$${savingsGoal.toStringAsFixed(2)}, you're currently saving \$${savingsProgress.toStringAsFixed(2)}. Keep it up! Consider reducing discretionary spending by 10% to reach your goal faster.";
+    } else {
+      return "Great job! You're on track to meet your savings goal. You have saved \$${savingsProgress.toStringAsFixed(2)} towards your goal of \$${savingsGoal.toStringAsFixed(2)}. Keep going!";
+    }
+  }
+
+  // Format the current time to "hour:minute AM/PM"
+  String _formatCurrentTime() {
+    final DateFormat timeFormat = DateFormat.jm();
+    return timeFormat.format(DateTime.now());
+  }
 
   void _deleteNotification(int index) {
     setState(() {
@@ -43,7 +82,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text("Delete Notification"),
-          content: const Text("Are you sure you want to delete this notification?"),
+          content:
+              const Text("Are you sure you want to delete this notification?"),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -66,122 +106,90 @@ class _NotificationScreenState extends State<NotificationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Notifications"),
-        // backgroundColor: Theme.of(context).colorScheme.primary,
+        title: const Text("Financial Notifications"),
         elevation: 4,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: ListView.builder(
-        itemCount: notifications.length,
-        padding: const EdgeInsets.all(8),
-        itemBuilder: (context, index) {
-          return Dismissible(
-            key: UniqueKey(),
-            direction: DismissDirection.endToStart,
-            confirmDismiss: (direction) async {
-              _showDeleteDialog(context, index);
-              return false; // Return false to let the dialog handle deletion
-            },
-            background: Container(
-              color: Colors.red,
-              alignment: Alignment.centerRight,
-              padding: const EdgeInsets.only(right: 16),
-              child: const Icon(Icons.delete, color: Colors.white),
+      body: Stack(
+        children: [
+          Column(
+            children: [
+              // Button to generate financial notification
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ElevatedButton(
+                  onPressed: _generateFinancialNotification,
+                  child: const Text("Generate Notification"),
+                ),
+              ),
+              // List of notifications
+              Expanded(
+                child: ListView.builder(
+                  itemCount: notifications.length,
+                  padding: const EdgeInsets.all(8),
+                  itemBuilder: (context, index) {
+                    return Dismissible(
+                      key: UniqueKey(),
+                      direction: DismissDirection.endToStart,
+                      confirmDismiss: (direction) async {
+                        _showDeleteDialog(context, index);
+                        return false; // Return false to let the dialog handle deletion
+                      },
+                      background: Container(
+                        color: Colors.red,
+                        alignment: Alignment.centerRight,
+                        padding: const EdgeInsets.only(right: 16),
+                        child: const Icon(Icons.delete, color: Colors.white),
+                      ),
+                      child: NotificationCard(
+                        message: notifications[index]["message"]!,
+                        time: notifications[index]["time"]!,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+          if (loading)
+            const Center(
+              child: CircularProgressIndicator(),
             ),
-            child: NotificationCard(
-              message: notifications[index]["message"]!,
-              time: notifications[index]["time"]!,
-            ),
-          );
-        },
+        ],
       ),
     );
   }
 }
 
+// NotificationCard Widget
 class NotificationCard extends StatelessWidget {
   final String message;
   final String time;
 
-  const NotificationCard({super.key, required this.message, required this.time});
+  const NotificationCard({Key? key, required this.message, required this.time})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 5,
+      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const CircleAvatar(
-                  radius: 12,
-                  backgroundColor: Colors.blueAccent,
-                  child: Icon(
-                    Icons.smart_toy,
-                    size: 15,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  time,
-                  style: const TextStyle(color: Colors.grey, fontSize: 12),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.blue[50],
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: GestureDetector(
-                onTap: () {
-                  _showFullMessageDialog(context, message);
-                },
-                child: Text(
-                  message.length > 100
-                      ? "${message.substring(0, 100)}..." // Truncated message
-                      : message,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-            ),
+            Text(message, style: const TextStyle(fontSize: 16)),
+            const SizedBox(height: 10),
+            Text(time,
+                style: const TextStyle(fontSize: 12, color: Colors.grey)),
           ],
         ),
       ),
-    );
-  }
-
-  void _showFullMessageDialog(BuildContext context, String fullMessage) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Notification"),
-          content: Text(fullMessage),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text("Close"),
-            ),
-          ],
-        );
-      },
     );
   }
 }
