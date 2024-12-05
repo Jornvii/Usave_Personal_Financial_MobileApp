@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import '../models/saving_db.dart';
-import 'notification_screen.dart';
 import 'transactions_screen.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -11,23 +9,14 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  double? _savingGoal;
-  final SavingGoalDB _savingGoalDB = SavingGoalDB();
   int _notificationCount = 0;
 
   @override
   void initState() {
     super.initState();
-    _fetchSavingGoal();
   }
 
-  /// Fetch the saving goal from `SavingGoalDB`.
-  Future<void> _fetchSavingGoal() async {
-    final goal = await _savingGoalDB.fetchSavingGoal();
-    setState(() {
-      _savingGoal = goal;
-    });
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -54,18 +43,17 @@ class _MyHomePageState extends State<MyHomePage> {
                 IconButton(
                   icon: const Icon(Icons.notifications),
                   onPressed: () async {
-                    if (_savingGoal == null) {
-                      // Show dialog to input saving goal
-                      await _showSavingGoalDialog(context);
-                    }
-                    if (_savingGoal != null) {
-                      // Navigate to NotificationScreen
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const NotificationScreen()),
-                      );
-                    }
+                    // if (_savingGoal == null) {
+                    //   await _showSavingGoalDialog(context);
+                    // }
+                    // if (_savingGoal != null) {
+                      
+                    //   Navigator.push(
+                    //     context,
+                    //     MaterialPageRoute(
+                    //         builder: (context) => const NotificationScreen()),
+                    //   );
+                    // }
                   },
                 ),
                 if (_notificationCount > 0)
@@ -124,24 +112,24 @@ class _MyHomePageState extends State<MyHomePage> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop(); 
               },
               child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () async {
-                final input = controller.text;
-                if (input.isNotEmpty) {
-                  final goal = double.tryParse(input);
-                  if (goal != null) {
-                    await _savingGoalDB
-                        .saveSavingGoal(goal); // Save to database
-                    setState(() {
-                      _savingGoal = goal;
-                    });
-                  }
-                }
-                Navigator.of(context).pop(); // Close the dialog
+                // final input = controller.text;
+                // if (input.isNotEmpty) {
+                //   final goal = double.tryParse(input);
+                //   if (goal != null) {
+                //     await _savingGoalDB
+                //         .saveSavingGoal(goal); // Save to database
+                //     setState(() {
+                //       _savingGoal = goal;
+                //     });
+                //   }
+                // }
+                // Navigator.of(context).pop(); 
               },
               child: const Text('Submit'),
             ),

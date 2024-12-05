@@ -30,9 +30,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
     double expenses = await TransactionDB().getTotalExpenses();
     double? savingsGoal = await SavingGoalDB().fetchSavingGoal();
 
-    if (savingsGoal == null) {
-      savingsGoal = 0.0;
-    }
+    savingsGoal ??= 0.0;
 
     // Calculate savings progress
     double savingsProgress = income - expenses;
@@ -169,8 +167,7 @@ class NotificationCard extends StatelessWidget {
   final String message;
   final String time;
 
-  const NotificationCard({Key? key, required this.message, required this.time})
-      : super(key: key);
+  const NotificationCard({super.key, required this.message, required this.time});
 
   @override
   Widget build(BuildContext context) {

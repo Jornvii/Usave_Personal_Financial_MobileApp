@@ -69,4 +69,14 @@ class CategoryDB {
       whereArgs: [id],
     );
   }
+    /// Fetch all categories with a specific type (e.g., 'Saving').
+   Future<List<Map<String, dynamic>>> fetchCategoriesByType(String type) async {
+    final db = await database;
+    return await db.query(
+      'categories',
+      where: 'type = ?',
+      whereArgs: [type],
+    );
+  }
+
 }

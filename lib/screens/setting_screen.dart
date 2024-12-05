@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/chat_db.dart';
-import '../models/saving_db.dart';
+import '../models/saving_goaldb.dart';
 import '../models/transaction_db.dart';
 import '../provider/langguages_provider.dart';
 import '../theme/theme_provider.dart';
 import '../widgets/profile_widget.dart';
 import 'category_screen.dart';
+import 'saving_goal_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -22,21 +23,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchSavingGoal();
-  }
-
-  Future<void> _fetchSavingGoal() async {
-    final goal = await _savingGoalDB.fetchSavingGoal();
-    setState(() {
-      _savingGoal = goal;
-    });
-  }
-
-  Future<void> _saveSavingGoal(double goal) async {
-    await _savingGoalDB.saveSavingGoal(goal);
-    setState(() {
-      _savingGoal = goal;
-    });
   }
 
   @override
@@ -72,20 +58,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leading: const Icon(Icons.savings),
             title: Text(languageProvider.translate('saving_goal')),
             subtitle: Text(
-              _savingGoal == null
-                  ? languageProvider.translate('not_set')
-                  : '${languageProvider.translate('your_saving_goal')}: $_savingGoal',
+              languageProvider.translate('manage_your_saving_goals'),
             ),
-            onTap: () async {
-              if (_savingGoal != null) {
-                final shouldEdit = await _showEditConfirmationDialog(
-                    context, languageProvider);
-                if (shouldEdit == true) {
-                  await _showSavingGoalDialog(context, languageProvider);
-                }
-              } else {
-                await _showSavingGoalDialog(context, languageProvider);
-              }
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const SavingGoalScreen()),
+              );
             },
           ),
           ListTile(
@@ -228,46 +208,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
               child: Text(languageProvider.translate('yes')),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> _showSavingGoalDialog(
-      BuildContext context, LanguageProvider languageProvider) async {
-    final TextEditingController controller = TextEditingController();
-
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(languageProvider.translate('set_saving_goal')),
-          content: TextField(
-            controller: controller,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              hintText: languageProvider.translate('enter_saving_goal'),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(languageProvider.translate('cancel')),
-            ),
-            TextButton(
-              onPressed: () async {
-                final input = controller.text;
-                if (input.isNotEmpty) {
-                  final goal = double.tryParse(input);
-                  if (goal != null) {
-                    await _saveSavingGoal(goal);
-                  }
-                }
-                Navigator.of(context).pop();
-              },
-              child: Text(languageProvider.translate('submit')),
             ),
           ],
         );

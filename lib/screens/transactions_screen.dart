@@ -56,7 +56,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       await db.addTransaction({
         ...newTransaction,
         'date': DateFormat('yyyy-MM-dd').format(newTransaction['date']),
-        'isIncome': newTransaction['isIncome'] ? 1 : 0, // Convert bool to int
+        'typeCategory': newTransaction['typeCategory'] ? 1 : 0, // Convert bool to int
       });
       _loadTransactions(); // Reload transactions
     }
@@ -202,20 +202,20 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                               ),
                               child: ListTile(
                                 leading: Icon(
-                                  transaction['isIncome'] == 1
+                                  transaction['typeCategory'] == 1
                                       ? Icons.arrow_upward
                                       : Icons.arrow_downward,
-                                  color: transaction['isIncome'] == 1
+                                  color: transaction['typeCategory'] == 1
                                       ? Colors.green
                                       : Colors.red,
                                 ),
                                 title: Text(transaction['category']),
-                                subtitle:
-                                    Text(transaction['description'] ?? ''),
+                                // subtitle:
+                                //     Text(transaction['description'] ?? ''),
                                 trailing: Text(
                                   '${transaction['amount']} USD',
                                   style: TextStyle(
-                                    color: transaction['isIncome'] == 1
+                                    color: transaction['typeCategory'] == 1
                                         ? Colors.green
                                         : Colors.red,
                                   ),

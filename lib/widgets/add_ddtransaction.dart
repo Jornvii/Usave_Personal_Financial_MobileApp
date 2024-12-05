@@ -12,7 +12,7 @@ class AddTransactionScreen extends StatefulWidget {
 }
 
 class _AddTransactionScreenState extends State<AddTransactionScreen> {
-  bool isIncome = true;
+  bool typeCategory = true;
   bool hasTransactionBeenAdded = false;
   String selectedCategory = '';
   DateTime? transactionDate;
@@ -63,7 +63,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         ...allCategories
             .where((cat) => cat['type'] == 'Income')
             .map((cat) => cat['name'] as String)
-            .toList()
       ];
 
       expenseCategories = [
@@ -71,7 +70,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         ...allCategories
             .where((cat) => cat['type'] == 'Expense')
             .map((cat) => cat['name'] as String)
-            .toList()
       ];
     });
   }
@@ -105,7 +103,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       final newTransaction = {
         'category': selectedCategory,
         'amount': double.parse(amountController.text),
-        'isIncome': isIncome,
+        'typeCategory': typeCategory,
         'description': descriptionController.text,
         'date': transactionDate,
       };
@@ -133,14 +131,14 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   }
 
   void _handleToggle(bool incomeSelected) {
-    if (isIncome != incomeSelected && !hasTransactionBeenAdded) {
+    if (typeCategory != incomeSelected && !hasTransactionBeenAdded) {
       setState(() {
-        isIncome = incomeSelected;
+        typeCategory = incomeSelected;
         _resetFields(); // Reset fields only if no transaction has been added
       });
     } else {
       setState(() {
-        isIncome = incomeSelected;
+        typeCategory = incomeSelected;
       });
     }
   }
@@ -160,7 +158,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               children: [
                 // Toggle for Income/Expense
                 Padding(
-                  padding: const EdgeInsets.only(top: 15,bottom: 15),
+                  padding: const EdgeInsets.only(top: 15, bottom: 15),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -168,7 +166,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         onTap: () => _handleToggle(true),
                         child: Container(
                           decoration: BoxDecoration(
-                            color: isIncome ? const Color.fromARGB(255, 0, 255, 8) : Colors.grey[200],
+                            color: typeCategory
+                                ? const Color.fromARGB(255, 0, 255, 8)
+                                : Colors.grey[200],
                             borderRadius: BorderRadius.circular(8),
                           ),
                           padding: const EdgeInsets.symmetric(
@@ -176,7 +176,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                           child: Text(
                             'Income',
                             style: TextStyle(
-                              color: isIncome ? Colors.black87 : Colors.black54,
+                              color: typeCategory
+                                  ? Colors.black87
+                                  : Colors.black54,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -186,8 +188,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         onTap: () => _handleToggle(false),
                         child: Container(
                           decoration: BoxDecoration(
-                            color:
-                                !isIncome ? const Color.fromARGB(255, 244, 26, 11) : Colors.grey[200],
+                            color: !typeCategory
+                                ? const Color.fromARGB(255, 244, 26, 11)
+                                : Colors.grey[200],
                             borderRadius: BorderRadius.circular(8),
                           ),
                           padding: const EdgeInsets.symmetric(
@@ -195,7 +198,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                           child: Text(
                             'Expense',
                             style: TextStyle(
-                              color: !isIncome ? Colors.white : Colors.black54,
+                              color:
+                                  !typeCategory ? Colors.white : Colors.black54,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -242,7 +246,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   ),
                   hint: const Text('Select Category'),
                   isExpanded: true,
-                  items: (isIncome ? incomeCategories : expenseCategories)
+                  items: (typeCategory ? incomeCategories : expenseCategories)
                       .map((category) {
                     return DropdownMenuItem<String>(
                       value: category,
@@ -305,7 +309,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 ElevatedButton(
                   onPressed: _addTransaction,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:const Color.fromARGB(255, 52, 214, 136),
+                    backgroundColor: const Color.fromARGB(255, 52, 214, 136),
                     padding: const EdgeInsets.symmetric(
                         horizontal: 32, vertical: 12),
                     shape: RoundedRectangleBorder(
@@ -314,7 +318,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   ),
                   child: const Text(
                     'Add Transaction',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold,color: Colors.black),
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black),
                   ),
                 ),
               ],

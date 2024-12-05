@@ -15,6 +15,12 @@ class _CategoryScreenState extends State<CategoryScreen> {
     'Bonus',
     'Salary'
   ];
+  final List<String> defaultSavingCayegories = [
+    'Emergency Fund',
+    'Healthcare',
+    'Travel',
+    'Debt Reduction'
+  ];
   final List<String> defaultExpenseCategories = [
     'Miscellaneous',
     'Childcare',
@@ -30,6 +36,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
   ];
 
   List<Map<String, dynamic>> incomeCategories = [];
+  List<Map<String, dynamic>> savingCategories = [];
   List<Map<String, dynamic>> expenseCategories = [];
 
   @override
@@ -42,18 +49,22 @@ class _CategoryScreenState extends State<CategoryScreen> {
     List<Map<String, dynamic>> categories = await CategoryDB().getCategories();
     List<Map<String, dynamic>> income = [];
     List<Map<String, dynamic>> expense = [];
+    List<Map<String, dynamic>> saving = [];
 
     for (var category in categories) {
       if (category['type'] == 'Income') {
         income.add(category);
-      } else {
+      } else if (category['type'] == 'Expense') {
         expense.add(category);
+      } else if (category['type'] == 'Saving') {
+        saving.add(category);
       }
     }
 
     setState(() {
       incomeCategories = income;
       expenseCategories = expense;
+      savingCategories = saving;
     });
   }
 
@@ -84,6 +95,14 @@ class _CategoryScreenState extends State<CategoryScreen> {
                 newCategories: expenseCategories,
                 color: Colors.red,
                 type: 'Expense',
+              ),
+              const SizedBox(height: 20),
+              _buildCategorySection(
+                title: 'Saving Categories',
+                categories: defaultSavingCayegories,
+                newCategories: savingCategories,
+                color: Colors.yellow,
+                type: 'Saving',
               ),
             ],
           ),
@@ -212,59 +231,92 @@ class _CategoryScreenState extends State<CategoryScreen> {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text('Add New Category'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: categoryController,
-                decoration: const InputDecoration(
-                  labelText: 'Category Name',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                value: selectedType,
-                decoration: const InputDecoration(
-                  labelText: 'Category Type',
-                  border: OutlineInputBorder(),
-                ),
-                items: ['Income', 'Expense']
-                    .map((type) => DropdownMenuItem<String>(
-                          value: type,
-                          child: Text(type),
-                        ))
-                    .toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedType = value!;
-                  });
-                },
-              ),
-            ],
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.0),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Add New Category',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: categoryController,
+                  decoration: InputDecoration(
+                    labelText: 'Category Name',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  value: selectedType,
+                  decoration: InputDecoration(
+                    labelText: 'Category Type',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                  ),
+                  items: ['Income', 'Expense', 'Saving']
+                      .map((type) => DropdownMenuItem<String>(
+                            value: type,
+                            child: Text(type),
+                          ))
+                      .toList(),
+                  onChanged: (value) {
+                    selectedType = value!;
+                  },
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    ElevatedButton(
+                      onPressed: () async {
+                        final newCategory = categoryController.text.trim();
+                        if (newCategory.isNotEmpty) {
+                          await CategoryDB().insertCategory({
+                            'name': newCategory,
+                            'type': selectedType,
+                          });
+                          _loadCategories();
+                          Navigator.pop(context);
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text('Add'),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            ElevatedButton(
-              onPressed: () async {
-                final newCategory = categoryController.text.trim();
-                if (newCategory.isNotEmpty) {
-                  await CategoryDB().insertCategory({
-                    'name': newCategory,
-                    'type': selectedType,
-                  });
-                  _loadCategories();
-                  Navigator.pop(context);
-                }
-              },
-              child: const Text('Add'),
-            ),
-          ],
+          ),
         );
       },
     );
@@ -303,7 +355,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                   labelText: 'Category Type',
                   border: OutlineInputBorder(),
                 ),
-                items: ['Income', 'Expense']
+                items: ['Income', 'Expense', 'Saving']
                     .map((type) => DropdownMenuItem<String>(
                           value: type,
                           child: Text(type),

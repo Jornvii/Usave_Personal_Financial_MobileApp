@@ -48,7 +48,7 @@ class _ReportScreenState extends State<ReportScreen> {
     double expense = 0;
 
     for (var transaction in transactions) {
-      if (transaction['isIncome'] == 1) {
+      if (transaction['typeCategory'] == 1) {
         income += transaction['amount'];
       } else {
         expense += transaction['amount'];
@@ -94,7 +94,7 @@ class _ReportScreenState extends State<ReportScreen> {
         DateFormat('yyyy-MM-dd').format(DateTime.parse(transaction['date'])),
         transaction['description'],
         transaction['amount'].toString(),
-        transaction['isIncome'] == 1 ? 'Income' : 'Expense',
+        transaction['typeCategory'] == 1 ? 'Income' : 'Expense',
       ]);
     }
 
