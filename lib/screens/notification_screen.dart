@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../models/saving_db.dart';
+import '../models/saving_goaldb.dart';
 import '../models/transaction_db.dart'; // Your transaction database model
 
 class NotificationScreen extends StatefulWidget {
@@ -19,61 +19,84 @@ class _NotificationScreenState extends State<NotificationScreen> {
     super.initState();
   }
 
-  // Function to generate financial notifications
+  /// Function to generate financial notifications
   Future<void> _generateFinancialNotification() async {
     setState(() {
       loading = true;
     });
 
-    // Fetch income, expenses, and savings goal from the DBs
-    double income = await TransactionDB().getTotalIncome();
-    double expenses = await TransactionDB().getTotalExpenses();
-    double? savingsGoal = await SavingGoalDB().fetchSavingGoal();
+    try {
+      // Fetch income, expenses, and saving goals
+      double income = await TransactionDB().getTotalIncome();
+      double expenses = await TransactionDB().getTotalExpenses();
 
-    savingsGoal ??= 0.0;
+      // Fetch all saving goals
+      final savingGoals = await SavingGoalDB().fetchSavingGoals();
 
-    // Calculate savings progress
-    double savingsProgress = income - expenses;
+      if (savingGoals.isEmpty) {
+        _showNoSavingGoalsDialog();
+        setState(() {
+          loading = false;
+        });
+        return;
+      }
 
-    // Generate financial advice
-    String message =
-        _generateAdvice(income, expenses, savingsGoal, savingsProgress);
+      // Calculate the first goal amount as an example (expand as needed)
+      double savingsGoal = savingGoals[0]['goalAmount'] ?? 0.0;
+      double savingsProgress = income - expenses;
 
-    // Get the current time formatted as "hour:minute AM/PM"
-    String time = _formatCurrentTime();
+      // Generate advice
+      String message =
+          _generateAdvice(income, expenses, savingsGoal, savingsProgress);
 
-    setState(() {
-      loading = false;
-      notifications.add({
-        "message": message,
-        "time": time,
+      // Get the current time formatted as "hour:minute AM/PM"
+      String time = _formatCurrentTime();
+
+      setState(() {
+        notifications.add({
+          "message": message,
+          "time": time,
+        });
       });
-    });
-  }
-
-  String _generateAdvice(double income, double expenses, double savingsGoal,
-      double savingsProgress) {
-    double percentageSaved = (savingsProgress / savingsGoal) * 100;
-
-    if (savingsProgress < savingsGoal) {
-      return "Based on your income of \$${income.toStringAsFixed(2)}, expenses of \$${expenses.toStringAsFixed(2)}, and a savings goal of \$${savingsGoal.toStringAsFixed(2)}, you're currently saving \$${savingsProgress.toStringAsFixed(2)}. Keep it up! Consider reducing discretionary spending by 10% to reach your goal faster.";
-    } else {
-      return "Great job! You're on track to meet your savings goal. You have saved \$${savingsProgress.toStringAsFixed(2)} towards your goal of \$${savingsGoal.toStringAsFixed(2)}. Keep going!";
+    } catch (e) {
+      _showErrorDialog(e.toString());
+    } finally {
+      setState(() {
+        loading = false;
+      });
     }
   }
 
-  // Format the current time to "hour:minute AM/PM"
+  /// Generates financial advice based on calculations
+  String _generateAdvice(
+      double income, double expenses, double savingsGoal, double savingsProgress) {
+    if (savingsGoal <= 0) {
+      return "Your saving goal is not properly set. Please update your saving goals.";
+    }
+
+    double percentageSaved = (savingsProgress / savingsGoal) * 100;
+
+    if (savingsProgress < savingsGoal) {
+      return "Based on your income of \$${income.toStringAsFixed(2)}, expenses of \$${expenses.toStringAsFixed(2)}, and a savings goal of \$${savingsGoal.toStringAsFixed(2)}, you're saving \$${savingsProgress.toStringAsFixed(2)}. Consider cutting discretionary expenses by 10% to reach your goal faster.";
+    } else {
+      return "Great job! You've saved \$${savingsProgress.toStringAsFixed(2)} towards your goal of \$${savingsGoal.toStringAsFixed(2)}. Keep up the great work!";
+    }
+  }
+
+  /// Format the current time to "hour:minute AM/PM"
   String _formatCurrentTime() {
     final DateFormat timeFormat = DateFormat.jm();
     return timeFormat.format(DateTime.now());
   }
 
+  /// Delete a notification
   void _deleteNotification(int index) {
     setState(() {
       notifications.removeAt(index);
     });
   }
 
+  /// Show a dialog for deleting a notification
   void _showDeleteDialog(BuildContext context, int index) {
     showDialog(
       context: context,
@@ -100,6 +123,49 @@ class _NotificationScreenState extends State<NotificationScreen> {
     );
   }
 
+  /// Show a dialog if no saving goals are available
+  void _showNoSavingGoalsDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("No Saving Goals"),
+          content: const Text(
+              "You haven't set any saving goals yet. Please set at least one saving goal to generate notifications."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text("Okay"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Show an error dialog if something goes wrong
+  void _showErrorDialog(String error) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Error"),
+          content: Text(error),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text("Okay"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -115,7 +181,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
         children: [
           Column(
             children: [
-              // Button to generate financial notification
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: ElevatedButton(
@@ -123,7 +188,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   child: const Text("Generate Notification"),
                 ),
               ),
-              // List of notifications
               Expanded(
                 child: ListView.builder(
                   itemCount: notifications.length,
@@ -134,7 +198,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       direction: DismissDirection.endToStart,
                       confirmDismiss: (direction) async {
                         _showDeleteDialog(context, index);
-                        return false; // Return false to let the dialog handle deletion
+                        return false;
                       },
                       background: Container(
                         color: Colors.red,
@@ -162,7 +226,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
   }
 }
 
-// NotificationCard Widget
+/// NotificationCard Widget
 class NotificationCard extends StatelessWidget {
   final String message;
   final String time;

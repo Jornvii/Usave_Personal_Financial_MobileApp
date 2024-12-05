@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'saving_goal_screen.dart';
+import 'notification_screen.dart';
+import '../models/saving_goaldb.dart';
 import 'transactions_screen.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -16,7 +19,42 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
   }
 
+  /// Check if at least one saving goal is filled
+  Future<bool> _hasFilledSavingGoals() async {
+    final savingGoals = await SavingGoalDB().fetchSavingGoals();
+    return savingGoals.any((goal) => goal['goalAmount'] != null && goal['goalAmount'] > 0);
+  }
 
+  /// Show a dialog to prompt the user to set a saving goal
+  void _showSetSavingGoalDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Set a Saving Goal'),
+          content: const Text('Please set at least one saving goal before accessing notifications.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SavingGoalScreen()),
+                );
+              },
+              child: const Text('Go to Saving Goals'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,17 +81,15 @@ class _MyHomePageState extends State<MyHomePage> {
                 IconButton(
                   icon: const Icon(Icons.notifications),
                   onPressed: () async {
-                    // if (_savingGoal == null) {
-                    //   await _showSavingGoalDialog(context);
-                    // }
-                    // if (_savingGoal != null) {
-                      
-                    //   Navigator.push(
-                    //     context,
-                    //     MaterialPageRoute(
-                    //         builder: (context) => const NotificationScreen()),
-                    //   );
-                    // }
+                    final hasGoals = await _hasFilledSavingGoals();
+                    if (hasGoals) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const NotificationScreen()),
+                      );
+                    } else {
+                      _showSetSavingGoalDialog();
+                    }
                   },
                 ),
                 if (_notificationCount > 0)
@@ -90,52 +126,6 @@ class _MyHomePageState extends State<MyHomePage> {
         padding: EdgeInsets.all(16.0),
         child: TransactionsScreen(),
       ),
-    );
-  }
-
-  /// Show a dialog to set or update the saving goal.
-  Future<void> _showSavingGoalDialog(BuildContext context) async {
-    final TextEditingController controller = TextEditingController();
-
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Pleasee Your Saving Goal'),
-          content: TextField(
-            controller: controller,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-                hintText:
-                    'Enter saving goal amount to get daily notification from ai'),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); 
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () async {
-                // final input = controller.text;
-                // if (input.isNotEmpty) {
-                //   final goal = double.tryParse(input);
-                //   if (goal != null) {
-                //     await _savingGoalDB
-                //         .saveSavingGoal(goal); // Save to database
-                //     setState(() {
-                //       _savingGoal = goal;
-                //     });
-                //   }
-                // }
-                // Navigator.of(context).pop(); 
-              },
-              child: const Text('Submit'),
-            ),
-          ],
-        );
-      },
     );
   }
 }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/chat_db.dart';
-import '../models/saving_goaldb.dart';
 import '../models/transaction_db.dart';
 import '../provider/langguages_provider.dart';
 import '../theme/theme_provider.dart';
@@ -17,9 +16,6 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  double? _savingGoal;
-  final SavingGoalDB _savingGoalDB = SavingGoalDB();
-
   @override
   void initState() {
     super.initState();
