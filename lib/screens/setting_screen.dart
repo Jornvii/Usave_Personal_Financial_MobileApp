@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_bot/screens/dev_pf.dart';
 import 'package:provider/provider.dart';
 import '../models/chat_db.dart';
 import '../models/transaction_db.dart';
@@ -91,7 +92,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ListTile(
             leading: const Icon(Icons.error),
             title: Text(languageProvider.translate('About Us')),
-            onTap: () {},
+            onTap: () {
+               Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const DevPfScreen()),
+              );
+            },
           ),
           const Padding(
             padding: EdgeInsets.all(20),
