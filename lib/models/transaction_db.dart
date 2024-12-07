@@ -40,27 +40,6 @@ class TransactionDB {
 
   
 
-// *****************
-  // Calculate total income
-  Future<double> getTotalIncome() async {
-    final db = await database;
-    var result = await db.rawQuery(
-        'SELECT SUM(amount) as totalIncome FROM transactions WHERE typeCategory = 1');
-    return result.isNotEmpty && result.first['totalIncome'] != null
-        ? result.first['totalIncome'] as double
-        : 0.0;
-  }
-
-  // Calculate total expenses
-  Future<double> getTotalExpenses() async {
-    final db = await database;
-    var result = await db.rawQuery(
-        'SELECT SUM(amount) as totalExpenses FROM transactions WHERE typeCategory = 0');
-    return result.isNotEmpty && result.first['totalExpenses'] != null
-        ? result.first['totalExpenses'] as double
-        : 0.0;
-  }
-  // ++++++++++++++++++++++++
 
   Future<int> addTransaction(Map<String, dynamic> transaction) async {
     final db = await database;
@@ -100,4 +79,41 @@ class TransactionDB {
     final db = await database;
     await db.delete('transactions');
   }
+
+
+  // functions  for Notification screen 
+
+
+// *****************
+  // Calculate total income
+  Future<double> getTotalIncome() async {
+    final db = await database;
+    var result = await db.rawQuery(
+        'SELECT SUM(amount) as totalIncome FROM transactions WHERE typeCategory = 1');
+    return result.isNotEmpty && result.first['totalIncome'] != null
+        ? result.first['totalIncome'] as double
+        : 0.0;
+  }
+
+  // Calculate total expenses
+  Future<double> getTotalExpenses() async {
+    final db = await database;
+    var result = await db.rawQuery(
+        'SELECT SUM(amount) as totalExpenses FROM transactions WHERE typeCategory = 0');
+    return result.isNotEmpty && result.first['totalExpenses'] != null
+        ? result.first['totalExpenses'] as double
+        : 0.0;
+  }
+ // Calculate total savings
+Future<double> getTotalSavings() async {
+  final db = await database;
+  var result = await db.rawQuery(
+      'SELECT SUM(amount) as totalSavings FROM transactions WHERE typeCategory = 2');
+  return result.isNotEmpty && result.first['totalSavings'] != null
+      ? result.first['totalSavings'] as double
+      : 0.0;
+}
+
+
+  // ++++++++++++++++++++++++
 }

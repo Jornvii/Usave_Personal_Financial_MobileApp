@@ -56,7 +56,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       await db.addTransaction({
         ...newTransaction,
         'date': DateFormat('yyyy-MM-dd').format(newTransaction['date']),
-        'typeCategory': newTransaction['typeCategory'] ? 1 : 0, // Convert bool to int
+        'typeCategory': newTransaction['typeCategory'],
       });
       _loadTransactions(); // Reload transactions
     }
@@ -64,6 +64,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Group transactions by date
     Map<String, List<Map<String, dynamic>>> groupedTransactions = {};
     for (var transaction in transactions) {
       final dateKey = transaction['date'];
@@ -73,6 +74,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       groupedTransactions[dateKey]?.add(transaction);
     }
 
+    // Filter transactions for the selected month
     final filteredTransactions = groupedTransactions.entries.where((entry) {
       final transactionDate = DateTime.parse(entry.key);
       return transactionDate.year == selectedDate.year &&
@@ -84,6 +86,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     return Scaffold(
       body: Column(
         children: [
+          // Month Selector
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -115,6 +118,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               ),
             ],
           ),
+
+          // Transactions List
           Expanded(
             child: filteredTransactions.isEmpty
                 ? const Center(
@@ -153,10 +158,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                           ),
                           ...dailyTransactions.map((transaction) {
                             return Dismissible(
-                              key: Key(transaction['id']
-                                  .toString()), // Ensure a unique key
-                              direction: DismissDirection
-                                  .endToStart, // Swipe left-to-right
+                              key: Key(transaction['id'].toString()),
+                              direction: DismissDirection.endToStart,
                               confirmDismiss: (direction) async {
                                 return await showDialog(
                                   context: context,
@@ -167,12 +170,12 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                                     actions: [
                                       TextButton(
                                         onPressed: () => Navigator.of(context)
-                                            .pop(false), // Cancel
+                                            .pop(false),
                                         child: const Text('Cancel'),
                                       ),
                                       TextButton(
                                         onPressed: () => Navigator.of(context)
-                                            .pop(true), // Confirm
+                                            .pop(true),
                                         child: const Text('Delete'),
                                       ),
                                     ],
@@ -181,17 +184,9 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                               },
                               onDismissed: (direction) async {
                                 final db = TransactionDB();
-                                await db.deleteTransaction(
-                                    transaction['id']); // Delete from database
-                                setState(() {
-                                  transactions = List.from(
-                                      transactions); // Ensure mutable list
-                                  transactions.removeWhere((t) =>
-                                      t['id'] ==
-                                      transaction['id']); // Remove item
-                                });
+                                await db.deleteTransaction(transaction['id']);
+                                _loadTransactions(); // Reload transactions
                               },
-
                               background: Container(
                                 color: Colors.red,
                                 alignment: Alignment.centerRight,
@@ -202,22 +197,31 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                               ),
                               child: ListTile(
                                 leading: Icon(
-                                  transaction['typeCategory'] == 1
+                                  transaction['typeCategory'] == 'Income'
                                       ? Icons.arrow_upward
-                                      : Icons.arrow_downward,
-                                  color: transaction['typeCategory'] == 1
+                                      : transaction['typeCategory'] == 'Expense'
+                                          ? Icons.arrow_downward
+                                          : Icons.savings,
+                                  color: transaction['typeCategory'] == 'Income'
                                       ? Colors.green
-                                      : Colors.red,
+                                      : transaction['typeCategory'] ==
+                                              'Expense'
+                                          ? Colors.red
+                                          : const Color.fromARGB(
+                                              255, 255, 215, 0),
                                 ),
                                 title: Text(transaction['category']),
-                                // subtitle:
-                                //     Text(transaction['description'] ?? ''),
                                 trailing: Text(
                                   '${transaction['amount']} USD',
                                   style: TextStyle(
-                                    color: transaction['typeCategory'] == 1
+                                    color: transaction['typeCategory'] ==
+                                            'Income'
                                         ? Colors.green
-                                        : Colors.red,
+                                        : transaction['typeCategory'] ==
+                                                'Expense'
+                                            ? Colors.red
+                                            : const Color.fromARGB(
+                                                255, 255, 215, 0),
                                   ),
                                 ),
                               ),
@@ -232,7 +236,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _openAddTransactionScreen,
-        backgroundColor:  const Color.fromARGB(255, 17, 215, 119),
+        backgroundColor: const Color.fromARGB(255, 17, 215, 119),
         child: const Icon(Icons.add),
       ),
     );

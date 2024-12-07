@@ -46,7 +46,7 @@ dependencies:
   path_provider: ^2.1.5
   pie_chart: ^5.4.0
   path: ^1.9.0
-  syncfusion_flutter_charts: ^27.2.4
+  syncfusion_flutter_charts: ^27.2.5
   share_plus: ^10.1.2
   csv: ^6.0.0
   fl_chart: ^0.69.2

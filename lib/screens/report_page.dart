@@ -1,13 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:sqflite/sqlite_api.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:csv/csv.dart';
-import 'dart:io';
-import 'package:provider/provider.dart';
-import '../models/transaction_db.dart';
-import '../provider/langguages_provider.dart';
-import '../widgets/list_totalamount.dart';
+import '../models/transaction_db.dart'; // Import your TransactionDB model
 
 class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});
@@ -17,248 +11,206 @@ class ReportScreen extends StatefulWidget {
 }
 
 class _ReportScreenState extends State<ReportScreen> {
-  double totalIncome = 0;
-  double totalExpense = 0;
-  String selectedChartType = 'Doughnut';
-  DateTime? startDate;
-  DateTime? endDate;
-  bool isLoading = true;
+  late List<Transaction> transactions = []; // List to hold transactions
+  late List<ChartData> chartData = []; // Chart data
+  double incomeTotal = 0.0;
+  double expenseTotal = 0.0;
+  double savingTotal = 0.0;
 
   @override
   void initState() {
     super.initState();
-    _loadData();
+    _loadTransactions();
   }
 
-  Future<void> _loadData() async {
-    setState(() {
-      isLoading = true;
-    });
-
+  // Fetch transactions from the database and prepare data for the chart
+  Future<void> _loadTransactions() async {
     final db = TransactionDB();
+    final allTransactions = await db.getTransactions(); // Assuming this fetches all transactions
 
-    List<Map<String, dynamic>> transactions;
-    if (startDate != null && endDate != null) {
-      transactions = await db.getTransactionsByDateRange(startDate!, endDate!);
-    } else {
-      transactions = await db.getTransactions();
-    }
+    Map<String, double> categoryTotals = {
+      'Income': 0.0,
+      'Expense': 0.0,
+      'Saving': 0.0,
+    };
 
-    double income = 0;
-    double expense = 0;
-
-    for (var transaction in transactions) {
-      if (transaction['typeCategory'] == 1) {
-        income += transaction['amount'];
-      } else {
-        expense += transaction['amount'];
+    // Calculate total amount per typeCategory (Income, Expense, Saving)
+    for (var transaction in allTransactions) {
+      if (transaction['typeCategory'] == 'Income') {
+        categoryTotals['Income'] = categoryTotals['Income']! + transaction['amount'];
+      } else if (transaction['typeCategory'] == 'Expense') {
+        categoryTotals['Expense'] = categoryTotals['Expense']! + transaction['amount'];
+      } else if (transaction['typeCategory'] == 'Saving') {
+        categoryTotals['Saving'] = categoryTotals['Saving']! + transaction['amount'];
       }
     }
 
+    // Update state with totals for each category
     setState(() {
-      totalIncome = income;
-      totalExpense = expense;
-      isLoading = false;
+      incomeTotal = categoryTotals['Income']!;
+      expenseTotal = categoryTotals['Expense']!;
+      savingTotal = categoryTotals['Saving']!;
+      chartData = [
+        ChartData(
+          'Income',
+          incomeTotal,
+          const Color.fromARGB(255, 17, 215, 119),
+        ),
+        ChartData('Expense', expenseTotal, Colors.red),
+        ChartData('Saving', savingTotal, Colors.yellow),
+      ];
     });
-  }
-
-  Future<void> _selectDateRange() async {
-    final selectedDateRange = await showDateRangePicker(
-      context: context,
-      initialDateRange: startDate != null && endDate != null
-          ? DateTimeRange(start: startDate!, end: endDate!)
-          : DateTimeRange(start: DateTime.now(), end: DateTime.now()),
-      firstDate: DateTime(2000),
-      lastDate: DateTime.now(),
-    );
-
-    if (selectedDateRange != null) {
-      setState(() {
-        startDate = selectedDateRange.start;
-        endDate = selectedDateRange.end;
-      });
-
-      _loadData();
-    }
-  }
-
-  Future<void> _exportToCSV() async {
-    final db = TransactionDB();
-    final transactions = await db.getTransactions();
-
-    List<List<String>> rows = [];
-    rows.add(['Date', 'Description', 'Amount', 'Type']);
-
-    for (var transaction in transactions) {
-      rows.add([
-        DateFormat('yyyy-MM-dd').format(DateTime.parse(transaction['date'])),
-        transaction['description'],
-        transaction['amount'].toString(),
-        transaction['typeCategory'] == 1 ? 'Income' : 'Expense',
-      ]);
-    }
-
-    String csv = const ListToCsvConverter().convert(rows);
-    final directory = await getApplicationDocumentsDirectory();
-    final path = '${directory.path}/transactions_report.csv';
-    final file = File(path);
-
-    await file.writeAsString(csv);
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(
-          '${Provider.of<LanguageProvider>(context, listen: false).translate('data_exported')} $path'),
-    ));
   }
 
   @override
   Widget build(BuildContext context) {
-    final languageProvider = Provider.of<LanguageProvider>(context);
-
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          languageProvider.translate('report'),
-          style: const TextStyle(fontWeight: FontWeight.bold),
+        title: const Text(
+          'Financial Report',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.date_range),
-            onPressed: _selectDateRange,
-          ),
-          IconButton(
-            icon: const Icon(Icons.view_list),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const ListSummaryScreen()),
-              );
-            },
-          ),
-        ],
+        backgroundColor: const Color(0xFF3F51B5),
+        elevation: 8,
+        toolbarHeight: 80,
+        centerTitle: true,
       ),
-      body: Center(
-        child: isLoading
-            ? const CircularProgressIndicator()
-            : SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: SizedBox(
-                      height: MediaQuery.of(context).size.height * .75,
-                      width: MediaQuery.of(context).size.width * .90,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              "${languageProvider.translate('balance')}: \$${(totalIncome - totalExpense).toStringAsFixed(2)}",
-                              style: TextStyle(
-                                fontSize: 20,
-                                color: (totalIncome - totalExpense) < 0
-                                    ? Colors.red
-                                    : Colors.green,
-                              ),
-                            ),
-                          ),
-                          const Divider(
-                            color: Colors.grey,
-                            thickness: 0.3,
-                            endIndent: 10,
-                            indent: 10,
-                          ),
-                          _buildSummary(languageProvider),
-                          // const SizedBox(height: 20),
-                          Expanded(child: _buildChart(languageProvider)),
-                        ],
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+          child: Column(
+            children: [
+              // Total summary for each category
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildCategorySummary('Income', incomeTotal, const Color.fromARGB(255, 17, 215, 119)),
+                                          _buildCategorySummary('Expense', expenseTotal, Colors.red),
+                   
+                   
+                    _buildCategorySummary('Saving', savingTotal, Colors.yellow),
+                  ],
+                ),
+              ),
+
+              // Financial Overview Card
+              Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Column(
+                  children: <Widget>[
+                    const Text(
+                      "Financial Overview",
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
                       ),
                     ),
-                  ),
-                ),
-              ),
-      ),
-    );
-  }
-
-  Widget _buildSummary(LanguageProvider languageProvider) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Column(
-            children: [
-              Text(
-                languageProvider.translate('income'),
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              Text(
-                "\$${totalIncome.toStringAsFixed(2)}",
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.green,
+                    const Divider(
+                      color: Colors.grey,
+                      thickness: 0.5,
+                      indent: 10,
+                      endIndent: 10,
+                    ),
+                    _buildChart(), // Donut chart widget
+                    const SizedBox(height: 20), // Space between chart and legend
+                    _buildChartLegend(), // Added color legend below chart
+                  ],
                 ),
               ),
             ],
           ),
-          Column(
-            children: [
-              Text(
-                languageProvider.translate('expense'),
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              Text(
-                "\$${totalExpense.toStringAsFixed(2)}",
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.red,
-                ),
-              ),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildChart(LanguageProvider languageProvider) {
-    final data = [
-      ChartData(Colors.greenAccent, languageProvider.translate('income'),
-          totalIncome),
-      ChartData(Colors.redAccent, languageProvider.translate('expense'),
-          totalExpense),
-    ];
-
-    return SfCircularChart(
-      legend: const Legend(
-        isVisible: true,
-        overflowMode: LegendItemOverflowMode.wrap,
-        position: LegendPosition.bottom,
-      ),
-      series: <CircularSeries>[
-        DoughnutSeries<ChartData, String>(
-          dataSource: data,
-          pointColorMapper: (ChartData data, _) => data.color,
-          xValueMapper: (ChartData data, _) => data.name,
-          yValueMapper: (ChartData data, _) => data.value,
-          radius: '70%',
-          dataLabelSettings: const DataLabelSettings(isVisible: true),
+  Widget _buildCategorySummary(String category, double amount, Color color) {
+    return Row(
+      children: [
+        Icon(
+          category == 'Income'
+              ? Icons.arrow_upward
+              : category == 'Expense'
+                  ? Icons.arrow_downward
+                  : Icons.savings,
+          color: color,
+          size: 32,
+        ),
+        const SizedBox(width: 16),
+        Text(
+          '$category: \$${amount.toStringAsFixed(2)}',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: color,
+          ),
         ),
       ],
+    );
+  }
+
+  Widget _buildChart() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+        height: 280, // Increased height for a bigger chart
+        child: SfCircularChart(
+          series: <CircularSeries>[
+            DoughnutSeries<ChartData, String>(
+              dataSource: chartData,
+              pointColorMapper: (ChartData data, _) => data.color,
+              xValueMapper: (ChartData data, _) => data.name,
+              yValueMapper: (ChartData data, _) => data.amount,
+              radius: '110%', // Adjusted radius for better view
+              innerRadius: '50%', // Creating the donut effect
+              dataLabelSettings: const DataLabelSettings(
+                isVisible: true,
+                textStyle: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              animationDuration: 2000, // Smoother animation for the chart
+              animationDelay: 500,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChartLegend() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: chartData.map((data) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Row(
+            children: [
+              Container(
+                width: 16,
+                height: 16,
+                color: data.color,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '${data.name}',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
     );
   }
 }
 
 class ChartData {
-  final Color color;
   final String name;
-  final double value;
+  final double amount;
+  final Color color;
 
-  ChartData(this.color, this.name, this.value);
+  ChartData(this.name, this.amount, this.color);
 }

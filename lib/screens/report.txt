@@ -1,23 +1,28 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:csv/csv.dart';
-import 'package:share_plus/share_plus.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:csv/csv.dart';
+import 'dart:io';
+import 'package:provider/provider.dart';
 import '../models/transaction_db.dart';
+import '../provider/langguages_provider.dart';
+import '../widgets/list_totalamount.dart';
 
 class ReportScreen extends StatefulWidget {
-  const ReportScreen({Key? key}) : super(key: key);
+  const ReportScreen({super.key});
 
   @override
   _ReportScreenState createState() => _ReportScreenState();
 }
 
 class _ReportScreenState extends State<ReportScreen> {
-  List<Map<String, dynamic>> transactions = [];
-  DateTimeRange? selectedRange;
   double totalIncome = 0;
   double totalExpense = 0;
+  String selectedChartType = 'Doughnut';
+  DateTime? startDate;
+  DateTime? endDate;
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -26,203 +31,226 @@ class _ReportScreenState extends State<ReportScreen> {
   }
 
   Future<void> _loadData() async {
+    setState(() {
+      isLoading = true;
+    });
+
     final db = TransactionDB();
-    final allTransactions = await db.getTransactions();
+
+    List<Map<String, dynamic>> transactions;
+    if (startDate != null && endDate != null) {
+      transactions = await db.getTransactionsByDateRange(startDate!, endDate!);
+    } else {
+      transactions = await db.getTransactions();
+    }
+
+    double income = 0;
+    double expense = 0;
+
+    for (var transaction in transactions) {
+      if (transaction['typeCategory'] == 1) {
+        income += transaction['amount'];
+      } else {
+        expense += transaction['amount'];
+      }
+    }
 
     setState(() {
-      transactions = selectedRange == null
-          ? allTransactions
-          : allTransactions.where((transaction) {
-              final date = DateTime.parse(transaction['date']);
-              return date.isAfter(selectedRange!.start) &&
-                  date.isBefore(selectedRange!.end);
-            }).toList();
-
-      totalIncome = transactions
-          .where((t) => t['isIncome'] == 1)
-          .fold(0.0, (sum, t) => sum + t['amount']);
-      totalExpense = transactions
-          .where((t) => t['isIncome'] == 0)
-          .fold(0.0, (sum, t) => sum + t['amount']);
+      totalIncome = income;
+      totalExpense = expense;
+      isLoading = false;
     });
   }
 
-  Future<void> _pickDateRange() async {
-    final range = await showDateRangePicker(
+  Future<void> _selectDateRange() async {
+    final selectedDateRange = await showDateRangePicker(
       context: context,
-      initialDateRange: selectedRange ??
-          DateTimeRange(
-            start: DateTime.now().subtract(const Duration(days: 30)),
-            end: DateTime.now(),
-          ),
+      initialDateRange: startDate != null && endDate != null
+          ? DateTimeRange(start: startDate!, end: endDate!)
+          : DateTimeRange(start: DateTime.now(), end: DateTime.now()),
       firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
+      lastDate: DateTime.now(),
     );
 
-    if (range != null) {
+    if (selectedDateRange != null) {
       setState(() {
-        selectedRange = range;
+        startDate = selectedDateRange.start;
+        endDate = selectedDateRange.end;
       });
+
       _loadData();
     }
   }
 
-Future<void> _exportData() async {
-  List<List<String>> csvData = [
-    ['Date', 'Category', 'Description', 'Amount', 'Type'],
-    ...transactions.map<List<String>>((transaction) {
-      return [
-        transaction['date'] as String, // Ensure it's a string
-        transaction['category'] as String,
-        (transaction['description'] ?? '') as String,
-        transaction['amount'].toString(),
-        transaction['isIncome'] == 1 ? 'Income' : 'Expense',
-      ];
-    }).toList(), // Explicitly cast to List<String>
-  ];
+  Future<void> _exportToCSV() async {
+    final db = TransactionDB();
+    final transactions = await db.getTransactions();
 
-  String csv = const ListToCsvConverter().convert(csvData);
-
-  final directory = await getApplicationDocumentsDirectory();
-  final path = "${directory.path}/report.csv";
-  final file = File(path);
-  await file.writeAsString(csv);
-
-  // Use Share with a corrected method for sharing files
-  Share.shareXFiles([XFile(path)], text: "My Transaction Report");
-}
-
-
-  Widget _buildChart() {
-    final chartData = [
-      ChartData(Colors.greenAccent, 'Income', totalIncome),
-      ChartData(Colors.redAccent, 'Expense', totalExpense),
-    ];
-
-    return SfCircularChart(
-      legend: Legend(isVisible: true, position: LegendPosition.bottom),
-      series: <PieSeries<ChartData, String>>[
-        PieSeries<ChartData, String>(
-          dataSource: chartData,
-          pointColorMapper: (ChartData data, _) => data.color,
-          xValueMapper: (ChartData data, _) => data.name,
-          yValueMapper: (ChartData data, _) => data.value,
-          dataLabelSettings: const DataLabelSettings(isVisible: true),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMonthlyComparisonChart() {
-    final groupedData = <String, Map<String, double>>{};
+    List<List<String>> rows = [];
+    rows.add(['Date', 'Description', 'Amount', 'Type']);
 
     for (var transaction in transactions) {
-      final date = DateTime.parse(transaction['date']);
-      final monthKey = "${date.year}-${date.month.toString().padLeft(2, '0')}";
-
-      groupedData[monthKey] ??= {'income': 0, 'expense': 0};
-      if (transaction['isIncome'] == 1) {
-        groupedData[monthKey]!['income'] =
-            (groupedData[monthKey]!['income'] ?? 0) + transaction['amount'];
-      } else {
-        groupedData[monthKey]!['expense'] =
-            (groupedData[monthKey]!['expense'] ?? 0) + transaction['amount'];
-      }
+      rows.add([
+        DateFormat('yyyy-MM-dd').format(DateTime.parse(transaction['date'])),
+        transaction['description'],
+        transaction['amount'].toString(),
+        transaction['typeCategory'] == 1 ? 'Income' : 'Expense',
+      ]);
     }
 
-    final chartData = groupedData.entries.map((entry) {
-      return ChartData(
-        Colors.green,
-        entry.key,
-        entry.value['income']!,
-        entry.value['expense']!,
-      );
-    }).toList();
+    String csv = const ListToCsvConverter().convert(rows);
+    final directory = await getApplicationDocumentsDirectory();
+    final path = '${directory.path}/transactions_report.csv';
+    final file = File(path);
 
-    return SfCartesianChart(
-      primaryXAxis: CategoryAxis(),
-      legend: Legend(isVisible: true),
-      series: <CartesianSeries>[
-        ColumnSeries<ChartData, String>(
-          dataSource: chartData,
-          xValueMapper: (ChartData data, _) => data.name,
-          yValueMapper: (ChartData data, _) => data.income,
-          name: 'Income',
-          color: Colors.green,
-        ),
-        ColumnSeries<ChartData, String>(
-          dataSource: chartData,
-          xValueMapper: (ChartData data, _) => data.name,
-          yValueMapper: (ChartData data, _) => data.expense,
-          name: 'Expense',
-          color: Colors.red,
-        ),
-      ],
-    );
+    await file.writeAsString(csv);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(
+          '${Provider.of<LanguageProvider>(context, listen: false).translate('data_exported')} $path'),
+    ));
   }
-
-Widget _buildInsights() {
-  final expenses = transactions.where((t) => t['isIncome'] == 0).toList();
-
-  final highestExpense = expenses.isNotEmpty
-      ? expenses.reduce((curr, next) => curr['amount'] > next['amount'] ? curr : next)
-      : null; // Handle no expenses case
-
-  final averageSavings = transactions.isEmpty
-      ? 0
-      : (totalIncome - totalExpense) / (selectedRange?.duration.inDays ?? 30);
-
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      if (highestExpense != null)
-        Text(
-          "Highest Expense: ${highestExpense['category']} - \$${highestExpense['amount']}",
-          style: const TextStyle(fontSize: 16),
-        )
-      else
-        const Text(
-          "No expenses recorded.",
-          style: TextStyle(fontSize: 16),
-        ),
-      Text(
-        "Average Monthly Savings: \$${averageSavings.toStringAsFixed(2)}",
-        style: const TextStyle(fontSize: 16),
-      ),
-    ],
-  );
-}
-
 
   @override
   Widget build(BuildContext context) {
+    final languageProvider = Provider.of<LanguageProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Report'),
-        backgroundColor: Colors.blueAccent,
+        title: Text(
+          languageProvider.translate('report'),
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.calendar_today),
-            onPressed: _pickDateRange,
+            icon: const Icon(Icons.date_range),
+            onPressed: _selectDateRange,
+          ),
+          IconButton(
+            icon: const Icon(Icons.view_list),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const ListSummaryScreen()),
+              );
+            },
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            _buildInsights(),
-            Expanded(child: _buildChart()),
-            const SizedBox(height: 20),
-            Expanded(child: _buildMonthlyComparisonChart()),
-          ],
+      body: Center(
+        child: isLoading
+            ? const CircularProgressIndicator()
+            : SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: SizedBox(
+                      height: MediaQuery.of(context).size.height * .75,
+                      width: MediaQuery.of(context).size.width * .90,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              "${languageProvider.translate('balance')}: \$${(totalIncome - totalExpense).toStringAsFixed(2)}",
+                              style: TextStyle(
+                                fontSize: 20,
+                                color: (totalIncome - totalExpense) < 0
+                                    ? Colors.red
+                                    : Colors.green,
+                              ),
+                            ),
+                          ),
+                          const Divider(
+                            color: Colors.grey,
+                            thickness: 0.3,
+                            endIndent: 10,
+                            indent: 10,
+                          ),
+                          _buildSummary(languageProvider),
+                          // const SizedBox(height: 20),
+                          Expanded(child: _buildChart(languageProvider)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+      ),
+    );
+  }
+
+  Widget _buildSummary(LanguageProvider languageProvider) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Column(
+            children: [
+              Text(
+                languageProvider.translate('income'),
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                "\$${totalIncome.toStringAsFixed(2)}",
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Colors.green,
+                ),
+              ),
+            ],
+          ),
+          Column(
+            children: [
+              Text(
+                languageProvider.translate('expense'),
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                "\$${totalExpense.toStringAsFixed(2)}",
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Colors.red,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChart(LanguageProvider languageProvider) {
+    final data = [
+      ChartData(Colors.greenAccent, languageProvider.translate('income'),
+          totalIncome),
+      ChartData(Colors.redAccent, languageProvider.translate('expense'),
+          totalExpense),
+    ];
+
+    return SfCircularChart(
+      legend: const Legend(
+        isVisible: true,
+        overflowMode: LegendItemOverflowMode.wrap,
+        position: LegendPosition.bottom,
+      ),
+      series: <CircularSeries>[
+        DoughnutSeries<ChartData, String>(
+          dataSource: data,
+          pointColorMapper: (ChartData data, _) => data.color,
+          xValueMapper: (ChartData data, _) => data.name,
+          yValueMapper: (ChartData data, _) => data.value,
+          radius: '70%',
+          dataLabelSettings: const DataLabelSettings(isVisible: true),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _exportData,
-        backgroundColor: Colors.blueAccent,
-        child: const Icon(Icons.share),
-      ),
+      ],
     );
   }
 }
@@ -231,8 +259,6 @@ class ChartData {
   final Color color;
   final String name;
   final double value;
-  final double? income;
-  final double? expense;
 
-  ChartData(this.color, this.name, this.value, [this.income, this.expense]);
+  ChartData(this.color, this.name, this.value);
 }

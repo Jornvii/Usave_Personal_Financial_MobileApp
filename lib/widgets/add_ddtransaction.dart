@@ -12,15 +12,16 @@ class AddTransactionScreen extends StatefulWidget {
 }
 
 class _AddTransactionScreenState extends State<AddTransactionScreen> {
-  bool typeCategory = true;
+  String typeCategory = 'Income'; // 'Income', 'Expense', 'Saving'
   bool hasTransactionBeenAdded = false;
   String selectedCategory = '';
   DateTime? transactionDate;
   final TextEditingController amountController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
 
-  List<String> incomeCategories = []; // Will store Income categories
-  List<String> expenseCategories = []; // Will store Expense categories
+  List<String> incomeCategories = [];
+  List<String> expenseCategories = [];
+  List<String> savingCategories = [];
 
   // Default categories
   final List<String> defaultIncomeCategories = [
@@ -42,6 +43,12 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     'Healthcare',
     'Transportation',
   ];
+  final List<String> defaultSavingCategories = [
+    'Emergency Fund',
+    'Retirement',
+    'Investments',
+    'Vacation Fund',
+  ];
 
   final _formKey = GlobalKey<FormState>();
 
@@ -57,19 +64,25 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     final allCategories = await db.getCategories();
 
     setState(() {
-      // Combine default categories with those fetched from the database
       incomeCategories = [
         ...defaultIncomeCategories,
         ...allCategories
             .where((cat) => cat['type'] == 'Income')
-            .map((cat) => cat['name'] as String)
+            .map((cat) => cat['name'] as String),
       ];
 
       expenseCategories = [
         ...defaultExpenseCategories,
         ...allCategories
             .where((cat) => cat['type'] == 'Expense')
-            .map((cat) => cat['name'] as String)
+            .map((cat) => cat['name'] as String),
+      ];
+
+      savingCategories = [
+        ...defaultSavingCategories,
+        ...allCategories
+            .where((cat) => cat['type'] == 'Saving')
+            .map((cat) => cat['name'] as String),
       ];
     });
   }
@@ -130,15 +143,15 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     descriptionController.clear();
   }
 
-  void _handleToggle(bool incomeSelected) {
-    if (typeCategory != incomeSelected && !hasTransactionBeenAdded) {
+  void _handleToggle(String selectedType) {
+    if (typeCategory != selectedType && !hasTransactionBeenAdded) {
       setState(() {
-        typeCategory = incomeSelected;
+        typeCategory = selectedType;
         _resetFields(); // Reset fields only if no transaction has been added
       });
     } else {
       setState(() {
-        typeCategory = incomeSelected;
+        typeCategory = selectedType;
       });
     }
   }
@@ -156,17 +169,17 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             key: _formKey,
             child: Column(
               children: [
-                // Toggle for Income/Expense
+                // Toggle for Income/Expense/Saving
                 Padding(
                   padding: const EdgeInsets.only(top: 15, bottom: 15),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       GestureDetector(
-                        onTap: () => _handleToggle(true),
+                        onTap: () => _handleToggle('Income'),
                         child: Container(
                           decoration: BoxDecoration(
-                            color: typeCategory
+                            color: typeCategory == 'Income'
                                 ? const Color.fromARGB(255, 0, 255, 8)
                                 : Colors.grey[200],
                             borderRadius: BorderRadius.circular(8),
@@ -176,7 +189,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                           child: Text(
                             'Income',
                             style: TextStyle(
-                              color: typeCategory
+                              color: typeCategory == 'Income'
                                   ? Colors.black87
                                   : Colors.black54,
                               fontWeight: FontWeight.bold,
@@ -185,10 +198,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         ),
                       ),
                       GestureDetector(
-                        onTap: () => _handleToggle(false),
+                        onTap: () => _handleToggle('Expense'),
                         child: Container(
                           decoration: BoxDecoration(
-                            color: !typeCategory
+                            color: typeCategory == 'Expense'
                                 ? const Color.fromARGB(255, 244, 26, 11)
                                 : Colors.grey[200],
                             borderRadius: BorderRadius.circular(8),
@@ -198,8 +211,31 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                           child: Text(
                             'Expense',
                             style: TextStyle(
-                              color:
-                                  !typeCategory ? Colors.white : Colors.black54,
+                              color: typeCategory == 'Expense'
+                                  ? Colors.white
+                                  : Colors.black54,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => _handleToggle('Saving'),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: typeCategory == 'Saving'
+                                ? const Color.fromARGB(255, 255, 215, 0)
+                                : Colors.grey[200],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
+                          child: Text(
+                            'Saving',
+                            style: TextStyle(
+                              color: typeCategory == 'Saving'
+                                  ? Colors.black87
+                                  : Colors.black54,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -246,7 +282,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   ),
                   hint: const Text('Select Category'),
                   isExpanded: true,
-                  items: (typeCategory ? incomeCategories : expenseCategories)
+                  items: (typeCategory == 'Income'
+                          ? incomeCategories
+                          : typeCategory == 'Expense'
+                              ? expenseCategories
+                              : savingCategories)
                       .map((category) {
                     return DropdownMenuItem<String>(
                       value: category,

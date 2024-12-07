@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'provider/langguages_provider.dart'; // Ensure this points to your LanguageProvider
-import 'theme/theme_provider.dart';
+import 'provider/theme_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/report_page.dart';
 import 'screens/chat_bot.dart';
@@ -69,7 +69,7 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _screens = [
     const MyHomePage(),
-    const ReportScreen(),
+     ReportScreen(),
     const ChatBotScreen(),
     const SettingsScreen(),
   ];

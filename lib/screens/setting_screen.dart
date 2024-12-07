@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import '../models/chat_db.dart';
 import '../models/transaction_db.dart';
 import '../provider/langguages_provider.dart';
-import '../theme/theme_provider.dart';
+import '../provider/theme_provider.dart';
 import '../widgets/profile_widget.dart';
 import 'category_screen.dart';
 import 'saving_goal_screen.dart';
