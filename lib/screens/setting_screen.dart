@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_bot/screens/dev_pf.dart';
 import 'package:provider/provider.dart';
@@ -77,8 +78,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: Text(languageProvider.translate('theme')),
             subtitle: Text(
               themeProvider.isDarkTheme
-                  ? languageProvider.translate('dark')
-                  : languageProvider.translate('light'),
+                  ? languageProvider.translate('Dark')
+                  : languageProvider.translate('Light'),
             ),
             value: themeProvider.isDarkTheme,
             onChanged: (value) => themeProvider.toggleTheme(),
@@ -91,21 +92,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.error),
-            title: Text(languageProvider.translate('About Us')),
+            title: Text(languageProvider.translate('about_us')),
             onTap: () {
-               Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const DevPfScreen()),
-              );
+              //  Navigator.push(
+              //   context,
+              //   MaterialPageRoute(
+              //       builder: (context) => const DevPfScreen()),
+              // );
+              Navigator.push(
+              context,
+              CupertinoPageRoute(builder: (context) => const DevPfScreen()),
+            );
             },
           ),
-          const Padding(
-            padding: EdgeInsets.all(20),
-            child: Text(
-              "version 1.0.1",
-              style: TextStyle(color: Colors.grey),
-            ),
+           Padding(
+            padding: const EdgeInsets.all(20),
+            child:
+             Text(languageProvider.translate('version_app')),
+            
+            //  Text(
+            //   "version 1.0.1",
+            //   style: TextStyle(color: Colors.grey),
+            // ),
           )
         ],
       ),

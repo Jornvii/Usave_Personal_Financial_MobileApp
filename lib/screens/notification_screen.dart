@@ -74,7 +74,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
       return "Your saving goal is not properly set. Please update your saving goals.";
     }
 
-    double percentageSaved = (savingsProgress / savingsGoal) * 100;
 
     if (savingsProgress < savingsGoal) {
       return "Based on your income of \$${income.toStringAsFixed(2)}, expenses of \$${expenses.toStringAsFixed(2)}, and a savings goal of \$${savingsGoal.toStringAsFixed(2)}, you're saving \$${savingsProgress.toStringAsFixed(2)}. Consider cutting discretionary expenses by 10% to reach your goal faster.";

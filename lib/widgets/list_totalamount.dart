@@ -245,7 +245,7 @@ class ViewAllDataScreen extends StatelessWidget {
             DataColumn(label: Text('Description')),
           ],
           source: TransactionsDataSource(transactions),
-          rowsPerPage: 13, 
+          rowsPerPage: 10, 
           showCheckboxColumn: false, 
         ),
       ),

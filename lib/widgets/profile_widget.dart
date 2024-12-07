@@ -96,13 +96,13 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
           child: Column(
             children: [
               Padding(
-                padding: EdgeInsets.only(top: 20,bottom: 20),
+                padding: EdgeInsets.only(top: 20, bottom: 20),
                 child: CircleAvatar(
                   radius: 60,
                   backgroundImage: AssetImage('assets/images/logoapp.png'),
                 ),
               ),
-              // Text("iSAVE",style: TextStyle(    fontWeight: FontWeight.w900,fontSize: 28),)
+              Text("iSAVE",style: TextStyle(    fontWeight: FontWeight.w900,fontSize: 24),)
             ],
           ),
         ),

@@ -3,7 +3,7 @@ import '../models/category_db.dart';
 import '../models/saving_goaldb.dart';
 
 class SavingGoalScreen extends StatefulWidget {
-  const SavingGoalScreen({Key? key}) : super(key: key);
+  const SavingGoalScreen({super.key});
 
   @override
   _SavingGoalScreenState createState() => _SavingGoalScreenState();
@@ -60,7 +60,7 @@ class _SavingGoalScreenState extends State<SavingGoalScreen> {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: Text(
             'Set Goal for $category',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           content: TextField(
             controller: goalController,

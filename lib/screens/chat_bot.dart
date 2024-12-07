@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_gemini/google_gemini.dart';
-import 'package:provider/provider.dart';
-import '../provider/langguages_provider.dart';
 
 const apiKey = "AIzaSyDISHUkyGSIRJjt5pb9uGICZpFQbB9o6DA";
 
@@ -17,6 +15,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
   bool loading = false;
   List<Map<String, String>> chatMessages = [];
   final ScrollController _scrollController = ScrollController();
+  String selectLanguage = 'English'; // Default language
 
   void _startChat() {
     showModalBottomSheet(
@@ -30,7 +29,6 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
   }
 
   Widget _buildOptionsMenu() {
-    final languageProvider = Provider.of<LanguageProvider>(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -46,37 +44,26 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
         const SizedBox(height: 12),
         ListTile(
           leading: const Icon(Icons.savings, color: Colors.green),
-          title: Text(languageProvider.translate("savings_plan")),
+          title: const Text("Savings Plan"),
           onTap: () => _handleOptionSelection(
-            languageProvider.translate("savings_plan"),
-            [
-              languageProvider.translate("monthly_income"),
-              languageProvider.translate("monthly_expenses"),
-              languageProvider.translate("savings_goal"),
-            ],
+            "Savings Plan",
+            ["Monthly Income", "Monthly Expenses", "Savings Goal"],
           ),
         ),
         ListTile(
           leading: const Icon(Icons.attach_money, color: Colors.blue),
-          title: Text(languageProvider.translate("income_planner")),
+          title: const Text("Income Planner"),
           onTap: () => _handleOptionSelection(
-            languageProvider.translate("income_planner"),
-            [
-              languageProvider.translate("target_income"),
-              languageProvider.translate("current_income"),
-            ],
+            "Income Planner",
+            ["Target Income", "Current Income"],
           ),
         ),
         ListTile(
           leading: const Icon(Icons.track_changes, color: Colors.orange),
-          title: Text(languageProvider.translate("expense_tracker")),
+          title: const Text("Expense Tracker"),
           onTap: () => _handleOptionSelection(
-            languageProvider.translate("expense_tracker"),
-            [
-              languageProvider.translate("monthly_income"),
-              languageProvider.translate("fixed_expenses"),
-              languageProvider.translate("variable_expenses"),
-            ],
+            "Expense Tracker",
+            ["Monthly Income", "Fixed Expenses", "Variable Expenses"],
           ),
         ),
         const SizedBox(height: 22),
@@ -87,12 +74,11 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
   void _handleOptionSelection(String title, List<String> fields) {
     Navigator.pop(context);
     _showInputForm(
-      title: title,
-      fields: fields,
-      onSubmit: (inputs) {
-        _generateResponse(title.toLowerCase(), inputs);
-      },
-    );
+        title: title,
+        fields: fields,
+        onSubmit: (inputs) {
+          _generateResponse(title.toLowerCase(), inputs);
+        });
   }
 
   void _showInputForm({
@@ -107,7 +93,6 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        final languageProvider = Provider.of<LanguageProvider>(context);
         return Dialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -168,7 +153,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
                           Navigator.pop(context);
                         },
                         icon: const Icon(Icons.cancel),
-                        label: Text(languageProvider.translate("cancel")),
+                        label: const Text("Cancel"),
                       ),
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
@@ -191,7 +176,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
                           onSubmit(inputs);
                         },
                         icon: const Icon(Icons.send),
-                        label: Text(languageProvider.translate("submit")),
+                        label: const Text("Submit"),
                       ),
                     ],
                   ),
@@ -216,7 +201,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
     final enrichedQuery = """
 Category: $category
 Inputs: $inputs
-Let show the details, calculation...through $inputs to me reach my $category and give some tips list to help me reach my  $category and to improve it further through my $category.  and respond in ${Provider.of<LanguageProvider>(context, listen: false).selectedLanguage} (respond in short and concise).
+Let show the details, calculation...through $inputs to me reach my $category and give some tips list to help me reach my  $category and to improve it further through my $category.  and respond in $selectLanguage (respond in short and concise).
     """;
 
     try {
@@ -266,18 +251,22 @@ Let show the details, calculation...through $inputs to me reach my $category and
 
   @override
   Widget build(BuildContext context) {
-    final languageProvider = Provider.of<LanguageProvider>(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(languageProvider.translate('chat_bot_title')),
+        title: const Text(
+          "AI Chat Bot",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         actions: [
           Row(
             children: [
-              Text(languageProvider.translate('language')),
+              Text(selectLanguage),
               PopupMenuButton<String>(
                 onSelected: (String value) {
                   if (value != 'Other') {
-                    languageProvider.setLanguage(value);
+                    setState(() {
+                      selectLanguage = value;
+                    });
                   }
                 },
                 itemBuilder: (BuildContext context) {
@@ -307,31 +296,31 @@ Let show the details, calculation...through $inputs to me reach my $category and
                               ),
                               onChanged: (value) {
                                 setState(() {
-                                  languageProvider.setLanguage(value);
+                                  selectLanguage =
+                                      value; // Temporarily store input
                                 });
                               },
                             ),
                           ),
                           GestureDetector(
                             onTap: () {
-                              if (languageProvider
-                                  .selectedLanguage.isNotEmpty) {
-                                Navigator.pop(context);
+                              if (selectLanguage.isNotEmpty) {
+                                Navigator.pop(context); // Close the menu
                                 setState(() {
-                                  languageProvider.setLanguage(
-                                      languageProvider.selectedLanguage);
+                                  // Finalize the selection
+                                  selectLanguage = selectLanguage;
                                 });
                               }
                             },
                             child: Container(
                               padding: const EdgeInsets.all(8),
                               decoration: const BoxDecoration(
-                                color: Colors.green,
-                                shape: BoxShape.circle,
+                                color: Colors.green, // Green background
+                                shape: BoxShape.circle, // Circular shape
                               ),
                               child: const Icon(
                                 Icons.check,
-                                color: Colors.white,
+                                color: Colors.white, // White tick icon
                               ),
                             ),
                           ),
@@ -397,7 +386,7 @@ Let show the details, calculation...through $inputs to me reach my $category and
                 padding: const EdgeInsets.only(bottom: 15),
                 child: FloatingActionButton.extended(
                   onPressed: _startChat,
-                  label: Text(languageProvider.translate('start_chat')),
+                  label: const Text("Start Chat"),
                   icon: const Icon(Icons.play_arrow),
                   backgroundColor: const Color.fromARGB(255, 17, 215, 119),
                 ),

@@ -73,14 +73,16 @@ class LanguageProvider with ChangeNotifier {
       'theme': 'Theme',
       'dark': 'Dark',
       'light': 'Light',
-     
-      'delete_data': 'Delete Data',
-    'choose_delete_option': 'Please choose to delete',
 
+      'delete_all': 'Delete Your Data',
+      'choose_delete_option': 'Please choose to delete',
+
+      'delete_data': 'clear your data',
       'delete_data_subtitle': 'Delete your chat or all data',
       'edit_saving_goal': 'Edit Saving Goal',
-      'delete_all_data': 'Delete All Data',
-      'delete_chat_data': 'Delete Chat Data',
+      'delete_chat': 'Delete Chat Data',
+        'about_us':"About Us",
+        'version_app':'version 1.0.1'
     },
     'Thai': {
       // ReportScreen
@@ -123,13 +125,16 @@ class LanguageProvider with ChangeNotifier {
       'theme': 'ธีม',
       'dark': 'มืด',
       'light': 'สว่าง',
-      
       'delete_data': 'ลบข้อมูล',
-    'choose_delete_option': 'กรุณาเลือกลบ',
+
+      'delete_all': 'ลบข้อมูล',
+      'choose_delete_option': 'กรุณาเลือกลบ',
       'delete_data_subtitle': 'ลบการหรือข้อมูลทั้งหมด',
       'edit_saving_goal': 'แก้ไขเป้าหมายการออม',
-      'delete_all': 'ลบข้อมูลทั้งหมด',
+    
       'delete_chat': 'ลบข้อมูล bot',
+            'about_us':"เกี่ยวกับเรา",
+'version_app':'เวอร์ชัน 1.0.1'
     },
     'Khmer': {
       // ReportScreen
@@ -175,11 +180,14 @@ class LanguageProvider with ChangeNotifier {
       'light': 'ភ្លឺ',
       'export_data': 'នាំចេញទិន្នន័យ',
       'export_data_subtitle': 'នាំចេញទិន្នន័យទៅ Excel',
-      'delete_data': 'លុបទិន្នន័យ',
-      'delete_data_subtitle': 'លុបសារឬទិន្នន័យទាំងអស់',
+      
+      'delete_all': 'លុបទិន្នន័យ',
+      'delete_data': 'លុបសារ ទិន្នន័យ',
+      'delete_data_subtitle': 'លុបសារ ទិន្នន័យ',
       'edit_saving_goal': 'កែសម្រួលគោលដៅសន្សំ',
-      'delete_all': 'លុបទិន្នន័យទាំងអស់',
       'delete_chat': 'លុបទិន្នន័យសារ',
+      'about_us':"អំពី អ្នកបង្កើតកម្មវិធី",
+      'version_app':'កំណែ 1.0.1'
     },
   };
 }

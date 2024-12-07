@@ -12,26 +12,18 @@ class DevPfScreen extends StatelessWidget {
         elevation: 0.5,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
         title: const Text(
           'Developer Profile',
           style: TextStyle(
-            color: Colors.black,
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search, color: Colors.black),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: const Icon(Icons.more_vert, color: Colors.black),
-            onPressed: () {},
-          ),
-        ],
+        
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -66,39 +58,56 @@ class DevPfScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 const Text(
-                  'I\'m from BC64 at MBS MSU',
+                  'I\'m from BC64 MBS MSU',
                   style: TextStyle(
                     color: Colors.blueGrey,
                     fontSize: 16,
                   ),
                 ),
                 const SizedBox(height: 6),
-               RichText(
-  textAlign: TextAlign.justify,
-  text: const TextSpan(
-    children: [
-      TextSpan(
-        text: 'I’m currently developing ',
-        style: TextStyle(color: Colors.grey, fontSize: 14, height: 1.5),
-      ),
-      TextSpan(
-        text: 'iSAVE',
-        style: TextStyle(
-          color: Colors.blue, 
-          fontSize: 14,
-          fontWeight: FontWeight.bold, 
-        ),
-      ),
-      TextSpan(
-        text: ', a Personal Financial Management Mobile Application that helps users track and manage their finances efficiently.\n'
-            'iSave is my final project for my bachelor’s degree and represents my dedication to creating practical, user-friendly solutions. '
-            'This project combines my technical skills and creativity, aiming to make financial management accessible and effective for everyone.',
-        style: TextStyle(color: Colors.grey, fontSize: 14, height: 1.5),
-      ),
-    ],
-  ),
-)
-
+                Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: RichText(
+                    textAlign: TextAlign.justify,
+                    text: const TextSpan(
+                      children: [
+                        TextSpan(
+                          text: 'I’m currently developing ',
+                          style: TextStyle(
+                              color: Colors.grey, fontSize: 14, height: 1.5),
+                        ),
+                        TextSpan(
+                          text: 'iSAVE',
+                          style: TextStyle(
+                            color: Colors.blue,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        TextSpan(
+                          text:
+                              ', a Personal Financial Management Mobile Application that helps users track and manage their finances efficiently.\n',
+                          style: TextStyle(
+                              color: Colors.grey, fontSize: 14, height: 1.5),
+                        ),
+                        TextSpan(
+                          text: 'iSAVE',
+                          style: TextStyle(
+                            color: Colors.blue,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        TextSpan(
+                          text:
+                              ' is my final project for my bachelor’s degree and represents my dedication to creating practical, users solutions, aiming to make financial management accessible and effective for everyone.',
+                          style: TextStyle(
+                              color: Colors.grey, fontSize: 14, height: 1.5),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
               ],
             ),
           ),
