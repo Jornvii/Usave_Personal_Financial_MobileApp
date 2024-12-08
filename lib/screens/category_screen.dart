@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/category_db.dart';
+import '../widgets/add_currency.dart';
 
 class CategoryScreen extends StatefulWidget {
   const CategoryScreen({super.key});
@@ -81,6 +82,23 @@ class _CategoryScreenState extends State<CategoryScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              
+
+              ListTile(
+            leading: const Icon(Icons.category),
+            title: const Text('Currency'),
+            subtitle: const Text('CurrencyScreen'),
+            onTap: () {
+              // Navigate to CategoryScreen
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CurrencyScreen()),
+              );
+            },
+          ),
+
+
+
               _buildCategorySection(
                 title: 'Income Categories',
                 categories: defaultIncomeCategories,

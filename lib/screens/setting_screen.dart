@@ -43,7 +43,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ListTile(
             leading: const Icon(Icons.category),
             title: Text(languageProvider.translate('category')),
-            subtitle: Text(languageProvider.translate('view_categories')),
+            // subtitle: Text(languageProvider.translate('view_categories')),
             onTap: () {
               // Navigate to CategoryScreen
               Navigator.push(
@@ -55,9 +55,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ListTile(
             leading: const Icon(Icons.savings),
             title: Text(languageProvider.translate('saving_goal')),
-            subtitle: Text(
-              languageProvider.translate('manage_your_saving_goals'),
-            ),
+            // subtitle: Text(
+            //   languageProvider.translate('manage_your_saving_goals'),
+            // ),
             onTap: () {
               Navigator.push(
                 context,

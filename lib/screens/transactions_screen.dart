@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../models/transaction_db.dart';
+import '../models/currency_db.dart'; // Import your CurrencyDB model
 import '../widgets/add_ddtransaction.dart';
 
 class TransactionsScreen extends StatefulWidget {
@@ -14,18 +15,29 @@ class TransactionsScreen extends StatefulWidget {
 class _TransactionsScreenState extends State<TransactionsScreen> {
   DateTime selectedDate = DateTime.now();
   List<Map<String, dynamic>> transactions = [];
+  String currencySymbol = '\$'; // Default currency symbol
 
   @override
   void initState() {
     super.initState();
+    _loadCurrency();
     _loadTransactions();
   }
+
+Future<void> _loadCurrency() async {
+  final db = CurrencyDB();
+  final defaultCurrency = await db.getDefaultCurrency();
+  setState(() {
+    currencySymbol = defaultCurrency?['symbol'] ?? '\$'; // Use default if null
+  });
+}
+
 
   Future<void> _loadTransactions() async {
     final db = TransactionDB();
     final data = await db.getTransactions();
     setState(() {
-      transactions = List<Map<String, dynamic>>.from(data); // Make it mutable
+      transactions = List<Map<String, dynamic>>.from(data);
     });
   }
 
@@ -58,13 +70,12 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         'date': DateFormat('yyyy-MM-dd').format(newTransaction['date']),
         'typeCategory': newTransaction['typeCategory'],
       });
-      _loadTransactions(); // Reload transactions
+      _loadTransactions();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Group transactions by date
     Map<String, List<Map<String, dynamic>>> groupedTransactions = {};
     for (var transaction in transactions) {
       final dateKey = transaction['date'];
@@ -74,19 +85,17 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       groupedTransactions[dateKey]?.add(transaction);
     }
 
-    // Filter transactions for the selected month
     final filteredTransactions = groupedTransactions.entries.where((entry) {
       final transactionDate = DateTime.parse(entry.key);
       return transactionDate.year == selectedDate.year &&
           transactionDate.month == selectedDate.month;
     }).toList()
-      ..sort((a, b) => DateTime.parse(b.key)
-          .compareTo(DateTime.parse(a.key))); // Sort dates descending
+      ..sort((a, b) =>
+          DateTime.parse(b.key).compareTo(DateTime.parse(a.key)));
 
     return Scaffold(
       body: Column(
         children: [
-          // Month Selector
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -118,8 +127,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               ),
             ],
           ),
-
-          // Transactions List
           Expanded(
             child: filteredTransactions.isEmpty
                 ? const Center(
@@ -136,7 +143,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                           filteredTransactions[index].value;
 
                       dailyTransactions.sort((a, b) =>
-                          b['date'].compareTo(a['date'])); // Descending order
+                          b['date'].compareTo(a['date']));
 
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -185,7 +192,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                               onDismissed: (direction) async {
                                 final db = TransactionDB();
                                 await db.deleteTransaction(transaction['id']);
-                                _loadTransactions(); // Reload transactions
+                                _loadTransactions();
                               },
                               background: Container(
                                 color: Colors.red,
@@ -212,7 +219,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                                 ),
                                 title: Text(transaction['category']),
                                 trailing: Text(
-                                  '${transaction['amount']} USD',
+                                  '$currencySymbol ${transaction['amount']}',
                                   style: TextStyle(
                                     color: transaction['typeCategory'] ==
                                             'Income'
