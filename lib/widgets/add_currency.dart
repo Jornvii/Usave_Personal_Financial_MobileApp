@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/currency_db.dart';
 
 class CurrencyScreen extends StatefulWidget {
-  const CurrencyScreen({Key? key}) : super(key: key);
+  const CurrencyScreen({super.key});
 
   @override
   _CurrencyScreenState createState() => _CurrencyScreenState();

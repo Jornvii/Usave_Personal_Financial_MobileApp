@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // Import intl package for formatting
+import 'package:intl/intl.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-import '../models/transaction_db.dart'; // Import your TransactionDB model
+import '../models/transaction_db.dart'; 
 import '../models/currency_db.dart';
-import '../widgets/list_totalamount.dart'; // Import your CurrencyDB model
+import '../widgets/list_totalamount.dart'; 
 
 class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});
@@ -14,23 +14,23 @@ class ReportScreen extends StatefulWidget {
 }
 
 class _ReportScreenState extends State<ReportScreen> {
-  late List<Transaction> transactions = []; // List to hold transactions
-  late List<ChartData> chartData = []; // Chart data
+  late List<Transaction> transactions = []; 
+  late List<ChartData> chartData = []; 
   double incomeTotal = 0.0;
   double expenseTotal = 0.0;
   double savingTotal = 0.0;
 
-  String currencySymbol = '\$'; // Default currency symbol
+  String currencySymbol = '\$'; 
   final NumberFormat currencyFormat =
-      NumberFormat('#,##0.00'); // Formatter for numbers
+      NumberFormat('#,##0.00');
 
   final CurrencyDB _currencyDB = CurrencyDB();
 
   @override
   void initState() {
     super.initState();
-    _loadDefaultCurrency(); // Load the default currency on init
-    _loadTransactions(); // Load transactions data
+    _loadDefaultCurrency(); 
+    _loadTransactions();
   }
 
   // Fetch the default currency symbol from CurrencyDB
@@ -270,7 +270,7 @@ class _ReportScreenState extends State<ReportScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-       appBar: AppBar(
+      appBar: AppBar(
         title: const Text(
           'Financial Report',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
@@ -302,7 +302,7 @@ class _ReportScreenState extends State<ReportScreen> {
               const Divider(
                 height: 20.0,
                 thickness: 3.0,
-                color:  Color.fromARGB(255, 17, 215, 119),
+                color: Color.fromARGB(255, 17, 215, 119),
                 indent: 25.0,
                 endIndent: 25.0,
               ),

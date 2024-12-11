@@ -38,9 +38,6 @@ class TransactionDB {
     );
   }
 
-  
-
-
   Future<int> addTransaction(Map<String, dynamic> transaction) async {
     final db = await database;
     return await db.insert('transactions', transaction);
@@ -51,20 +48,16 @@ class TransactionDB {
     return await db.query('transactions', orderBy: 'date DESC');
   }
 
-  Future<List<Map<String, dynamic>>> getTransactionsByDateRange(
-      DateTime startDate, DateTime endDate) async {
-    final db = await database;
+  Future<void> updateTransaction(int id, Map<String, dynamic> updatedTransaction) async {
+  final db = await database; // Assuming you have a `database` getter
+  await db.update(
+    'transactions', 
+    updatedTransaction,
+    where: 'id = ?', 
+    whereArgs: [id],
+  );
+}
 
-    String start = startDate.toIso8601String();
-    String end = endDate.toIso8601String();
-
-    return await db.query(
-      'transactions',
-      where: 'date BETWEEN ? AND ?',
-      whereArgs: [start, end],
-      orderBy: 'date DESC',
-    );
-  }
 
   Future<void> deleteTransaction(int id) async {
     final db = await database;
@@ -80,12 +73,6 @@ class TransactionDB {
     await db.delete('transactions');
   }
 
-
-  // functions  for Notification screen 
-
-
-// *****************
-  // Calculate total income
   Future<double> getTotalIncome() async {
     final db = await database;
     var result = await db.rawQuery(
@@ -95,7 +82,6 @@ class TransactionDB {
         : 0.0;
   }
 
-  // Calculate total expenses
   Future<double> getTotalExpenses() async {
     final db = await database;
     var result = await db.rawQuery(
@@ -104,16 +90,13 @@ class TransactionDB {
         ? result.first['totalExpenses'] as double
         : 0.0;
   }
- // Calculate total savings
-Future<double> getTotalSavings() async {
-  final db = await database;
-  var result = await db.rawQuery(
-      'SELECT SUM(amount) as totalSavings FROM transactions WHERE typeCategory = 2');
-  return result.isNotEmpty && result.first['totalSavings'] != null
-      ? result.first['totalSavings'] as double
-      : 0.0;
-}
 
-
-  // ++++++++++++++++++++++++
+  Future<double> getTotalSavings() async {
+    final db = await database;
+    var result = await db.rawQuery(
+        'SELECT SUM(amount) as totalSavings FROM transactions WHERE typeCategory = 2');
+    return result.isNotEmpty && result.first['totalSavings'] != null
+        ? result.first['totalSavings'] as double
+        : 0.0;
+  }
 }

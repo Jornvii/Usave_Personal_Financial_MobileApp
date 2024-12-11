@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
 
 import '../models/transaction_db.dart';
 import '../models/currency_db.dart'; // Import your CurrencyDB model
 import '../widgets/add_ddtransaction.dart';
+import '../widgets/edit_transaction.dart';
 
 class TransactionsScreen extends StatefulWidget {
   const TransactionsScreen({super.key});
@@ -24,14 +26,14 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     _loadTransactions();
   }
 
-Future<void> _loadCurrency() async {
-  final db = CurrencyDB();
-  final defaultCurrency = await db.getDefaultCurrency();
-  setState(() {
-    currencySymbol = defaultCurrency?['symbol'] ?? '\$'; // Use default if null
-  });
-}
-
+  Future<void> _loadCurrency() async {
+    final db = CurrencyDB();
+    final defaultCurrency = await db.getDefaultCurrency();
+    setState(() {
+      currencySymbol =
+          defaultCurrency?['symbol'] ?? '\$'; // Use default if null
+    });
+  }
 
   Future<void> _loadTransactions() async {
     final db = TransactionDB();
@@ -53,6 +55,32 @@ Future<void> _loadCurrency() async {
         selectedDate = DateTime(newDate.year, newDate.month);
       });
     }
+  }
+
+  void _confirmDeleteTransaction(int id) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirm Delete'),
+        content:
+            const Text('Are you sure you want to delete this transaction?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              final db = TransactionDB();
+              await db.deleteTransaction(id);
+              Navigator.pop(context);
+              _loadTransactions();
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
   }
 
   void _openAddTransactionScreen() async {
@@ -90,8 +118,7 @@ Future<void> _loadCurrency() async {
       return transactionDate.year == selectedDate.year &&
           transactionDate.month == selectedDate.month;
     }).toList()
-      ..sort((a, b) =>
-          DateTime.parse(b.key).compareTo(DateTime.parse(a.key)));
+      ..sort((a, b) => DateTime.parse(b.key).compareTo(DateTime.parse(a.key)));
 
     return Scaffold(
       body: Column(
@@ -142,8 +169,8 @@ Future<void> _loadCurrency() async {
                       final dailyTransactions =
                           filteredTransactions[index].value;
 
-                      dailyTransactions.sort((a, b) =>
-                          b['date'].compareTo(a['date']));
+                      dailyTransactions
+                          .sort((a, b) => b['date'].compareTo(a['date']));
 
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -164,75 +191,80 @@ Future<void> _loadCurrency() async {
                             ),
                           ),
                           ...dailyTransactions.map((transaction) {
-                            return Dismissible(
-                              key: Key(transaction['id'].toString()),
-                              direction: DismissDirection.endToStart,
-                              confirmDismiss: (direction) async {
-                                return await showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    title: const Text('Confirm Deletion'),
-                                    content: const Text(
-                                        'Are you sure you want to delete this transaction?'),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.of(context)
-                                            .pop(false),
-                                        child: const Text('Cancel'),
-                                      ),
-                                      TextButton(
-                                        onPressed: () => Navigator.of(context)
-                                            .pop(true),
-                                        child: const Text('Delete'),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                              onDismissed: (direction) async {
-                                final db = TransactionDB();
-                                await db.deleteTransaction(transaction['id']);
-                                _loadTransactions();
-                              },
-                              background: Container(
-                                color: Colors.red,
-                                alignment: Alignment.centerRight,
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 20),
-                                child: const Icon(Icons.delete,
-                                    color: Colors.white),
-                              ),
-                              child: ListTile(
-                                leading: Icon(
-                                  transaction['typeCategory'] == 'Income'
-                                      ? Icons.arrow_upward
-                                      : transaction['typeCategory'] == 'Expense'
-                                          ? Icons.arrow_downward
-                                          : Icons.savings,
-                                  color: transaction['typeCategory'] == 'Income'
-                                      ? Colors.green
-                                      : transaction['typeCategory'] ==
-                                              'Expense'
-                                          ? Colors.red
-                                          : const Color.fromARGB(
-                                              255, 255, 215, 0),
+                            return Slidable(
+                                key: ValueKey(transaction['id']),
+                                endActionPane: ActionPane(
+                                  motion: const DrawerMotion(),
+                                  children: [
+                                    SlidableAction(
+                                      onPressed: (_) async {
+                                        final updatedTransaction =
+                                            await Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                UpdateTransactionScreen(
+                                              transaction: transaction,
+                                            ),
+                                          ),
+                                        );
+
+                                        if (updatedTransaction != null) {
+                                          final db = TransactionDB();
+                                          await db.updateTransaction(
+                                            updatedTransaction[
+                                                'id'], // Pass the ID
+                                            updatedTransaction, // Pass the updated transaction data
+                                          );
+                                          _loadTransactions();
+                                        }
+                                      },
+                                      backgroundColor: Colors.blue,
+                                      icon: Icons.edit,
+                                      label: 'Edit',
+                                    ),
+                                    SlidableAction(
+                                      onPressed: (_) =>
+                                          _confirmDeleteTransaction(
+                                              transaction['id']),
+                                      backgroundColor: Colors.red,
+                                      icon: Icons.delete,
+                                      label: 'Delete',
+                                    ),
+                                  ],
                                 ),
-                                title: Text(transaction['category']),
-                                trailing: Text(
-                                  '$currencySymbol ${transaction['amount']}',
-                                  style: TextStyle(
-                                    color: transaction['typeCategory'] ==
-                                            'Income'
-                                        ? Colors.green
+                                child: ListTile(
+                                  leading: Icon(
+                                    transaction['typeCategory'] == 'Income'
+                                        ? Icons.arrow_upward
                                         : transaction['typeCategory'] ==
                                                 'Expense'
-                                            ? Colors.red
-                                            : const Color.fromARGB(
-                                                255, 255, 215, 0),
+                                            ? Icons.arrow_downward
+                                            : Icons.savings,
+                                    color:
+                                        transaction['typeCategory'] == 'Income'
+                                            ? Colors.green
+                                            : transaction['typeCategory'] ==
+                                                    'Expense'
+                                                ? Colors.red
+                                                : const Color.fromARGB(
+                                                    255, 255, 215, 0),
                                   ),
-                                ),
-                              ),
-                            );
+                                  title: Text(transaction['category']),
+                                  trailing: Text(
+                                    '$currencySymbol ${transaction['amount']}',
+                                    style: TextStyle(
+                                      color: transaction['typeCategory'] ==
+                                              'Income'
+                                          ? Colors.green
+                                          : transaction['typeCategory'] ==
+                                                  'Expense'
+                                              ? Colors.red
+                                              : const Color.fromARGB(
+                                                  255, 255, 215, 0),
+                                    ),
+                                  ),
+                                ));
                           }),
                         ],
                       );
