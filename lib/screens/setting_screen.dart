@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_bot/screens/dev_pf.dart';
+import 'package:flutter_chat_bot/screens/trashbin_screen.dart';
 import 'package:provider/provider.dart';
 import '../models/chat_db.dart';
 import '../models/transaction_db.dart';
@@ -49,6 +50,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const CategoryScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.category),
+            title: Text(languageProvider.translate('Trash bin')),
+            // subtitle: Text(languageProvider.translate('view_categories')),
+            onTap: () {
+              // Navigate to CategoryScreen
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const TrashBinScreen()),
               );
             },
           ),
@@ -195,7 +208,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _deleteAllData(
       BuildContext context, LanguageProvider languageProvider) async {
     // Clear all data from the database
-    await TransactionDB().clearTransactions();
+    // await TransactionDB().clearTransactions();
+
 // Show a confirmation message after clearing data
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(languageProvider.translate('all_data_cleared'))),

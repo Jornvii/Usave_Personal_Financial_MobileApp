@@ -98,7 +98,7 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
               Padding(
                 padding: EdgeInsets.only(top: 20, bottom: 20),
                 child: CircleAvatar(
-                  radius: 60,
+                  radius: 50,
                   backgroundImage: AssetImage('assets/images/logoapp.png'),
                 ),
               ),

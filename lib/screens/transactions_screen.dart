@@ -3,7 +3,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
 
 import '../models/transaction_db.dart';
-import '../models/currency_db.dart'; // Import your CurrencyDB model
+import '../models/currency_db.dart';
 import '../widgets/add_ddtransaction.dart';
 import '../widgets/edit_transaction.dart';
 
@@ -57,31 +57,58 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     }
   }
 
-  void _confirmDeleteTransaction(int id) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirm Delete'),
-        content:
-            const Text('Are you sure you want to delete this transaction?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              final db = TransactionDB();
-              await db.deleteTransaction(id);
-              Navigator.pop(context);
-              _loadTransactions();
-            },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
-  }
+void _confirmDeleteTransaction(int id) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Move to Trash?'),
+      content: const Text(
+          'This will move the transaction to Trashbin. You can recover it later.'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () async {
+            final db = TransactionDB();
+            await db.moveToTrash(id);
+            Navigator.pop(context);
+            _loadTransactions();
+          },
+          child: const Text('Move', style: TextStyle(color: Colors.orange)),
+        ),
+      ],
+    ),
+  );
+}
+
+
+  // void _confirmDeleteTransaction(int id) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) => AlertDialog(
+  //       title: const Text('Confirm Delete'),
+  //       content:
+  //           const Text('Are you sure you want to delete this transaction?'),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () => Navigator.pop(context),
+  //           child: const Text('Cancel'),
+  //         ),
+  //         TextButton(
+  //           onPressed: () async {
+  //             final db = TransactionDB();
+  //             await db.deleteTransaction(id);
+  //             Navigator.pop(context);
+  //             _loadTransactions();
+  //           },
+  //           child: const Text('Delete', style: TextStyle(color: Colors.red)),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   void _openAddTransactionScreen() async {
     final newTransaction = await Navigator.push(
