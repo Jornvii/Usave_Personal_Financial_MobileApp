@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../models/category_db.dart'; // Adjust the path as per your project structure
 
 class UpdateTransactionScreen extends StatefulWidget {
   final Map<String, dynamic> transaction;
@@ -22,6 +23,7 @@ class _UpdateTransactionScreenState extends State<UpdateTransactionScreen> {
   List<String> expenseCategories = [];
   List<String> savingCategories = [];
 
+  // Default categories
   final List<String> defaultIncomeCategories = [
     'Interests',
     'Sales',
@@ -63,11 +65,30 @@ class _UpdateTransactionScreenState extends State<UpdateTransactionScreen> {
     _loadCategories();
   }
 
+  // Load categories from the database and merge with default categories
   Future<void> _loadCategories() async {
+    final db = CategoryDB(); // Assuming this is your database helper
+    final allCategories = await db.getCategories();
+
     setState(() {
-      incomeCategories = defaultIncomeCategories;
-      expenseCategories = defaultExpenseCategories;
-      savingCategories = defaultSavingCategories;
+      incomeCategories = [
+        ...defaultIncomeCategories,
+        ...allCategories
+            .where((cat) => cat['type'] == 'Income')
+            .map((cat) => cat['name'] as String),
+      ];
+      expenseCategories = [
+        ...defaultExpenseCategories,
+        ...allCategories
+            .where((cat) => cat['type'] == 'Expense')
+            .map((cat) => cat['name'] as String),
+      ];
+      savingCategories = [
+        ...defaultSavingCategories,
+        ...allCategories
+            .where((cat) => cat['type'] == 'Saving')
+            .map((cat) => cat['name'] as String),
+      ];
     });
   }
 
@@ -86,10 +107,13 @@ class _UpdateTransactionScreenState extends State<UpdateTransactionScreen> {
   }
 
   void _updateTransaction() {
-    if (amountController.text.isEmpty || selectedCategory == null) {
+    if (amountController.text.isEmpty ||
+        double.tryParse(amountController.text) == null ||
+        selectedCategory == null ||
+        transactionDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please fill out all required fields'),
+          content: Text('Please fill out all required fields correctly'),
           backgroundColor: Colors.redAccent,
         ),
       );
@@ -105,6 +129,13 @@ class _UpdateTransactionScreenState extends State<UpdateTransactionScreen> {
       'date': DateFormat('yyyy-MM-dd').format(transactionDate!),
     };
 
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Transaction updated successfully'),
+        backgroundColor: Colors.green,
+      ),
+    );
+
     Navigator.pop(context, updatedTransaction);
   }
 
@@ -118,7 +149,7 @@ class _UpdateTransactionScreenState extends State<UpdateTransactionScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // TypeCategory Selector
+            // Type Selector (Income, Expense, Saving)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: ['Income', 'Expense', 'Saving'].map((type) {
@@ -126,7 +157,8 @@ class _UpdateTransactionScreenState extends State<UpdateTransactionScreen> {
                   onTap: () {
                     setState(() {
                       typeCategory = type;
-                      selectedCategory = null; // Reset category
+                      selectedCategory =
+                          null; // Reset category when type changes
                     });
                   },
                   child: Container(
@@ -150,6 +182,7 @@ class _UpdateTransactionScreenState extends State<UpdateTransactionScreen> {
               }).toList(),
             ),
             const SizedBox(height: 20),
+
             // Amount Input
             TextFormField(
               controller: amountController,
@@ -162,6 +195,7 @@ class _UpdateTransactionScreenState extends State<UpdateTransactionScreen> {
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 20),
+
             // Category Dropdown
             DropdownButtonFormField<String>(
               value: selectedCategory,
@@ -188,6 +222,7 @@ class _UpdateTransactionScreenState extends State<UpdateTransactionScreen> {
               ),
             ),
             const SizedBox(height: 20),
+
             // Date Picker
             TextFormField(
               readOnly: true,
@@ -203,6 +238,7 @@ class _UpdateTransactionScreenState extends State<UpdateTransactionScreen> {
               ),
             ),
             const SizedBox(height: 20),
+
             // Description Input
             TextFormField(
               controller: descriptionController,
@@ -214,6 +250,8 @@ class _UpdateTransactionScreenState extends State<UpdateTransactionScreen> {
               ),
             ),
             const SizedBox(height: 40),
+
+            // Update Button
             ElevatedButton(
               onPressed: _updateTransaction,
               child: const Text('Update Transaction'),
