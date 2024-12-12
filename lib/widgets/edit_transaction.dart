@@ -252,9 +252,28 @@ class _UpdateTransactionScreenState extends State<UpdateTransactionScreen> {
             const SizedBox(height: 40),
 
             // Update Button
+            // ElevatedButton(
+            //   onPressed: _updateTransaction,
+            //   child: const Text('Update Transaction'),
+            // ),
+
             ElevatedButton(
               onPressed: _updateTransaction,
-              child: const Text('Update Transaction'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 52, 214, 136),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text(
+                'Update Transaction',
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black),
+              ),
             ),
           ],
         ),

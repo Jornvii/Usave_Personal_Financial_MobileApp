@@ -72,7 +72,7 @@ class _TrashBinScreenState extends State<TrashBinScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete All'),
-        content: const Text('Are you sure you want to permanently delete all transactions in the trash? This action cannot be undone.'),
+        content: const Text('Delete permanently all transactions ?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -83,7 +83,8 @@ class _TrashBinScreenState extends State<TrashBinScreen> {
               _deleteAllTransactions();
               Navigator.pop(context);
             },
-            child: const Text('Delete All', style: TextStyle(color: Colors.red)),
+            child:
+                const Text('Delete All', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -95,7 +96,7 @@ class _TrashBinScreenState extends State<TrashBinScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Restore All'),
-        content: const Text('Are you sure you want to restore all transactions from the trash?'),
+        content: const Text('Restore all transactions from the trash?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -106,7 +107,8 @@ class _TrashBinScreenState extends State<TrashBinScreen> {
               _recoverAllTransactions();
               Navigator.pop(context);
             },
-            child: const Text('Restore All', style: TextStyle(color: Colors.green)),
+            child: const Text('Restore All',
+                style: TextStyle(color: Colors.green)),
           ),
         ],
       ),
@@ -163,9 +165,11 @@ class _TrashBinScreenState extends State<TrashBinScreen> {
                           itemCount: filteredTransactions.length,
                           itemBuilder: (context, index) {
                             final date = filteredTransactions[index].key;
-                            final dailyTransactions = filteredTransactions[index].value;
+                            final dailyTransactions =
+                                filteredTransactions[index].value;
 
-                            dailyTransactions.sort((a, b) => b['date'].compareTo(a['date']));
+                            dailyTransactions
+                                .sort((a, b) => b['date'].compareTo(a['date']));
 
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -173,7 +177,9 @@ class _TrashBinScreenState extends State<TrashBinScreen> {
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: Text(
-                                    date == DateFormat('yyyy-MM-dd').format(DateTime.now())
+                                    date ==
+                                            DateFormat('yyyy-MM-dd')
+                                                .format(DateTime.now())
                                         ? 'Today'
                                         : date,
                                     style: const TextStyle(
@@ -190,13 +196,16 @@ class _TrashBinScreenState extends State<TrashBinScreen> {
                                       motion: const DrawerMotion(),
                                       children: [
                                         SlidableAction(
-                                          onPressed: (_) => _recoverTransaction(transaction['id']),
+                                          onPressed: (_) => _recoverTransaction(
+                                              transaction['id']),
                                           backgroundColor: Colors.green,
                                           icon: Icons.restore,
                                           label: 'Restore',
                                         ),
                                         SlidableAction(
-                                          onPressed: (_) => _permanentlyDeleteTransaction(transaction['id']),
+                                          onPressed: (_) =>
+                                              _permanentlyDeleteTransaction(
+                                                  transaction['id']),
                                           backgroundColor: Colors.red,
                                           icon: Icons.delete_forever,
                                           label: 'Delete Forever',
@@ -207,24 +216,31 @@ class _TrashBinScreenState extends State<TrashBinScreen> {
                                       leading: Icon(
                                         transaction['typeCategory'] == 'Income'
                                             ? Icons.arrow_upward
-                                            : transaction['typeCategory'] == 'Expense'
+                                            : transaction['typeCategory'] ==
+                                                    'Expense'
                                                 ? Icons.arrow_downward
                                                 : Icons.savings,
-                                        color: transaction['typeCategory'] == 'Income'
+                                        color: transaction['typeCategory'] ==
+                                                'Income'
                                             ? Colors.green
-                                            : transaction['typeCategory'] == 'Expense'
+                                            : transaction['typeCategory'] ==
+                                                    'Expense'
                                                 ? Colors.red
-                                                : const Color.fromARGB(255, 255, 215, 0),
+                                                : const Color.fromARGB(
+                                                    255, 255, 215, 0),
                                       ),
                                       title: Text(transaction['category']),
                                       trailing: Text(
                                         '$currencySymbol ${transaction['amount']}',
                                         style: TextStyle(
-                                          color: transaction['typeCategory'] == 'Income'
+                                          color: transaction['typeCategory'] ==
+                                                  'Income'
                                               ? Colors.green
-                                              : transaction['typeCategory'] == 'Expense'
+                                              : transaction['typeCategory'] ==
+                                                      'Expense'
                                                   ? Colors.red
-                                                  : const Color.fromARGB(255, 255, 215, 0),
+                                                  : const Color.fromARGB(
+                                                      255, 255, 215, 0),
                                         ),
                                       ),
                                     ),

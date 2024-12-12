@@ -4,7 +4,6 @@ import 'package:flutter_chat_bot/screens/dev_pf.dart';
 import 'package:flutter_chat_bot/screens/trashbin_screen.dart';
 import 'package:provider/provider.dart';
 import '../models/chat_db.dart';
-import '../models/transaction_db.dart';
 import '../provider/langguages_provider.dart';
 import '../provider/theme_provider.dart';
 import '../widgets/profile_widget.dart';
@@ -54,7 +53,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.category),
+            leading: const Icon(Icons.delete,color: Colors.red,),
             title: Text(languageProvider.translate('Trash bin')),
             // subtitle: Text(languageProvider.translate('view_categories')),
             onTap: () {

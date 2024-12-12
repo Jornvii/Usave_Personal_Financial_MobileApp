@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-import '../models/transaction_db.dart'; 
+import '../models/transaction_db.dart';
 import '../models/currency_db.dart';
-import '../widgets/list_totalamount.dart'; 
+import '../widgets/list_totalamount.dart';
 
 class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});
@@ -14,22 +14,21 @@ class ReportScreen extends StatefulWidget {
 }
 
 class _ReportScreenState extends State<ReportScreen> {
-  late List<Transaction> transactions = []; 
-  late List<ChartData> chartData = []; 
+  late List<Transaction> transactions = [];
+  late List<ChartData> chartData = [];
   double incomeTotal = 0.0;
   double expenseTotal = 0.0;
   double savingTotal = 0.0;
 
-  String currencySymbol = '\$'; 
-  final NumberFormat currencyFormat =
-      NumberFormat('#,##0.00');
+  String currencySymbol = '\$';
+  final NumberFormat currencyFormat = NumberFormat('#,##0.00');
 
   final CurrencyDB _currencyDB = CurrencyDB();
 
   @override
   void initState() {
     super.initState();
-    _loadDefaultCurrency(); 
+    _loadDefaultCurrency();
     _loadTransactions();
   }
 
@@ -88,6 +87,78 @@ class _ReportScreenState extends State<ReportScreen> {
     });
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'Financial Report',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+        ),
+        actions: [
+          // IconButton(
+          //   icon: const Icon(Icons.date_range),
+          //   onPressed: _selectDateRange,
+          // ),
+          IconButton(
+            icon: const Icon(Icons.view_list),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const ListSummaryScreen()),
+              );
+            },
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+          child: Column(
+            children: [
+              buildBalanceSection(),
+              const SizedBox(height: 10),
+              const Divider(
+                height: 20.0,
+                thickness: 3.0,
+                color: Color.fromARGB(255, 17, 215, 119),
+                indent: 25.0,
+                endIndent: 25.0,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    'Balance: ',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    ' $currencySymbol ${currencyFormat.format(incomeTotal - expenseTotal)}',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: (incomeTotal - expenseTotal) < 0
+                          ? Colors.red
+                          : Colors.green,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              _buildChart(),
+              const SizedBox(height: 20),
+              _buildChartLegend(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   // Modernized balance section
   Widget buildBalanceSection() {
     return Column(
@@ -124,7 +195,7 @@ class _ReportScreenState extends State<ReportScreen> {
     return Expanded(
       child: Container(
         margin: const EdgeInsets.all(5),
-        padding: const EdgeInsets.all(10.0),
+        padding: const EdgeInsets.all(5.0),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [color.withOpacity(0.8), color.withOpacity(0.6)],
@@ -143,12 +214,13 @@ class _ReportScreenState extends State<ReportScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 20),
+            Icon(icon, size: 15),
             const SizedBox(height: 8),
             Text(
               title,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
+                fontSize: 14,
                 color: Colors.white,
               ),
             ),
@@ -156,7 +228,7 @@ class _ReportScreenState extends State<ReportScreen> {
             Text(
               '$currencySymbol ${currencyFormat.format(amount)}',
               style: const TextStyle(
-                fontSize: 16,
+                fontSize: 14,
               ),
             ),
           ],
@@ -189,12 +261,13 @@ class _ReportScreenState extends State<ReportScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 20),
+            Icon(icon, size: 15),
             const SizedBox(height: 8),
             Text(
               title,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
+                fontSize: 14,
                 color: Colors.white,
               ),
             ),
@@ -202,7 +275,7 @@ class _ReportScreenState extends State<ReportScreen> {
             Text(
               '$currencySymbol ${currencyFormat.format(amount)}',
               style: const TextStyle(
-                fontSize: 16,
+                fontSize: 14,
               ),
             ),
           ],
@@ -252,90 +325,21 @@ class _ReportScreenState extends State<ReportScreen> {
               Container(
                 width: 16,
                 height: 16,
-                color: data.color,
+                decoration: BoxDecoration(
+                  color: data.color,
+                  borderRadius: BorderRadius.circular(15),
+                ),
               ),
               const SizedBox(width: 8),
               Text(
                 data.name,
                 style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
               ),
             ],
           ),
         );
       }).toList(),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Financial Report',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
-        ),
-        actions: [
-          // IconButton(
-          //   icon: const Icon(Icons.date_range),
-          //   onPressed: _selectDateRange,
-          // ),
-          IconButton(
-            icon: const Icon(Icons.view_list),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const ListSummaryScreen()),
-              );
-            },
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
-          child: Column(
-            children: [
-              buildBalanceSection(),
-              const SizedBox(height: 10),
-              const Divider(
-                height: 20.0,
-                thickness: 3.0,
-                color: Color.fromARGB(255, 17, 215, 119),
-                indent: 25.0,
-                endIndent: 25.0,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'Balance: ',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    ' $currencySymbol ${currencyFormat.format(incomeTotal - expenseTotal)}',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: (incomeTotal - expenseTotal) < 0
-                          ? Colors.red
-                          : Colors.green,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              _buildChart(),
-              const SizedBox(height: 20),
-              _buildChartLegend(),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

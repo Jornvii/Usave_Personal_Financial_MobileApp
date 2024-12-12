@@ -82,23 +82,34 @@ class _CategoryScreenState extends State<CategoryScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              
-
-              ListTile(
-            leading: const Icon(Icons.category),
-            title: const Text('Currency'),
-            subtitle: const Text('CurrencyScreen'),
-            onTap: () {
-              // Navigate to CategoryScreen
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const CurrencyScreen()),
-              );
-            },
-          ),
-
-
-
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  height: 60,
+                  decoration: const BoxDecoration(
+                      color: Color.fromARGB(137, 158, 158, 158),
+                      borderRadius: BorderRadius.all(Radius.circular(15)),
+                       boxShadow: [
+            BoxShadow(
+              color:  Color.fromARGB(137, 158, 158, 158),
+              blurRadius: 2,
+              offset: const Offset(2, 2),
+            ),
+          ],),
+                  child: ListTile(
+                    leading: const Icon(Icons.paid),
+                    title: const Text('Currency'),
+                    // subtitle: const Text('Currency'),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const CurrencyScreen()),
+                      );
+                    },
+                  ),
+                ),
+              ),
               _buildCategorySection(
                 title: 'Income Categories',
                 categories: defaultIncomeCategories,
