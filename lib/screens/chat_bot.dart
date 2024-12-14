@@ -296,8 +296,7 @@ Let show the details, calculation...through $inputs to me reach my $category and
                               ),
                               onChanged: (value) {
                                 setState(() {
-                                  selectLanguage =
-                                      value; // Temporarily store input
+                                  selectLanguage = value;
                                 });
                               },
                             ),

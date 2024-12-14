@@ -346,22 +346,33 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 const SizedBox(height: 40),
 
                 // Add Transaction Button
-                ElevatedButton(
-                  onPressed: _addTransaction,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 52, 214, 136),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 32, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text(
-                    'Add Transaction',
-                    style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black),
+
+                // ElevatedButton(
+                //   onPressed: _addTransaction,
+                //   style: ElevatedButton.styleFrom(
+                //     backgroundColor: const Color.fromARGB(255, 52, 214, 136),
+                //     padding: const EdgeInsets.symmetric(
+                //         horizontal: 32, vertical: 12),
+                //     shape: RoundedRectangleBorder(
+                //       borderRadius: BorderRadius.circular(8),
+                //     ),
+                //   ),
+                //   child: const Text(
+                //     'Add Transaction',
+                //     style: TextStyle(
+                //         fontSize: 18,
+                //         fontWeight: FontWeight.bold,
+                //         color: Colors.black),
+                //   ),
+                // ),
+
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 15),
+                  child: FloatingActionButton.extended(
+                    onPressed: _addTransaction,
+                    label: const Text("export data"),
+                    icon: const Icon(Icons.add),
+                    backgroundColor: const Color.fromARGB(255, 17, 215, 119),
                   ),
                 ),
               ],

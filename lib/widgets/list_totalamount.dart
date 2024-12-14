@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/transaction_db.dart';
-import 'package:share_plus/share_plus.dart';
+import '../models/currency_db.dart';
+import 'table_transactions.dart';
 
 class ListSummaryScreen extends StatefulWidget {
   const ListSummaryScreen({super.key});
@@ -11,286 +12,273 @@ class ListSummaryScreen extends StatefulWidget {
 }
 
 class _ListSummaryScreenState extends State<ListSummaryScreen> {
+  DateTime selectedStartDate =
+      DateTime(DateTime.now().year, DateTime.now().month, 1);
+  DateTime selectedEndDate =
+      DateTime(DateTime.now().year, DateTime.now().month + 1, 0);
   List<Map<String, dynamic>> transactions = [];
-  Map<String, double> incomeCategoryTotals = {};
-  Map<String, double> expenseCategoryTotals = {};
+  String currencySymbol = '\$'; // Default currency symbol
 
   @override
   void initState() {
     super.initState();
+    _loadCurrency();
     _loadTransactions();
   }
 
-  // Load transactions from the database
-  Future<void> _loadTransactions() async {
-    final db = TransactionDB();
-    final data = await db.getTransactions();
-
+  Future<void> _loadCurrency() async {
+    final db = CurrencyDB();
+    final defaultCurrency = await db.getDefaultCurrency();
     setState(() {
-      transactions = List<Map<String, dynamic>>.from(data);
-
-      // Calculate totals for Income categories
-      incomeCategoryTotals = _calculateCategoryTotals(
-          transactions.where((t) => t['typeCategory'] == 1).toList());
-
-      // Calculate totals for Expense categories
-      expenseCategoryTotals = _calculateCategoryTotals(
-          transactions.where((t) => t['typeCategory'] == 0).toList());
+      currencySymbol =
+          defaultCurrency?['symbol'] ?? '\$'; // Use default if null
     });
   }
 
-  // Calculate total for each category
-  Map<String, double> _calculateCategoryTotals(
-      List<Map<String, dynamic>> filteredTransactions) {
-    Map<String, double> categoryTotals = {};
-    for (var transaction in filteredTransactions) {
-      final category = transaction['category'] ?? 'Uncategorized';
-      final amount = transaction['amount']?.toDouble() ?? 0.0;
+  Future<void> _loadTransactions() async {
+    final db = TransactionDB();
+    final data = await db.getTransactions();
+    setState(() {
+      transactions = List<Map<String, dynamic>>.from(data);
+    });
+  }
 
-      if (categoryTotals.containsKey(category)) {
-        categoryTotals[category] = categoryTotals[category]! + amount;
+  // Show the date range picker
+  void _pickDateRange() async {
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      initialDateRange:
+          DateTimeRange(start: selectedStartDate, end: selectedEndDate),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+
+    if (picked != null && picked.start != null && picked.end != null) {
+      setState(() {
+        selectedStartDate = picked.start;
+        selectedEndDate = picked.end;
+      });
+    }
+  }
+
+  // void _exportTransaction() {
+
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //     const SnackBar(content: Text("Exporting Transactions...")),
+  //   );
+  // }
+
+  @override
+  Widget build(BuildContext context) {
+    // Grouping transactions by their type (Income, Expense, Savings)
+    Map<String, Map<String, List<Map<String, dynamic>>>> groupedTransactions = {
+      'Income': {},
+      'Expense': {},
+      'Savings': {}, // Grouping for savings and subcategories
+    };
+
+    for (var transaction in transactions) {
+      final type = transaction['typeCategory'];
+      final category = transaction['category'];
+
+      if (type == 'Savings') {
+        if (!groupedTransactions['Savings']!.containsKey(category)) {
+          groupedTransactions['Savings']![category] = [];
+        }
+        groupedTransactions['Savings']![category]?.add(transaction);
       } else {
-        categoryTotals[category] = amount;
+        if (!groupedTransactions.containsKey(type)) {
+          groupedTransactions[type] = {};
+        }
+        if (!groupedTransactions[type]!.containsKey(category)) {
+          groupedTransactions[type]![category] = [];
+        }
+        groupedTransactions[type]![category]?.add(transaction);
       }
     }
-    return categoryTotals;
-  }
 
-  // Format date to 'dd/MM/yyyy'
-  String _formatDate(String date) {
-    try {
-      DateTime parsedDate = DateTime.parse(date);
-      return DateFormat('dd/MM/yyyy').format(parsedDate);
-    } catch (e) {
-      return '';
-    }
-  }
-
-  // Export transactions as CSV
-  Future<void> _exportData() async {
-    String csvData = "Date,Category,Amount,Type\n";
-    for (var transaction in transactions) {
-      csvData +=
-          "${_formatDate(transaction['date'])},${transaction['category']},${transaction['amount']},${transaction['typeCategory'] == 1 ? 'Income' : 'Expense'}\n";
+    // Filtering transactions based on selected date range
+    for (var type in groupedTransactions.keys) {
+      groupedTransactions[type]!.forEach((category, categoryTransactions) {
+        categoryTransactions.removeWhere((transaction) {
+          final transactionDate = DateTime.parse(transaction['date']);
+          return transactionDate.isBefore(selectedStartDate) ||
+              transactionDate.isAfter(selectedEndDate);
+        });
+      });
     }
 
-    // Share the CSV data
-    await Share.share(csvData, subject: 'Transaction Data');
-  }
-
-  // Navigate to the View All Data screen
-  void _viewAllData() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ViewAllDataScreen(transactions: transactions),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Summary'),
+        backgroundColor: Colors.blueAccent,
+        title: Center(
+          child: Text(
+            ' ${DateFormat('dd/MM/yyyy').format(selectedStartDate)} to ${DateFormat('dd/MM/yyyy').format(selectedEndDate)}',
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.download),
-            onPressed: _exportData,
+            icon: const Icon(Icons.calendar_today),
+            onPressed: _pickDateRange, // Call date range picker
           ),
         ],
       ),
-      body: Padding(
+      body: ListView(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            ElevatedButton(
-              onPressed: _viewAllData,
-              child: const Text('View All Data'),
+        children: groupedTransactions.entries.map((entry) {
+          final type = entry.key;
+          final categories = entry.value;
+
+          // To prevent multiple "Savings" blocks
+          if (type == 'Savings' && categories.isNotEmpty) {
+            return _buildCategorySummary(type, categories);
+          }
+
+          // For Income and Expense
+          if (categories.isNotEmpty) {
+            return _buildCategorySummary(type, categories);
+          }
+
+          return const SizedBox.shrink();
+        }).toList(),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  DataTransactionTable(transactions: transactions),
             ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: ListView(
-                children: [
-                  _buildCategorySection('Income', incomeCategoryTotals, true),
-                  const SizedBox(height: 20),
-                  _buildCategorySection(
-                      'Expense', expenseCategoryTotals, false),
-                ],
-              ),
-            ),
-          ],
-        ),
+          );
+        },
+        backgroundColor: const Color.fromARGB(255, 17, 215, 119),
+        child: const Icon(Icons.visibility),
       ),
     );
   }
 
-  // Build UI section for each category type (Income/Expense)
-  Widget _buildCategorySection(
-      String title, Map<String, double> categoryTotals, bool typeCategory) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-              fontSize: 24, fontWeight: FontWeight.bold, color: Colors.blue),
-        ),
-        const SizedBox(height: 10),
-        if (categoryTotals.isEmpty)
-          const Text('No data available',
-              style: TextStyle(fontSize: 16, color: Colors.grey)),
-        ...categoryTotals.entries.map((entry) {
-          return _buildCategoryRow(entry.key, entry.value, typeCategory);
-        }),
-      ],
-    );
-  }
-
-  // Build each category row with date, category, and amount
-  Widget _buildCategoryRow(String category, double totalAmount, bool typeCategory) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 18),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                category,
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-              ),
-              Text(
-                '${NumberFormat("#,##0.00", "en_US").format(totalAmount)} ',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: typeCategory ? Colors.green : Colors.red,
-                ),
-              ),
-            ],
-          ),
-          const Divider(
-            color: Colors.grey,
-            thickness: 1,
-          ),
-          const SizedBox(height: 8),
-          // Transaction list for each category
-          Column(
-            children: transactions
-                .where((t) => t['category'] == category)
-                .map((transaction) {
-              return _buildTransactionRow(transaction, typeCategory);
-            }).toList(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Build a transaction row (category, date, amount)
-  Widget _buildTransactionRow(Map<String, dynamic> transaction, bool typeCategory) {
-    final date = _formatDate(transaction['date']);
-    final amount = transaction['amount']?.toDouble() ?? 0.0;
+  // Method to build a summary block for each category
+  Widget _buildCategorySummary(
+      String type, Map<String, List<Map<String, dynamic>>> categories) {
+    double totalAmount = 0;
+    categories.forEach((category, transactions) {
+      totalAmount += transactions.fold(
+          0.0, (sum, transaction) => sum + transaction['amount']);
+    });
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            date,
-            style: const TextStyle(fontSize: 14, color: Colors.grey),
-          ),
-          Text(
-            '${NumberFormat("#,##0.00", "en_US").format(amount)} ',
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Container(
+        decoration: BoxDecoration(
+          color: type == 'Income'
+              ? Colors.green[50]
+              : type == 'Expense'
+                  ? Colors.red[50]
+                  : Colors.orange[50],
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              spreadRadius: 2,
+              blurRadius: 6,
+              offset: const Offset(0, 4), // Shadow position
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class ViewAllDataScreen extends StatelessWidget {
-  final List<Map<String, dynamic>> transactions;
-
-  const ViewAllDataScreen({super.key, required this.transactions});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('All Transactions'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: PaginatedDataTable(
-          header: const Text('Transaction List'),
-          columns: const [
-            DataColumn(label: Text('No')),
-            DataColumn(label: Text('Date')),
-            DataColumn(label: Text('Category')),
-            DataColumn(label: Text('Amount')),
-            DataColumn(label: Text('Type')),
-            DataColumn(label: Text('Description')),
           ],
-          source: TransactionsDataSource(transactions),
-          rowsPerPage: 10, 
-          showCheckboxColumn: false, 
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    type == 'Income'
+                        ? Icons.arrow_upward
+                        : type == 'Expense'
+                            ? Icons.arrow_downward
+                            : Icons.savings,
+                    color: type == 'Income'
+                        ? Colors.green
+                        : type == 'Expense'
+                            ? Colors.red
+                            : Colors.orange,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '$type (${totalAmount.toStringAsFixed(2)})',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              ...categories.entries.map((categoryEntry) {
+                final category = categoryEntry.key;
+                final categoryTransactions = categoryEntry.value;
+                double categoryTotal = categoryTransactions.fold(
+                    0.0, (sum, transaction) => sum + transaction['amount']);
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '$category (${categoryTotal.toStringAsFixed(2)})',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: type == 'Income'
+                            ? Colors.green
+                            : type == 'Expense'
+                                ? Colors.red
+                                : Colors.orange,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ...categoryTransactions.map((transaction) {
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        margin: const EdgeInsets.symmetric(vertical: 4),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 8, horizontal: 16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                DateFormat('dd/MM/yyyy').format(
+                                    DateTime.parse(transaction['date'])),
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                              Text(
+                                '${transaction['amount']}',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: type == 'Income'
+                                      ? Colors.green
+                                      : type == 'Expense'
+                                          ? Colors.red
+                                          : Colors.orange,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ],
+                );
+              }).toList(),
+            ],
+          ),
         ),
       ),
     );
-  }
-}
-
-class TransactionsDataSource extends DataTableSource {
-  final List<Map<String, dynamic>> transactions;
-
-  TransactionsDataSource(this.transactions);
-
-  @override
-  DataRow? getRow(int index) {
-    if (index >= transactions.length) return null;
-
-    final transaction = transactions[index];
-
-    return DataRow(cells: [
-      DataCell(Text((index + 1).toString())), // Row number
-      DataCell(Text(_formatDate(transaction['date']))),
-      DataCell(Text(transaction['category'] ?? 'Uncategorized')),
-      DataCell(Text(NumberFormat("#,##0.00", "en_US")
-          .format(transaction['amount'] ?? 0.0))),
-      DataCell(Text(transaction['typeCategory'] == 1 ? 'Income' : 'Expense')),
-      DataCell(Text(transaction['description'] ?? '')),
-    ]);
-  }
-
-  @override
-  bool get isRowCountApproximate => false;
-
-  @override
-  int get rowCount => transactions.length;
-
-  @override
-  int get selectedRowCount => 0;
-
-  String _formatDate(String? date) {
-    if (date == null || date.isEmpty) return '';
-    try {
-      DateTime parsedDate = DateTime.parse(date);
-      return DateFormat('dd/MM/yyyy').format(parsedDate);
-    } catch (e) {
-      return '';
-    }
   }
 }

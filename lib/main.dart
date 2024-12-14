@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'provider/langguages_provider.dart'; // Ensure this points to your LanguageProvider
 import 'provider/theme_provider.dart';
 import 'screens/home_screen.dart';
-import 'screens/report_page.dart';
+import 'screens/report_screen.dart';
 import 'screens/chat_bot.dart';
 import 'screens/setting_screen.dart';
 

@@ -15,7 +15,8 @@ class TransactionsScreen extends StatefulWidget {
 }
 
 class _TransactionsScreenState extends State<TransactionsScreen> {
-  DateTime selectedDate = DateTime.now();
+  late DateTime selectedStartDate;
+  late DateTime selectedEndDate;
   List<Map<String, dynamic>> transactions = [];
   String currencySymbol = '\$'; // Default currency symbol
 
@@ -24,6 +25,10 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     super.initState();
     _loadCurrency();
     _loadTransactions();
+    // Default date range set to the current month
+    selectedStartDate = DateTime(DateTime.now().year, DateTime.now().month, 1);
+    selectedEndDate =
+        DateTime(DateTime.now().year, DateTime.now().month + 1, 0);
   }
 
   Future<void> _loadCurrency() async {
@@ -43,80 +48,67 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     });
   }
 
-  void _pickMonth() async {
-    final newDate = await showDatePicker(
+  // Show the date range picker
+  void _pickDateRange() async {
+    final DateTimeRange? picked = await showDateRangePicker(
       context: context,
-      initialDate: selectedDate,
+      initialDateRange:
+          DateTimeRange(start: selectedStartDate, end: selectedEndDate),
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
-    if (newDate != null) {
+
+    if (picked != null && picked.start != null && picked.end != null) {
       setState(() {
-        selectedDate = DateTime(newDate.year, newDate.month);
+        selectedStartDate = picked.start;
+        selectedEndDate = picked.end;
       });
     }
   }
 
-void _confirmDeleteTransaction(int id) {
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('Move to Trash?'),
-      content: const Text(
-          'This will move the transaction to Trashbin. You can recover it later.'),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        TextButton(
-          onPressed: () async {
-            final db = TransactionDB();
-            await db.moveToTrash(id);
-            Navigator.pop(context);
-            _loadTransactions();
-          },
-          child: const Text('Move', style: TextStyle(color: Colors.orange)),
-        ),
-      ],
-    ),
-  );
-}
-
-
-  // void _confirmDeleteTransaction(int id) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (context) => AlertDialog(
-  //       title: const Text('Confirm Delete'),
-  //       content:
-  //           const Text('Are you sure you want to delete this transaction?'),
-  //       actions: [
-  //         TextButton(
-  //           onPressed: () => Navigator.pop(context),
-  //           child: const Text('Cancel'),
-  //         ),
-  //         TextButton(
-  //           onPressed: () async {
-  //             final db = TransactionDB();
-  //             await db.deleteTransaction(id);
-  //             Navigator.pop(context);
-  //             _loadTransactions();
-  //           },
-  //           child: const Text('Delete', style: TextStyle(color: Colors.red)),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
+  void _confirmDeleteTransaction(int id) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Move to Trash?'),
+        content: const Text(
+            'This will move the transaction to Trashbin. You can recover it later.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              final db = TransactionDB();
+              await db.moveToTrash(id);
+              Navigator.pop(context);
+              _loadTransactions();
+            },
+            child: const Text('Move', style: TextStyle(color: Colors.orange)),
+          ),
+        ],
+      ),
+    );
+  }
 
   void _openAddTransactionScreen() async {
     final newTransaction = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => AddTransactionScreen(selectedDate: selectedDate),
+        builder: (context) =>
+            AddTransactionScreen(selectedDate: selectedStartDate),
       ),
     );
+
+
+//  Navigator.push(
+//             context,
+//             MaterialPageRoute(
+//               builder: (context) =>
+//                   DataTransactionTable(transactions: transactions),
+//             ),
+//           );
 
     if (newTransaction != null) {
       final db = TransactionDB();
@@ -140,10 +132,12 @@ void _confirmDeleteTransaction(int id) {
       groupedTransactions[dateKey]?.add(transaction);
     }
 
+    // Filter transactions based on the selected date range
     final filteredTransactions = groupedTransactions.entries.where((entry) {
       final transactionDate = DateTime.parse(entry.key);
-      return transactionDate.year == selectedDate.year &&
-          transactionDate.month == selectedDate.month;
+      return transactionDate
+              .isAfter(selectedStartDate.subtract(const Duration(days: 1))) &&
+          transactionDate.isBefore(selectedEndDate.add(const Duration(days: 1)));
     }).toList()
       ..sort((a, b) => DateTime.parse(b.key).compareTo(DateTime.parse(a.key)));
 
@@ -157,15 +151,17 @@ void _confirmDeleteTransaction(int id) {
                 icon: const Icon(Icons.arrow_back),
                 onPressed: () {
                   setState(() {
-                    selectedDate =
-                        DateTime(selectedDate.year, selectedDate.month - 1);
+                    selectedStartDate = DateTime(
+                        selectedStartDate.year, selectedStartDate.month - 1, 1);
+                    selectedEndDate = DateTime(
+                        selectedStartDate.year, selectedStartDate.month + 1, 0);
                   });
                 },
               ),
               TextButton(
-                onPressed: _pickMonth,
+                onPressed: _pickDateRange,
                 child: Text(
-                  DateFormat('MMMM yyyy').format(selectedDate),
+                  '${DateFormat('MMMM yyyy').format(selectedStartDate)}',
                   style: const TextStyle(
                       fontSize: 16, fontWeight: FontWeight.bold),
                 ),
@@ -174,8 +170,10 @@ void _confirmDeleteTransaction(int id) {
                 icon: const Icon(Icons.arrow_forward),
                 onPressed: () {
                   setState(() {
-                    selectedDate =
-                        DateTime(selectedDate.year, selectedDate.month + 1);
+                    selectedStartDate = DateTime(
+                        selectedStartDate.year, selectedStartDate.month + 1, 1);
+                    selectedEndDate = DateTime(
+                        selectedStartDate.year, selectedStartDate.month + 1, 0);
                   });
                 },
               ),
@@ -185,7 +183,7 @@ void _confirmDeleteTransaction(int id) {
             child: filteredTransactions.isEmpty
                 ? const Center(
                     child: Text(
-                      'No transactions available for this month.',
+                      'No transactions available for this period.',
                       style: TextStyle(fontSize: 16, color: Colors.grey),
                     ),
                   )
@@ -239,9 +237,8 @@ void _confirmDeleteTransaction(int id) {
                                         if (updatedTransaction != null) {
                                           final db = TransactionDB();
                                           await db.updateTransaction(
-                                            updatedTransaction[
-                                                'id'], // Pass the ID
-                                            updatedTransaction, // Pass the updated transaction data
+                                            updatedTransaction['id'],
+                                            updatedTransaction,
                                           );
                                           _loadTransactions();
                                         }
