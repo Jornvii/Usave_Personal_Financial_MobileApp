@@ -58,7 +58,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       lastDate: DateTime(2100),
     );
 
-    if (picked != null && picked.start != null && picked.end != null) {
+    if (picked != null) {
       setState(() {
         selectedStartDate = picked.start;
         selectedEndDate = picked.end;
@@ -161,7 +161,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               TextButton(
                 onPressed: _pickDateRange,
                 child: Text(
-                  '${DateFormat('MMMM yyyy').format(selectedStartDate)}',
+                  DateFormat('MMMM yyyy').format(selectedStartDate),
                   style: const TextStyle(
                       fontSize: 16, fontWeight: FontWeight.bold),
                 ),

@@ -53,7 +53,7 @@ class _ListSummaryScreenState extends State<ListSummaryScreen> {
       lastDate: DateTime(2100),
     );
 
-    if (picked != null && picked.start != null && picked.end != null) {
+    if (picked != null) {
       setState(() {
         selectedStartDate = picked.start;
         selectedEndDate = picked.end;
@@ -271,10 +271,10 @@ class _ListSummaryScreenState extends State<ListSummaryScreen> {
                           ),
                         ),
                       );
-                    }).toList(),
+                    }),
                   ],
                 );
-              }).toList(),
+              }),
             ],
           ),
         ),

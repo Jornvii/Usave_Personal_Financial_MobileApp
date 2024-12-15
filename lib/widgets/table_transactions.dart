@@ -121,7 +121,7 @@ class _DataTransactionTableState extends State<DataTransactionTable> {
                 rows: List.generate(paginatedTransactions.length, (index) {
                   final transaction = paginatedTransactions[index];
                   return DataRow(
-                    color: MaterialStateProperty.resolveWith<Color?>(
+                    color: WidgetStateProperty.resolveWith<Color?>(
                       (states) =>
                           index.isEven ? Colors.grey[200] : Colors.white,
                     ),
