@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import '../models/transaction_db.dart';
 
 class DataTransactionTable extends StatefulWidget {
   final List<Map<String, dynamic>> transactions;
@@ -13,7 +11,7 @@ class DataTransactionTable extends StatefulWidget {
 
 class _DataTransactionTableState extends State<DataTransactionTable> {
   int currentPage = 0;
-  static const int rowsPerPage = 10;
+  static const int rowsPerPage = 11;
   int? _sortColumnIndex;
   bool _sortAscending = true;
 
@@ -181,12 +179,11 @@ class _DataTransactionTableState extends State<DataTransactionTable> {
       ),
       // Floating Action Button for exporting data
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 40,left: 20),
+        padding: const EdgeInsets.only(bottom: 40, left: 20),
         child: Align(
           alignment: Alignment.bottomCenter,
           child: FloatingActionButton.extended(
-            onPressed: () {
-            },
+            onPressed: () {},
             label: const Text("Export Data"),
             icon: const Icon(Icons.play_arrow),
             backgroundColor: const Color.fromARGB(255, 17, 215, 119),

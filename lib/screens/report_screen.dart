@@ -198,7 +198,7 @@ class _ReportScreenState extends State<ReportScreen> {
         padding: const EdgeInsets.all(5.0),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [color.withOpacity(0.8), color.withOpacity(0.6)],
+            colors: [color.withOpacity(0.9), color.withOpacity(0.9)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -245,7 +245,7 @@ class _ReportScreenState extends State<ReportScreen> {
         padding: const EdgeInsets.all(10.0),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [color.withOpacity(0.8), color.withOpacity(0.6)],
+            colors: [color.withOpacity(0.9), color.withOpacity(0.9)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),

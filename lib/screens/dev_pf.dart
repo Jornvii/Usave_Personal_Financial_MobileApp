@@ -113,38 +113,41 @@ class DevPfScreen extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           // Section Header
-          sectionHeader('About Me'),
-          const Divider(),
-          buildListTile('My Projects', Icons.folder_special_outlined),
-          buildListTile('Skills & Tools', Icons.engineering_outlined),
-          buildListTile('Work Experience', Icons.work_outline),
-          buildListTile('Education', Icons.school_outlined),
-          buildListTileWithBadge(
-              'Certifications', Icons.verified_outlined, Colors.green),
-          const Divider(),
+          // sectionHeader('About Me'),
+          // const Divider(),
+          // buildListTile('My Projects', Icons.folder_special_outlined),
+          // buildListTile('Skills & Tools', Icons.engineering_outlined),
+          // buildListTile('Work Experience', Icons.work_outline),
+          // buildListTile('Education', Icons.school_outlined),
+          // buildListTileWithBadge(
+          //     'Certifications', Icons.verified_outlined, Colors.green),
+          // const Divider(),
+
+
           // Developer Tools Section
-          sectionHeader('Developer Tools'),
-          const Divider(),
-          buildListTile(
-            'GitHub Profile',
-            Icons.code,
-            subtitle: 'View repositories',
-          ),
-          buildListTile(
-            'LinkedIn',
-            Icons.person_search,
-            subtitle: 'Professional connections',
-          ),
-          buildListTile(
-            'Stack Overflow',
-            Icons.question_answer_outlined,
-            subtitle: 'Q&A contributions',
-          ),
-          buildListTile(
-            'Portfolio Website',
-            Icons.web_outlined,
-            subtitle: 'View my work',
-          ),
+
+          // sectionHeader('Developer Tools'),
+          // const Divider(),
+          // buildListTile(
+          //   'GitHub Profile',
+          //   Icons.code,
+          //   subtitle: 'View repositories',
+          // ),
+          // buildListTile(
+          //   'LinkedIn',
+          //   Icons.person_search,
+          //   subtitle: 'Professional connections',
+          // ),
+          // buildListTile(
+          //   'Stack Overflow',
+          //   Icons.question_answer_outlined,
+          //   subtitle: 'Q&A contributions',
+          // ),
+          // buildListTile(
+          //   'Portfolio Website',
+          //   Icons.web_outlined,
+          //   subtitle: 'View my work',
+          // ),
         ],
       ),
     );
