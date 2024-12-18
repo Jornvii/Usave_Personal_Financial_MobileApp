@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'provider/langguages_provider.dart'; // Ensure this points to your LanguageProvider
 import 'provider/theme_provider.dart';
+import 'screens/grid_view.dart';
 import 'screens/home_screen.dart';
 import 'screens/report_screen.dart';
 import 'screens/chat_bot.dart';
@@ -45,7 +46,7 @@ class MyApp extends StatelessWidget {
       theme: themeProvider.lightTheme,
       darkTheme: themeProvider.darkTheme,
       themeMode: themeProvider.isDarkTheme ? ThemeMode.dark : ThemeMode.light,
-      home: const SplashScreen(),
+      home: const SettingUi(),
       // home: const LineChartSample10(),
       localizationsDelegates: const [], 
       supportedLocales: const [
@@ -102,7 +103,7 @@ class _MainScreenState extends State<MainScreen> {
         items: [
           BottomNavigationBarItem(
             icon: const Icon(Icons.home),
-            label: languageProvider.translate('home'), // Use translations
+            label: languageProvider.translate('home'), 
           ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.bar_chart),

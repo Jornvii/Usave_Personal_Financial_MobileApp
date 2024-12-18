@@ -370,7 +370,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   padding: const EdgeInsets.only(bottom: 15),
                   child: FloatingActionButton.extended(
                     onPressed: _addTransaction,
-                    label: const Text("export data"),
+                    label: const Text("Submit"),
                     icon: const Icon(Icons.add),
                     backgroundColor: const Color.fromARGB(255, 17, 215, 119),
                   ),

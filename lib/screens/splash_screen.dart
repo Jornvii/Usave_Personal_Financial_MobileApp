@@ -67,7 +67,7 @@ class _SplashScreenState extends State<SplashScreen>
                 animationFadeText(
                   "iSave",
                   50,
-                  Color.fromARGB(255, 17, 215, 119),
+                  const Color.fromARGB(255, 17, 215, 119),
                   FontWeight.bold
                 ),
                 animationFadeText(
