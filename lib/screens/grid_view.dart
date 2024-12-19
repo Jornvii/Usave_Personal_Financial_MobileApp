@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_bot/screens/appearance_screen.dart';
 import 'package:flutter_chat_bot/screens/saving_goal_screen.dart';
-import 'package:flutter_chat_bot/screens/setting_screen.dart';
 import 'package:flutter_chat_bot/widgets/add_currency.dart';
 import 'package:provider/provider.dart';
-
+import '../models/chat_db.dart';
 import '../models/transaction_db.dart';
 import '../provider/langguages_provider.dart';
 import '../provider/theme_provider.dart';
@@ -12,17 +11,18 @@ import '../models/profile_db.dart';
 import '../widgets/lsit_summary.dart';
 import '../widgets/table_transactions.dart';
 import 'category_screen.dart';
+import 'dev_pf.dart';
 import 'trashbin_screen.dart';
 
-class SettingUi extends StatefulWidget {
+class SettingScreenUi extends StatefulWidget {
   final List<Map<String, dynamic>> transactions;
-  const SettingUi({super.key, required this.transactions});
+  const SettingScreenUi({super.key, required this.transactions});
 
   @override
-  State<SettingUi> createState() => _SettingUiState();
+  State<SettingScreenUi> createState() => _SettingScreenUiState();
 }
 
-class _SettingUiState extends State<SettingUi> {
+class _SettingScreenUiState extends State<SettingScreenUi> {
   String? _username;
   final UserDB _userDB = UserDB();
   List<Map<String, dynamic>> transactions = [];
@@ -41,7 +41,7 @@ class _SettingUiState extends State<SettingUi> {
     });
   }
 
-  Future<void> _loadUserProfile() async {
+ Future<void> _loadUserProfile() async {
     final userProfile = await _userDB.fetchUserProfile();
     if (userProfile != null) {
       setState(() {
@@ -105,6 +105,7 @@ class _SettingUiState extends State<SettingUi> {
       ),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -191,7 +192,7 @@ class _SettingUiState extends State<SettingUi> {
                             languageProvider.translate('default_username'),
                         style: const TextStyle(
                           fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                          // fontWeight: FontWeight.bold,
                           letterSpacing: 1.2,
                         ),
                       ),
@@ -315,12 +316,8 @@ class _SettingUiState extends State<SettingUi> {
                 _BuildSecMenuItem(
                     context,
                     Icons.delete_forever,
-                    'Clear Data',
-                    () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const SettingsScreen()),
-                        ),
+                    'delete_data',
+                    () => _showDeleteOptionsDialog(context, languageProvider),
                     Colors.redAccent),
                 _BuildSecMenuItem(
                     context,
@@ -329,7 +326,7 @@ class _SettingUiState extends State<SettingUi> {
                     () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const SettingsScreen()),
+                              builder: (context) => const DevPfScreen()),
                         ),
                     Colors.red),
               ],
@@ -352,8 +349,7 @@ class _SettingUiState extends State<SettingUi> {
     VoidCallback onTap,
     Color secmenucolor,
   ) {
-    return 
-    Card(
+    return Card(
       elevation: 5,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
@@ -417,4 +413,57 @@ class _SettingUiState extends State<SettingUi> {
       ),
     );
   }
+}
+
+void _showDeleteOptionsDialog(
+    BuildContext context, LanguageProvider languageProvider) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text(languageProvider.translate('delete_data')),
+        content: Text(languageProvider.translate('choose_delete_option')),
+        actions: [
+          TextButton(
+            onPressed: () {
+              _deleteAllData(context, languageProvider);
+              Navigator.of(context).pop();
+            },
+            child: Text(languageProvider.translate('delete_all')),
+          ),
+          TextButton(
+            onPressed: () {
+              _deleteChatData(context, languageProvider);
+              Navigator.of(context).pop();
+            },
+            child: Text(languageProvider.translate('delete_chat')),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(languageProvider.translate('cancel')),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+void _deleteChatData(
+    BuildContext context, LanguageProvider languageProvider) async {
+  final chatDatabase = ChatDB();
+  await chatDatabase.clearMessages();
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(languageProvider.translate('chat_data_cleared'))),
+  );
+}
+
+void _deleteAllData(
+    BuildContext context, LanguageProvider languageProvider) async {
+  // Clear all data from the database
+  // await TransactionDB().clearTransactions();
+
+// Show a confirmation message after clearing data
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(languageProvider.translate('all_data_cleared'))),
+  );
 }

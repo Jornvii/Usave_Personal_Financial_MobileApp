@@ -82,38 +82,38 @@ class _CategoryScreenState extends State<CategoryScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  height: 60,
-                  decoration: const BoxDecoration(
-                    color: Color.fromARGB(137, 158, 158, 158),
-                    borderRadius: BorderRadius.all(Radius.circular(15)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Color.fromARGB(36, 158, 158, 158),
-                        blurRadius: 2,
-                        offset: Offset(2, 2),
-                      ),
-                    ],
-                  ),
-                  child: ListTile(
-                    leading: const Icon(
-                      Icons.paid,
-                      color: Colors.orange,
-                    ),
-                    title: const Text('Currency'),
-                    // subtitle: const Text('Currency'),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const CurrencyScreen()),
-                      );
-                    },
-                  ),
-                ),
-              ),
+              // Padding(
+              //   padding: const EdgeInsets.all(8.0),
+              //   child: Container(
+              //     height: 60,
+              //     decoration: const BoxDecoration(
+              //       color: Color.fromARGB(137, 158, 158, 158),
+              //       borderRadius: BorderRadius.all(Radius.circular(15)),
+              //       boxShadow: [
+              //         BoxShadow(
+              //           color: Color.fromARGB(36, 158, 158, 158),
+              //           blurRadius: 2,
+              //           offset: Offset(2, 2),
+              //         ),
+              //       ],
+              //     ),
+              //     child: ListTile(
+              //       leading: const Icon(
+              //         Icons.paid,
+              //         color: Colors.orange,
+              //       ),
+              //       title: const Text('Currency'),
+              //       // subtitle: const Text('Currency'),
+              //       onTap: () {
+              //         Navigator.push(
+              //           context,
+              //           MaterialPageRoute(
+              //               builder: (context) => const CurrencyScreen()),
+              //         );
+              //       },
+              //     ),
+              //   ),
+              // ),
               _buildCategorySection(
                 title: 'Income Categories',
                 categories: defaultIncomeCategories,

@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 
 import '../provider/langguages_provider.dart';
 import '../provider/theme_provider.dart';
-import 'category_screen.dart';
 
 class AppearanceScreen extends StatefulWidget {
   const AppearanceScreen({super.key});
@@ -34,34 +33,35 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
                 Icons.translate,
                 'language',
                 languageProvider
-                .translate(languageProvider.selectedLanguage.toUpperCase()),
-                ()=>
-                _showLanguageSelectionDialog(context, languageProvider),
-                
+                    .translate(languageProvider.selectedLanguage.toUpperCase()),
+                () => _showLanguageSelectionDialog(context, languageProvider),
                 Colors.lightBlue,
               ),
-               SwitchListTile(
-            title: Text(languageProvider.translate('theme')),
-            subtitle: Text(
-              themeProvider.isDarkTheme
-                  ? languageProvider.translate('Dark')
-                  : languageProvider.translate('Light'),
-            ),
-            value: themeProvider.isDarkTheme,
-            onChanged: (value) => themeProvider.toggleTheme(),
-          ),
-              _appearancemenu(
-                context,
-                languageProvider,
-                Icons.dark_mode,
-                'theme',
-                '',
-                () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const CategoryScreen()),
+              Padding(
+                padding: const EdgeInsets.all(5),
+                child: Card(
+                  elevation: 5,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: const BorderSide(
+                      color: Colors.blue,
+                      width: 0.1,
+                    ),
+                  ),
+                  child: InkWell(
+                    child: SwitchListTile(
+                      title: Text(languageProvider.translate('theme')),
+                      subtitle: Text(
+                        themeProvider.isDarkTheme
+                            ? languageProvider.translate('Dark')
+                            : languageProvider.translate('Light'),
+                      ),
+                      value: themeProvider.isDarkTheme,
+                      onChanged: (value) => themeProvider.toggleTheme(),
+                    ),
+                  ),
                 ),
-                Colors.lightBlue,
-              )
+              ),
             ],
           ),
         ),
@@ -70,35 +70,36 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
   }
 }
 
-  void _showLanguageSelectionDialog(
-      BuildContext context, LanguageProvider languageProvider) {
-    final languages = ['English', 'Thai', 'Khmer'];
+void _showLanguageSelectionDialog(
+    BuildContext context, LanguageProvider languageProvider) {
+  final languages = ['English', 'Thai', 'Khmer'];
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(languageProvider.translate('select_language')),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: languages.map((language) {
-              return RadioListTile<String>(
-                title: Text(languageProvider.translate(language.toUpperCase())),
-                value: language,
-                groupValue: languageProvider.selectedLanguage,
-                onChanged: (value) {
-                  if (value != null) {
-                    languageProvider.setLanguage(value);
-                    Navigator.of(context).pop();
-                  }
-                },
-              );
-            }).toList(),
-          ),
-        );
-      },
-    );
-  }
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text(languageProvider.translate('select_language')),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: languages.map((language) {
+            return RadioListTile<String>(
+              title: Text(languageProvider.translate(language.toUpperCase())),
+              value: language,
+              groupValue: languageProvider.selectedLanguage,
+              onChanged: (value) {
+                if (value != null) {
+                  languageProvider.setLanguage(value);
+                  Navigator.of(context).pop();
+                }
+              },
+            );
+          }).toList(),
+        ),
+      );
+    },
+  );
+}
+
 Widget _appearancemenu(
   BuildContext context,
   LanguageProvider languageProvider,
@@ -109,7 +110,7 @@ Widget _appearancemenu(
   Color appearancemenucolor,
 ) {
   return Padding(
-    padding: const EdgeInsets.all(2),
+    padding: const EdgeInsets.all(5),
     child: Card(
       elevation: 5,
       shape: RoundedRectangleBorder(
@@ -132,7 +133,7 @@ Widget _appearancemenu(
               fontWeight: FontWeight.bold,
             ),
           ),
-          subtitle:Text(apearanceSub),
+          subtitle: Text(apearanceSub),
         ),
       ),
     ),

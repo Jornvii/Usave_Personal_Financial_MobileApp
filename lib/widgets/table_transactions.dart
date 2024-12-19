@@ -119,10 +119,7 @@ class _DataTransactionTableState extends State<DataTransactionTable> {
                 rows: List.generate(paginatedTransactions.length, (index) {
                   final transaction = paginatedTransactions[index];
                   return DataRow(
-                    color: WidgetStateProperty.resolveWith<Color?>(
-                      (states) =>
-                          index.isEven ? Colors.grey[200] : Colors.white,
-                    ),
+                  
                     cells: [
                       DataCell(
                           Text('${index + 1 + (currentPage * rowsPerPage)}')),

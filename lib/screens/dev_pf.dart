@@ -23,7 +23,6 @@ class DevPfScreen extends StatelessWidget {
             fontSize: 18,
           ),
         ),
-        
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -44,9 +43,18 @@ class DevPfScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 24),
             child: Column(
               children: [
-                const CircleAvatar(
-                  radius: 60,
-                  backgroundImage: AssetImage('assets/images/profile.jpg'),
+                Container(
+                  decoration: BoxDecoration(
+                      color: Colors.orange,
+                      borderRadius: BorderRadius.circular(60)),
+                  child: const Padding(
+                    padding: EdgeInsets.all(2),
+                    child: CircleAvatar(
+                      radius: 60,
+                      // backgroundColor: Colors.black,
+                      backgroundImage: AssetImage('assets/images/profile.jpg'),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 12),
                 const Text(
@@ -57,14 +65,28 @@ class DevPfScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 6),
-                const Text(
-                  'I\'m from BC64 MBS MSU',
-                  style: TextStyle(
-                    color: Colors.blueGrey,
-                    fontSize: 16,
+                RichText(
+                    text: const TextSpan(children: [
+                  TextSpan(
+                    text: 'I\'m from',
+                    style: TextStyle(
+                      color: Colors.blueGrey,
+                      fontSize: 16,
+                    ),
                   ),
-                ),
+                  TextSpan(
+                    text: ' BC64 (MBS MSU)',
+                    style: TextStyle(
+                      color: Colors.blue,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ])),
                 const SizedBox(height: 6),
+               
+
+                 SizedBox(height: 6),
                 Padding(
                   padding: const EdgeInsets.all(10),
                   child: RichText(
@@ -86,7 +108,7 @@ class DevPfScreen extends StatelessWidget {
                         ),
                         TextSpan(
                           text:
-                              ', a Personal Financial Management Mobile Application that helps users track and manage their finances efficiently.\n',
+                              ', a Personal Financial Management Mobile Application that helps users to note, track and manage their finances efficiently.\n',
                           style: TextStyle(
                               color: Colors.grey, fontSize: 14, height: 1.5),
                         ),
@@ -122,7 +144,6 @@ class DevPfScreen extends StatelessWidget {
           // buildListTileWithBadge(
           //     'Certifications', Icons.verified_outlined, Colors.green),
           // const Divider(),
-
 
           // Developer Tools Section
 

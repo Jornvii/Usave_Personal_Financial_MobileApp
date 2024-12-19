@@ -59,7 +59,7 @@ class LanguageProvider with ChangeNotifier {
       // settings screen
       'settings': 'Settings',
       'edit_user_name': 'Edit User Name',
-      'username': 'Username',
+      'category': 'Category',
       'cancel': 'Cancel',
       'save': 'Save',
       'profile_updated': 'Profile updated successfully!',
@@ -112,7 +112,7 @@ class LanguageProvider with ChangeNotifier {
       'variable_expenses': 'ค่าใช้จ่ายผันแปร',
       // settings screen
       'settings': 'การตั้งค่า',
-      'edit_user_name': 'แก้ไขชื่อผู้ใช้',
+       'category': 'ประเภท',
       'username': 'ชื่อผู้ใช้',
       'save': 'บันทึก',
       'profile_updated': 'โปรไฟล์ได้รับการอัปเดตเรียบร้อยแล้ว!',
@@ -166,7 +166,7 @@ class LanguageProvider with ChangeNotifier {
       // settings screen
       'settings': 'ការកំណត់',
       'edit_user_name': 'កែប្រែឈ្មោះអ្នកប្រើ',
-      'username': 'ឈ្មោះអ្នកប្រើ',
+       'category': 'ប្រភេទ',
       'save': 'រក្សាទុក',
       'profile_updated': 'ប្រវត្តិរូបត្រូវបានធ្វើបច្ចុប្បន្នភាពដោយជោគជ័យ!',
       'name': 'ឈ្មោះ',

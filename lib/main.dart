@@ -41,11 +41,12 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Financial Manager',
+      title: 'iSave',
       theme: themeProvider.lightTheme,
       darkTheme: themeProvider.darkTheme,
       themeMode: themeProvider.isDarkTheme ? ThemeMode.dark : ThemeMode.light,
-      home:  const SettingUi(transactions: [],),
+      home:  const MainScreen(),
+      // home:  const SettingUi(transactions: [],),
       // home: const LineChartSample10(),
       localizationsDelegates: const [], 
       supportedLocales: const [
@@ -72,7 +73,7 @@ class _MainScreenState extends State<MainScreen> {
     const MyHomePage(),
      const ReportScreen(),
     const ChatBotScreen(),
-    const SettingsScreen(),
+    const SettingScreenUi(transactions: [],),
   ];
 
   @override
