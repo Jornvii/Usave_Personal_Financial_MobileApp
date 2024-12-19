@@ -4,7 +4,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import '../models/transaction_db.dart';
 import '../models/currency_db.dart';
-import '../widgets/list_totalamount.dart';
+import '../widgets/lsit_summary.dart';
 
 class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});

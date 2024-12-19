@@ -43,9 +43,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ListTile(
             leading: const Icon(Icons.category),
             title: Text(languageProvider.translate('category')),
-            // subtitle: Text(languageProvider.translate('view_categories')),
             onTap: () {
-              // Navigate to CategoryScreen
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const CategoryScreen()),
@@ -55,9 +53,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ListTile(
             leading: const Icon(Icons.delete,color: Colors.red,),
             title: Text(languageProvider.translate('Trash bin')),
-            // subtitle: Text(languageProvider.translate('view_categories')),
             onTap: () {
-              // Navigate to CategoryScreen
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const TrashBinScreen()),
@@ -67,9 +63,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ListTile(
             leading: const Icon(Icons.savings),
             title: Text(languageProvider.translate('saving_goal')),
-            // subtitle: Text(
-            //   languageProvider.translate('manage_your_saving_goals'),
-            // ),
             onTap: () {
               Navigator.push(
                 context,
@@ -82,7 +75,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leading: const Icon(Icons.language),
             title: Text(languageProvider.translate('language')),
             subtitle: Text(languageProvider
-                .translate(languageProvider.selectedLanguage.toLowerCase())),
+                .translate(languageProvider.selectedLanguage.toUpperCase())),
             onTap: () =>
                 _showLanguageSelectionDialog(context, languageProvider),
           ),

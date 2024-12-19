@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_bot/main.dart';
 import 'package:lottie/lottie.dart';
 
 class SplashScreen extends StatefulWidget {

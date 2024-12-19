@@ -1,32 +1,127 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_bot/screens/appearance_screen.dart';
+import 'package:flutter_chat_bot/screens/saving_goal_screen.dart';
 import 'package:flutter_chat_bot/screens/setting_screen.dart';
+import 'package:flutter_chat_bot/widgets/add_currency.dart';
+import 'package:provider/provider.dart';
+
+import '../models/transaction_db.dart';
+import '../provider/langguages_provider.dart';
+import '../provider/theme_provider.dart';
+import '../models/profile_db.dart';
+import '../widgets/lsit_summary.dart';
+import '../widgets/table_transactions.dart';
+import 'category_screen.dart';
+import 'trashbin_screen.dart';
 
 class SettingUi extends StatefulWidget {
-  const SettingUi({super.key});
+  final List<Map<String, dynamic>> transactions;
+  const SettingUi({super.key, required this.transactions});
 
   @override
   State<SettingUi> createState() => _SettingUiState();
 }
 
 class _SettingUiState extends State<SettingUi> {
-  void _onMenuItemClick(String title) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text('Clicked: $title')));
+  String? _username;
+  final UserDB _userDB = UserDB();
+  List<Map<String, dynamic>> transactions = [];
+  @override
+  void initState() {
+    super.initState();
+    _loadUserProfile();
+    _loadTransactions();
+  }
+
+  Future<void> _loadTransactions() async {
+    final db = TransactionDB();
+    final data = await db.getTransactions();
+    setState(() {
+      transactions = List<Map<String, dynamic>>.from(data);
+    });
+  }
+
+  Future<void> _loadUserProfile() async {
+    final userProfile = await _userDB.fetchUserProfile();
+    if (userProfile != null) {
+      setState(() {
+        _username = userProfile['username'];
+      });
+    }
+  }
+
+  Future<void> _showEditDialog(LanguageProvider languageProvider) async {
+    final TextEditingController usernameController =
+        TextEditingController(text: _username);
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(languageProvider.translate('edit_user_name')),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: usernameController,
+                decoration: InputDecoration(
+                  labelText: languageProvider.translate('username'),
+                  border: const OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(languageProvider.translate('cancel')),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final updatedUsername = usernameController.text.trim();
+                await _userDB.saveOrUpdateUserProfile(updatedUsername);
+
+                setState(() {
+                  _username = updatedUsername;
+                });
+
+                Navigator.of(context).pop();
+                _showSuccessSnackbar(languageProvider);
+              },
+              child: Text(languageProvider.translate('save')),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showSuccessSnackbar(LanguageProvider languageProvider) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(languageProvider.translate('profile_updated')),
+        backgroundColor: Colors.green,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final languageProvider = Provider.of<LanguageProvider>(context);
     return Scaffold(
       appBar: AppBar(
         // backgroundColor: Colors.white,
         elevation: 0,
-        title: const Text(
-          'Setting',
-          style: TextStyle(
+        title: Text(
+          languageProvider.translate('settings'),
+          style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
         ),
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -86,18 +181,24 @@ class _SettingUiState extends State<SettingUi> {
                 child: InkWell(
                   borderRadius: BorderRadius.circular(8),
                   onTap: () {},
-                  child: const Padding(
-                    padding: EdgeInsets.all(8.0),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
                     child: ListTile(
-                      leading: Icon(Icons.person),
+                      leading: const Icon(Icons.person),
+                      // title: Text(languageProvider.translate('name')),
                       title: Text(
-                        'Jii Vorn',
-                        style: TextStyle(
-                          fontSize: 18,
+                        _username ??
+                            languageProvider.translate('default_username'),
+                        style: const TextStyle(
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
+                          letterSpacing: 1.2,
                         ),
                       ),
-                      trailing: Icon(Icons.more_vert),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.more_vert),
+                        onPressed: () => _showEditDialog(languageProvider),
+                      ),
                     ),
                   ),
                 ),
@@ -115,63 +216,73 @@ class _SettingUiState extends State<SettingUi> {
               padding: const EdgeInsets.all(8),
               children: [
                 _buildMenuItem(
+                  context,
+                  languageProvider,
+                  Icons.category,
+                  'category',
+                  () => Navigator.push(
                     context,
-                    Icons.category,
-                    'Category',
-                    () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const SettingsScreen()),
-                        ),
-                    Colors.lightBlue),
+                    MaterialPageRoute(
+                        builder: (context) => const CategoryScreen()),
+                  ),
+                  Colors.lightBlue,
+                ),
                 _buildMenuItem(
                     context,
+                    languageProvider,
                     Icons.paid,
-                    'Currency',
+                    'currency',
                     () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const SettingsScreen()),
+                              builder: (context) => const CurrencyScreen()),
                         ),
                     Colors.green),
                 _buildMenuItem(
                     context,
+                    languageProvider,
                     Icons.savings,
-                    'Saving Goal',
+                    'savingGoal',
                     () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const SettingsScreen()),
+                              builder: (context) => const SavingGoalScreen()),
                         ),
                     Colors.orange),
                 _buildMenuItem(
                     context,
+                    languageProvider,
                     Icons.leaderboard,
-                    'Data ',
+                    'datatotal',
                     () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const SettingsScreen()),
+                              builder: (context) => const ListSummaryScreen()),
                         ),
                     Colors.orange),
                 _buildMenuItem(
                     context,
+                    languageProvider,
                     Icons.table_chart,
-                    'Saved',
+                    'dataTable',
                     () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const SettingsScreen()),
+                            builder: (context) => DataTransactionTable(
+                                transactions:
+                                    transactions), // Pass the data here
+                          ),
                         ),
                     Colors.pink.shade300),
                 _buildMenuItem(
                     context,
+                    languageProvider,
                     Icons.delete_outline,
-                    'Trash bin',
+                    'Trashbin',
                     () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const SettingsScreen()),
+                              builder: (context) => const TrashBinScreen()),
                         ),
                     Colors.red),
               ],
@@ -198,7 +309,7 @@ class _SettingUiState extends State<SettingUi> {
                     () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const SettingsScreen()),
+                              builder: (context) => const AppearanceScreen()),
                         ),
                     Colors.red),
                 _BuildSecMenuItem(
@@ -241,7 +352,8 @@ class _SettingUiState extends State<SettingUi> {
     VoidCallback onTap,
     Color secmenucolor,
   ) {
-    return Card(
+    return 
+    Card(
       elevation: 5,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
@@ -267,15 +379,21 @@ class _SettingUiState extends State<SettingUi> {
     );
   }
 
-  Widget _buildMenuItem(BuildContext context, IconData icon, String title,
-      VoidCallback onTap, Color menucolor) {
+  Widget _buildMenuItem(
+    BuildContext context,
+    LanguageProvider languageProvider,
+    IconData icon,
+    String titleKey,
+    VoidCallback onTap,
+    Color menuColor,
+  ) {
     return Card(
       elevation: 5,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
         side: const BorderSide(
           color: Colors.blue,
-          width: 1 / 10,
+          width: 0.1,
         ),
       ),
       child: InkWell(
@@ -285,10 +403,10 @@ class _SettingUiState extends State<SettingUi> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 35, color: menucolor),
+              Icon(icon, size: 35, color: menuColor),
               const SizedBox(height: 8),
               Text(
-                title,
+                languageProvider.translate(titleKey),
                 textAlign: TextAlign.center,
                 style:
                     const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),

@@ -61,20 +61,13 @@ class _ListSummaryScreenState extends State<ListSummaryScreen> {
     }
   }
 
-  // void _exportTransaction() {
-
-  //   ScaffoldMessenger.of(context).showSnackBar(
-  //     const SnackBar(content: Text("Exporting Transactions...")),
-  //   );
-  // }
 
   @override
   Widget build(BuildContext context) {
-    // Grouping transactions by their type (Income, Expense, Savings)
     Map<String, Map<String, List<Map<String, dynamic>>>> groupedTransactions = {
       'Income': {},
       'Expense': {},
-      'Savings': {}, // Grouping for savings and subcategories
+      'Savings': {}, 
     };
 
     for (var transaction in transactions) {

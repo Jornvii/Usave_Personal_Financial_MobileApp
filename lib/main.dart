@@ -8,7 +8,6 @@ import 'screens/home_screen.dart';
 import 'screens/report_screen.dart';
 import 'screens/chat_bot.dart';
 import 'screens/setting_screen.dart';
-import 'screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,7 +45,7 @@ class MyApp extends StatelessWidget {
       theme: themeProvider.lightTheme,
       darkTheme: themeProvider.darkTheme,
       themeMode: themeProvider.isDarkTheme ? ThemeMode.dark : ThemeMode.light,
-      home: const SettingUi(),
+      home:  const SettingUi(transactions: [],),
       // home: const LineChartSample10(),
       localizationsDelegates: const [], 
       supportedLocales: const [
