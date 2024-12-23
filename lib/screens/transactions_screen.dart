@@ -72,7 +72,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       builder: (context) => AlertDialog(
         title: const Text('Move to Trash?'),
         content: const Text(
-            'This will move the transaction to Trashbin. You can recover it later.'),
+            'This will move the transaction to Trashbin ?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -100,7 +100,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
             AddTransactionScreen(selectedDate: selectedStartDate),
       ),
     );
-
 
 //  Navigator.push(
 //             context,
@@ -137,7 +136,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       final transactionDate = DateTime.parse(entry.key);
       return transactionDate
               .isAfter(selectedStartDate.subtract(const Duration(days: 1))) &&
-          transactionDate.isBefore(selectedEndDate.add(const Duration(days: 1)));
+          transactionDate
+              .isBefore(selectedEndDate.add(const Duration(days: 1)));
     }).toList()
       ..sort((a, b) => DateTime.parse(b.key).compareTo(DateTime.parse(a.key)));
 
@@ -245,7 +245,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                                       },
                                       backgroundColor: Colors.blue,
                                       icon: Icons.edit,
-                                      label: 'Edit',
+                                      // label: 'Edit',
                                     ),
                                     SlidableAction(
                                       onPressed: (_) =>
@@ -253,7 +253,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                                               transaction['id']),
                                       backgroundColor: Colors.red,
                                       icon: Icons.delete,
-                                      label: 'Delete',
+                                      // label: 'Delete',
                                     ),
                                   ],
                                 ),
@@ -274,7 +274,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                                                 : const Color.fromARGB(
                                                     255, 255, 215, 0),
                                   ),
-                                  title: Text(transaction['category']),
+                                  title: Text(transaction['category'],style: TextStyle(fontWeight: FontWeight.w400,fontSize: 15),),
                                   trailing: Text(
                                     '$currencySymbol ${transaction['amount']}',
                                     style: TextStyle(

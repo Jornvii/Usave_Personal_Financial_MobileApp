@@ -200,7 +200,7 @@ class _TrashBinScreenState extends State<TrashBinScreen> {
                                               transaction['id']),
                                           backgroundColor: Colors.green,
                                           icon: Icons.restore,
-                                          label: 'Restore',
+                                          // label: 'Restore',
                                         ),
                                         SlidableAction(
                                           onPressed: (_) =>
@@ -208,7 +208,7 @@ class _TrashBinScreenState extends State<TrashBinScreen> {
                                                   transaction['id']),
                                           backgroundColor: Colors.red,
                                           icon: Icons.delete_forever,
-                                          label: 'Delete Forever',
+                                          // label: 'Delete Forever',
                                         ),
                                       ],
                                     ),

@@ -198,6 +198,7 @@ class _ListSummaryScreenState extends State<ListSummaryScreen> {
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      color: Colors.black
                     ),
                   ),
                 ],
@@ -240,7 +241,8 @@ class _ListSummaryScreenState extends State<ListSummaryScreen> {
                               Text(
                                 DateFormat('dd/MM/yyyy').format(
                                     DateTime.parse(transaction['date'])),
-                                style: const TextStyle(fontSize: 14),
+                                style: const TextStyle(fontSize: 14,color: Colors.black),
+                                
                               ),
                               Text(
                                 '${transaction['amount']}',
