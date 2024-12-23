@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../models/category_db.dart';
-import '../widgets/add_currency.dart';
 
 class CategoryScreen extends StatefulWidget {
   const CategoryScreen({super.key});

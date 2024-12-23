@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_bot/main.dart';
 import 'package:lottie/lottie.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -36,8 +37,7 @@ class _SplashScreenState extends State<SplashScreen>
     await Future.delayed(const Duration(seconds: 3));
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (context) => const SplashScreen()),
-      // MaterialPageRoute(builder: (context) => const MainScreen()),
+      MaterialPageRoute(builder: (context) => const MainScreen()),
       (Route<dynamic> route) => false,
     );
   }
@@ -63,14 +63,17 @@ class _SplashScreenState extends State<SplashScreen>
             const SizedBox(height: 20),
             Column(
               children: [
-                animationFadeText(
+                animationTypeText(
                   "iSave",
                   50,
                   const Color.fromARGB(255, 17, 215, 119),
-                  FontWeight.bold
+                  FontWeight.bold,
                 ),
-                animationFadeText(
-                    "Your Personal Financail Management App", 18, Colors.black,FontWeight.w500)
+                animationFadeText2(
+                  "Your Personal Financial Management App",
+                  18,
+                  FontWeight.w500,
+                ),
               ],
             ),
           ],
@@ -79,8 +82,8 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 
-  FadeTransition animationFadeText(
-      String animatedtxt, double sizetxt, Color colorstxt,FontWeight weighttxt) {
+  FadeTransition animationTypeText(
+      String animatedtxt, double sizetxt, Color colorstxt, FontWeight weighttxt) {
     return FadeTransition(
       opacity: _fadeAnimation,
       child: Text(
@@ -89,7 +92,20 @@ class _SplashScreenState extends State<SplashScreen>
           fontSize: sizetxt,
           fontWeight: weighttxt,
           color: colorstxt,
-          // color:  Color.fromARGB(255, 17, 215, 119),
+        ),
+      ),
+    );
+  }
+
+  FadeTransition animationFadeText2(
+      String animatedtxt, double sizetxt, FontWeight weighttxt) {
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: Text(
+        animatedtxt,
+        style: TextStyle(
+          fontSize: sizetxt,
+          fontWeight: weighttxt,
         ),
       ),
     );

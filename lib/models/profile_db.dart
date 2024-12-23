@@ -35,22 +35,35 @@ class UserDB {
     );
   }
 
-  // Save or update user profile
-  Future<void> saveOrUpdateUserProfile(String username) async {
-    final db = await database;
+Future<void> saveOrUpdateUserProfile(String username) async {
+  final db = await database;
 
-    try {
-      await db.insert(
-        'user_profile',
-        {
-          'username': username,
-        },
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
-    } catch (e) {
-      print('Error saving user profile: $e');
-    }
+  try {
+    await db.delete('user_profile'); // Clear existing profile
+    await db.insert(
+      'user_profile',
+      {'username': username},
+    );
+  } catch (e) {
+    print('Error saving user profile: $e');
   }
+}
+
+  // Future<void> saveOrUpdateUserProfile(String username) async {
+  //   final db = await database;
+
+  //   try {
+  //     await db.insert(
+  //       'user_profile',
+  //       {
+  //         'username': username,
+  //       },
+  //       conflictAlgorithm: ConflictAlgorithm.replace,
+  //     );
+  //   } catch (e) {
+  //     print('Error saving user profile: $e');
+  //   }
+  // }
 
   // Fetch user profile
   Future<Map<String, dynamic>?> fetchUserProfile() async {

@@ -197,15 +197,16 @@ class _ReportScreenState extends State<ReportScreen> {
         margin: const EdgeInsets.all(5),
         padding: const EdgeInsets.all(5.0),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [color.withOpacity(0.9), color.withOpacity(0.9)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: color,
+          // gradient: LinearGradient(
+          //   colors: [color.withOpacity(0.9), color.withOpacity(0.9)],
+          //   begin: Alignment.topLeft,
+          //   end: Alignment.bottomRight,
+          // ),
           borderRadius: BorderRadius.circular(16.0),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.4),
+              color: color.withOpacity(0.2),
               blurRadius: 10,
               offset: const Offset(0, 6),
             ),
@@ -244,16 +245,17 @@ class _ReportScreenState extends State<ReportScreen> {
         margin: const EdgeInsets.all(5),
         padding: const EdgeInsets.all(10.0),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [color.withOpacity(0.9), color.withOpacity(0.9)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: color,
+          // gradient: LinearGradient(
+          //   
+          //   begin: Alignment.topLeft,
+          //   end: Alignment.bottomRight,
+          // ),
           borderRadius: BorderRadius.circular(16.0),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.4),
-              blurRadius: 10,
+              color: color.withOpacity(0.2),
+              blurRadius: 15,
               offset: const Offset(0, 6),
             ),
           ],

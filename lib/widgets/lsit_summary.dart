@@ -171,14 +171,7 @@ class _ListSummaryScreenState extends State<ListSummaryScreen> {
                   ? Colors.red[50]
                   : Colors.orange[50],
           borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              spreadRadius: 2,
-              blurRadius: 6,
-              offset: const Offset(0, 4), // Shadow position
-            ),
-          ],
+          
         ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),

@@ -67,10 +67,11 @@ class _CurrencyScreenState extends State<CurrencyScreen> {
                   controller: _nameController,
                   decoration: const InputDecoration(labelText: 'Currency Name'),
                 ),
+                SizedBox(height: 10),
                 TextField(
                   controller: _symbolController,
                   decoration:
-                      const InputDecoration(labelText: 'Symbol like \$  ฿...'),
+                      const InputDecoration(labelText: 'Symbol like \$'),
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton(

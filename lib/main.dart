@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_bot/screens/splash_screen.dart';
 import 'package:provider/provider.dart';
 
-import 'provider/langguages_provider.dart'; // Ensure this points to your LanguageProvider
+import 'provider/langguages_provider.dart'; 
 import 'provider/theme_provider.dart';
-import 'screens/grid_view.dart';
 import 'screens/home_screen.dart';
 import 'screens/report_screen.dart';
 import 'screens/chat_bot.dart';
-import 'screens/setting_screen.dart';
+import 'screens/splash_screen.dart';
+import 'screens/setting_screenui.dart';
+import 'screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,7 +47,7 @@ class MyApp extends StatelessWidget {
       theme: themeProvider.lightTheme,
       darkTheme: themeProvider.darkTheme,
       themeMode: themeProvider.isDarkTheme ? ThemeMode.dark : ThemeMode.light,
-      home:  const MainScreen(),
+      home:   const SplashScreen(),
       // home:  const SettingUi(transactions: [],),
       // home: const LineChartSample10(),
       localizationsDelegates: const [], 

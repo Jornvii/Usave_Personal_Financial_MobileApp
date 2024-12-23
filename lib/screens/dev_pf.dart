@@ -86,7 +86,7 @@ class DevPfScreen extends StatelessWidget {
                 const SizedBox(height: 6),
                
 
-                 SizedBox(height: 6),
+                 const SizedBox(height: 6),
                 Padding(
                   padding: const EdgeInsets.all(10),
                   child: RichText(

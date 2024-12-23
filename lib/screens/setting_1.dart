@@ -10,14 +10,14 @@ import '../widgets/profile_widget.dart';
 import 'category_screen.dart';
 import 'saving_goal_screen.dart';
 
-class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key});
+class SettingsScreenv1 extends StatefulWidget {
+  const SettingsScreenv1({super.key});
 
   @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
+  State<SettingsScreenv1> createState() => _SettingsScreenv1State();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class _SettingsScreenv1State extends State<SettingsScreenv1> {
   @override
   void initState() {
     super.initState();
