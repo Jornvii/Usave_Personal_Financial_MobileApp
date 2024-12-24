@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_bot/provider/langguages_provider.dart';
+import 'package:provider/provider.dart';
 import 'saving_goal_screen.dart';
 import 'notification_screen.dart';
 import '../models/saving_goaldb.dart';
@@ -58,11 +60,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final languageProvider = Provider.of<LanguageProvider>(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Transactions",
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title:  Text( languageProvider.translate ("Transactions"),
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         elevation: 4,
         actions: [

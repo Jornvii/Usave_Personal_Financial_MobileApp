@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_bot/provider/langguages_provider.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../models/category_db.dart';
 
 class AddTransactionScreen extends StatefulWidget {
@@ -158,9 +160,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final languageProvider = Provider.of<LanguageProvider>(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Transaction'),
+        title: Text(languageProvider.translate('add_transaction')),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -187,7 +190,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 8),
                           child: Text(
-                            'Income',
+                            languageProvider.translate('Income'),
                             style: TextStyle(
                               color: typeCategory == 'Income'
                                   ? Colors.black87
@@ -209,7 +212,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 8),
                           child: Text(
-                            'Expense',
+                            languageProvider.translate('Expense'),
                             style: TextStyle(
                               color: typeCategory == 'Expense'
                                   ? Colors.white
@@ -231,7 +234,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 8),
                           child: Text(
-                            'Saving',
+                            languageProvider.translate('Saving'),
                             style: TextStyle(
                               color: typeCategory == 'Saving'
                                   ? Colors.black87
@@ -250,8 +253,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 TextFormField(
                   controller: amountController,
                   decoration: InputDecoration(
-                    labelText: 'Amount',
-                    hintText: 'Enter amount',
+                    labelText: languageProvider.translate('Amount'),
+                    hintText: languageProvider.translate('Enteramount'),
                     prefixIcon: const Icon(Icons.attach_money),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -260,10 +263,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   keyboardType: TextInputType.number,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Amount is required';
+                      return languageProvider.translate('Amountisrequired');
                     }
                     if (double.tryParse(value) == null) {
-                      return 'Enter a valid number';
+                      return languageProvider.translate('Enteravalidnumber');
                     }
                     return null;
                   },
@@ -274,13 +277,13 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 DropdownButtonFormField<String>(
                   value: selectedCategory.isEmpty ? null : selectedCategory,
                   decoration: InputDecoration(
-                    labelText: 'Category',
+                    labelText: languageProvider.translate('Category'),
                     prefixIcon: const Icon(Icons.category),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  hint: const Text('Select Category'),
+                  hint: Text(languageProvider.translate('SelectCategory')),
                   isExpanded: true,
                   items: (typeCategory == 'Income'
                           ? incomeCategories
@@ -300,7 +303,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Category is required';
+                      return languageProvider.translate('Categoryisrequired');
                     }
                     return null;
                   },
@@ -312,18 +315,18 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   readOnly: true,
                   onTap: _pickDate,
                   decoration: InputDecoration(
-                    labelText: 'Date of Transaction',
+                    labelText: languageProvider.translate('DateofTransaction'),
                     prefixIcon: const Icon(Icons.calendar_today),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                     hintText: transactionDate == null
-                        ? 'Select a date'
+                        ? languageProvider.translate('Selectadate')
                         : DateFormat('yyyy-MM-dd').format(transactionDate!),
                   ),
                   validator: (value) {
                     if (transactionDate == null) {
-                      return 'Date is required';
+                      return languageProvider.translate('Dateisrequired');
                     }
                     return null;
                   },
@@ -334,8 +337,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 TextFormField(
                   controller: descriptionController,
                   decoration: InputDecoration(
-                    labelText: 'Description',
-                    hintText: 'Enter any notes or details (optional)',
+                    labelText: languageProvider.translate('Description'),
+                    hintText:
+                        languageProvider.translate('Enteranynotesordetails'),
                     prefixIcon: const Icon(Icons.description),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -370,7 +374,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   padding: const EdgeInsets.only(bottom: 15),
                   child: FloatingActionButton.extended(
                     onPressed: _addTransaction,
-                    label: const Text("Submit"),
+                    label: Text(languageProvider.translate("Submit")),
                     icon: const Icon(Icons.add),
                     backgroundColor: const Color.fromARGB(255, 17, 215, 119),
                   ),

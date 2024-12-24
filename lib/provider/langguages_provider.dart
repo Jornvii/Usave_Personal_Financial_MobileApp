@@ -32,6 +32,41 @@ class LanguageProvider with ChangeNotifier {
   // Translations for different languages
   static const Map<String, Map<String, String>> _translations = {
     'English': {
+      //Main Screen
+      'home': 'Home',
+'chatbot': 'Chat bot',
+ //Add Transaction Screen
+      'add_transaction': 'Add Transaction',
+      'Amount': 'Amount',
+'Enteramount': 'Enter amount',
+'Amountisrequired': 'Amount is required',
+'Enteravalidnumber':'Enter a valid number',
+'Category' : 'Category',
+'SelectCategory' : 'Select Category',
+'Categoryisrequired': 'Category is required',
+'DateofTransaction' : 'Date of Transaction',
+'Selectadate': 'Select a date',
+'Dateisrequired' : 'Date is required',
+'Description' :  'Description',
+'Enteranynotesordetails(optional)' : 'Enter any notes or details (optional)',
+"Submit" : "Submit",
+"Transactions" : "Transactions",
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       // ReportScreen
       'FinancialReport': 'Financial Report',
       'report': 'Report',
@@ -95,6 +130,47 @@ class LanguageProvider with ChangeNotifier {
       'version_app': 'version 1.0.1'
     },
     'Thai': {
+      //Main Screen
+      'home': 'หน้าหลัก',
+      'chatbot': 'Chat bot',
+
+      //Add Transaction Screen
+      'add_transaction': 'เพิ่มรายการ',
+'Amount': 'จำนวนเงิน',
+'Enteramount': 'กรุณากรอกจำนวนเงิน',
+'Amountisrequired': 'กรุณากรอกจำนวนเงิน',
+'Enteravalidnumber':'กรุณากรอกตัวเลขที่ถูกต้อง',
+'Category' : 'ประเภท',
+'SelectCategory' : 'เลือกประเภท',
+'Categoryisrequired': 'กรุณาเลือกประเภท',
+'DateofTransaction' : 'วันที่ทำรายการ',
+'Selectadate': 'เลือกวันที่',
+'Dateisrequired' : 'กรุณาเลือกวันที่',
+'Description' :  'รายละเอียด',
+'Enteranynotesordetails(optional)' : 'กรอกรายละเอียดเพิ่มเติม',
+"Submit" : "เพิ่มข้อมูล",
+"Transactions" : "รายการ",
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       // ReportScreen
       'FinancialReport': 'รายงานการเงิน',
       'report': 'รายงาน',
@@ -158,7 +234,48 @@ class LanguageProvider with ChangeNotifier {
       'about_us': "เกี่ยวกับเรา",
       'version_app': 'เวอร์ชัน 1.0.1'
     },
+
+
+    
     'Khmer': {
+      //Main Screen
+      'home': 'ទំព័រដើម',
+      'chatbot': 'Chat bot',
+      //Home Screen
+
+      //Add Transaction Screen
+      'add_transaction': 'បញ្ចូលប្រតិបត្តិការ',
+'Enteramount': 'បញ្ចូលចំនួនទឹកប្រាក់',
+'Amountisrequired': 'សូមបញ្ចូលចំនួនទឹកប្រាក់',
+'Enteravalidnumber':'សូមបញ្ចូលលេខត្រឹមត្រូវ',
+'Category' : 'ប្រភេទ',
+'SelectCategory' : 'ជ្រើសរើសប្រភេទ',
+'Categoryisrequired': 'សូមជ្រើសរើសប្រភេទ',
+'DateofTransaction' : 'កាលបរិច្ឆេទ',
+'Selectadate': 'ជ្រើសរើសកាលបរិច្ឆេទ',
+'Dateisrequired' : 'សូមជ្រើសរើសកាលបរិច្ឆេទ',
+'Description' : 'កំណត់ចំណាំបន្ថែម ',
+'Enteranynotesordetails(optional)' : 'បញ្ចូលកំណត់ចំណាំ ឬ ព័ត៌មានបន្ថែម ',
+  "Submit" : "បញ្ជូន",
+"Transactions" :  'ប្រតិបត្តិការ',
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      'Amount': 'ចំនួនទឹកប្រាក់',
       // ReportScreen
       'FinancialReport': 'របាយការណ៍ហិរញ្ញវត្ថុ',
       'report': 'របាយការណ៍',
