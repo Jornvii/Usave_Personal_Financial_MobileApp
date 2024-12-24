@@ -67,7 +67,7 @@ class _CurrencyScreenState extends State<CurrencyScreen> {
                   controller: _nameController,
                   decoration: const InputDecoration(labelText: 'Currency Name'),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 TextField(
                   controller: _symbolController,
                   decoration:
@@ -92,7 +92,7 @@ class _CurrencyScreenState extends State<CurrencyScreen> {
                   trailing: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: isDefault
-                          ? const Color.fromARGB(255, 177, 222, 179)
+                          ? Theme.of(context).primaryColor.withOpacity(0.5)
                           : null,
                     ),
                     onPressed: () =>

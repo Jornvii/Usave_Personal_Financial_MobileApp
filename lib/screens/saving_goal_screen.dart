@@ -183,9 +183,9 @@ class _SavingGoalScreenState extends State<SavingGoalScreen> {
                     margin: const EdgeInsets.symmetric(vertical: 8),
                     child: ListTile(
                       leading: CircleAvatar(
-                        backgroundColor: Colors.blue.shade100,
+                        backgroundColor: Theme.of(context).primaryColor,
                         child: Text(
-                          '${index + 1}', // Auto-incrementing number for each category
+                          '${index + 1}',
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
@@ -204,7 +204,7 @@ class _SavingGoalScreenState extends State<SavingGoalScreen> {
                             color: goalAmount != null
                                 ? Colors.greenAccent
                                 : Colors.grey,
-                                fontSize: 15,
+                            fontSize: 15,
                             fontWeight: FontWeight.bold),
                       ),
                       trailing: IconButton(

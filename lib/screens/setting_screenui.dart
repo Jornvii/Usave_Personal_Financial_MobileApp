@@ -316,12 +316,13 @@ class _SettingScreenUiState extends State<SettingScreenUi> {
                   physics: const NeverScrollableScrollPhysics(),
                   crossAxisCount: 2,
                   childAspectRatio: 3,
-                  padding: const EdgeInsets.only(left: 8, right: 8),
+                  padding:  EdgeInsets.only(left: 8, right: 8),
                   children: [
                     _BuildSecMenuItem(
                         context,
                         Icons.tune,
-                        'Appearance',
+                        languageProvider,
+                        'appearance',
                         () => Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -331,7 +332,9 @@ class _SettingScreenUiState extends State<SettingScreenUi> {
                         Colors.amber),
                     _BuildSecMenuItem(
                         context,
+                        
                         Icons.delete_forever,
+                        languageProvider,
                         'delete_data',
                         () =>
                             _showDeleteOptionsDialog(context, languageProvider),
@@ -339,7 +342,8 @@ class _SettingScreenUiState extends State<SettingScreenUi> {
                     _BuildSecMenuItem(
                         context,
                         Icons.code,
-                        'About Me',
+                        languageProvider,
+                        'AboutMe',
                         () => Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -358,7 +362,8 @@ class _SettingScreenUiState extends State<SettingScreenUi> {
                     _BuildSecMenuItem(
                         context,
                         Icons.error_outline,
-                        'Open Source',
+                        languageProvider,
+                        'OpenSource',
                         () => Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -407,7 +412,9 @@ class _SettingScreenUiState extends State<SettingScreenUi> {
   Widget _BuildSecMenuItem(
     BuildContext context,
     IconData secicon,
+     LanguageProvider languageProvider,
     String sectitle,
+   
     VoidCallback onTap,
     Color secmenucolor,
   ) {
@@ -426,8 +433,11 @@ class _SettingScreenUiState extends State<SettingScreenUi> {
         onTap: onTap,
         child: ListTile(
           leading: Icon(secicon, size: 18, color: secmenucolor),
-          title: Text(
-            sectitle,
+          title:
+          
+          
+           Text(
+             languageProvider.translate(sectitle),
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,

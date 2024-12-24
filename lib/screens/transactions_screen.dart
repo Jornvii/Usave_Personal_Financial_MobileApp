@@ -274,7 +274,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                                                 : const Color.fromARGB(
                                                     255, 255, 215, 0),
                                   ),
-                                  title: Text(transaction['category'],style: TextStyle(fontWeight: FontWeight.w400,fontSize: 15),),
+                                  title: Text(transaction['category'],style: const TextStyle(fontWeight: FontWeight.w400,fontSize: 15),),
                                   trailing: Text(
                                     '$currencySymbol ${transaction['amount']}',
                                     style: TextStyle(

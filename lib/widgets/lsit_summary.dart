@@ -103,7 +103,6 @@ class _ListSummaryScreenState extends State<ListSummaryScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blueAccent,
         title: Center(
           child: Text(
             ' ${DateFormat('dd/MM/yyyy').format(selectedStartDate)} to ${DateFormat('dd/MM/yyyy').format(selectedEndDate)}',
@@ -123,7 +122,7 @@ class _ListSummaryScreenState extends State<ListSummaryScreen> {
           final type = entry.key;
           final categories = entry.value;
 
-          // To prevent multiple "Savings" blocks
+
           if (type == 'Savings' && categories.isNotEmpty) {
             return _buildCategorySummary(type, categories);
           }

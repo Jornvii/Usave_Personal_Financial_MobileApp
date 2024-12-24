@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import '../models/transaction_db.dart';
 import '../models/currency_db.dart';
+import '../provider/langguages_provider.dart';
 import '../widgets/lsit_summary.dart';
 
 class ReportScreen extends StatefulWidget {
@@ -89,12 +91,14 @@ class _ReportScreenState extends State<ReportScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final languageProvider = Provider.of<LanguageProvider>(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Financial Report',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
-        ),
+        title: Text(languageProvider.translate('FinancialReport')),
+        // title: const Text(
+        //   'Financial Report',
+        //   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+        // ),
         actions: [
           // IconButton(
           //   icon: const Icon(Icons.date_range),
@@ -117,7 +121,7 @@ class _ReportScreenState extends State<ReportScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
           child: Column(
             children: [
-              buildBalanceSection(),
+              buildBalanceSection(languageProvider),
               const SizedBox(height: 10),
               const Divider(
                 height: 20.0,
@@ -129,13 +133,20 @@ class _ReportScreenState extends State<ReportScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                    'Balance: ',
-                    style: TextStyle(
+                  Text(
+                    languageProvider.translate('balance'),
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  // Text(
+                  //   'balance',
+                  //   style: TextStyle(
+                  //     fontSize: 18,
+                  //     fontWeight: FontWeight.bold,
+                  //   ),
+                  // ),
                   Text(
                     ' $currencySymbol ${currencyFormat.format(incomeTotal - expenseTotal)}',
                     style: TextStyle(
@@ -160,23 +171,23 @@ class _ReportScreenState extends State<ReportScreen> {
   }
 
   // Modernized balance section
-  Widget buildBalanceSection() {
+  Widget buildBalanceSection(LanguageProvider languageProvider) {
     return Column(
       children: [
         Row(
           // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            buildBalanceCard('Income', incomeTotal,
+            buildBalanceCard(languageProvider, 'Income', incomeTotal,
                 const Color.fromARGB(255, 17, 215, 119), Icons.attach_money),
-            buildBalanceCard(
-                'Expense', expenseTotal, Colors.red, Icons.money_off),
+            buildBalanceCard(languageProvider, 'Expense', expenseTotal,
+                Colors.red, Icons.money_off),
           ],
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            buildsavingCard(
-                'Saving', savingTotal, Colors.orange, Icons.savings),
+            buildsavingCard(languageProvider, 'Saving', savingTotal,
+                Colors.orange, Icons.savings),
             // buildBalanceCard(
             //   'Balance',
             //   incomeTotal - expenseTotal,
@@ -190,8 +201,8 @@ class _ReportScreenState extends State<ReportScreen> {
   }
 
   // Modern balance card
-  Widget buildBalanceCard(
-      String title, double amount, Color color, IconData icon) {
+  Widget buildBalanceCard(LanguageProvider languageProvider, String title,
+      double amount, Color color, IconData icon) {
     return Expanded(
       child: Container(
         margin: const EdgeInsets.all(5),
@@ -218,7 +229,7 @@ class _ReportScreenState extends State<ReportScreen> {
             Icon(icon, size: 15),
             const SizedBox(height: 8),
             Text(
-              title,
+              languageProvider.translate(title),
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
@@ -238,8 +249,8 @@ class _ReportScreenState extends State<ReportScreen> {
     );
   }
 
-  Widget buildsavingCard(
-      String title, double amount, Color color, IconData icon) {
+  Widget buildsavingCard(LanguageProvider languageProvider, String title,
+      double amount, Color color, IconData icon) {
     return Expanded(
       child: Container(
         margin: const EdgeInsets.all(5),
@@ -247,7 +258,7 @@ class _ReportScreenState extends State<ReportScreen> {
         decoration: BoxDecoration(
           color: color,
           // gradient: LinearGradient(
-          //   
+          //
           //   begin: Alignment.topLeft,
           //   end: Alignment.bottomRight,
           // ),
@@ -265,8 +276,7 @@ class _ReportScreenState extends State<ReportScreen> {
           children: [
             Icon(icon, size: 15),
             const SizedBox(height: 8),
-            Text(
-              title,
+            Text(languageProvider.translate(title),
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 14,

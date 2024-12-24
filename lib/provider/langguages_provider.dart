@@ -33,9 +33,11 @@ class LanguageProvider with ChangeNotifier {
   static const Map<String, Map<String, String>> _translations = {
     'English': {
       // ReportScreen
+      'FinancialReport': 'Financial Report',
       'report': 'Report',
-      'income': 'Income',
-      'expense': 'Expense',
+      'Income': 'Income',
+      'Expense': 'Expense',
+      'Saving': 'Saving',
       'balance': 'Balance',
       'income_vs_expense': 'Income vs Expense',
       'donut_chart': 'Doughnut Chart',
@@ -64,7 +66,15 @@ class LanguageProvider with ChangeNotifier {
       'save': 'Save',
       'profile_updated': 'Profile updated successfully!',
       'name': 'Name',
-      'default_username': 'Username',
+      'currency': 'Currency',
+      'savingGoal': 'Saving Goal',
+      'datatotal': 'Total Data',
+      'dataTable': 'Data Table',
+      'Trashbin': 'Trashbin',
+      'appearance': 'Appearance',
+      'AboutMe': 'About Me',
+      'OpenSource': 'Open Source',
+
       'language': 'Language',
       'select_language': 'Select Language',
       'saving_goal': 'Saving Goal',
@@ -77,23 +87,26 @@ class LanguageProvider with ChangeNotifier {
       'delete_all': 'Delete Your Data',
       'choose_delete_option': 'Please choose to delete',
 
-      'delete_data': 'clear your data',
+      'delete_data': 'Delete your data',
       'delete_data_subtitle': 'Delete your chat or all data',
       'edit_saving_goal': 'Edit Saving Goal',
       'delete_chat': 'Delete Chat Data',
-        'about_us':"About Us",
-        'version_app':'version 1.0.1'
+      'about_us': "About Us",
+      'version_app': 'version 1.0.1'
     },
     'Thai': {
       // ReportScreen
+      'FinancialReport': 'รายงานการเงิน',
       'report': 'รายงาน',
-      'income': 'รายรับ',
-      'expense': 'รายจ่าย',
+      'Income': 'รายรับ',
+      'Expense': 'รายจ่าย',
+      'Saving': 'เงินออม',
       'balance': 'ยอดคงเหลือ',
       'income_vs_expense': 'รายรับเทียบกับรายจ่าย',
       'donut_chart': 'กราฟโดนัท',
       'line_chart': 'กราฟเส้น',
       'data_exported': 'ข้อมูลถูกส่งออกไปยัง',
+
       // bot screen
       'chat_bot_title': 'บอท AI',
       'start_chat': 'เริ่ม',
@@ -112,12 +125,21 @@ class LanguageProvider with ChangeNotifier {
       'variable_expenses': 'ค่าใช้จ่ายผันแปร',
       // settings screen
       'settings': 'การตั้งค่า',
-       'category': 'ประเภท',
+      'category': 'ประเภท',
       'username': 'ชื่อผู้ใช้',
       'save': 'บันทึก',
       'profile_updated': 'โปรไฟล์ได้รับการอัปเดตเรียบร้อยแล้ว!',
       'name': 'ชื่อ',
-      'default_username': 'ชื่อผู้ใช้',
+      'edit_user_name': 'แก้ไขชื่อผู้ใช้',
+      'currency': 'สกุลเงิน',
+      'savingGoal': 'การออม',
+      'datatotal': 'ข้อมูลทั้งหมด',
+      'dataTable': 'ตารางข้อมูล',
+      'Trashbin': 'ถังขยะ',
+      'appearance': 'การกำหนด',
+      'AboutMe': 'ผู้พัฒนา',
+      'OpenSource': 'Open Source',
+
       'select_language': 'เลือกภาษา',
       'saving_goal': 'เป้าหมายการออม',
       'not_set': 'ไม่ได้ตั้งค่า',
@@ -131,16 +153,18 @@ class LanguageProvider with ChangeNotifier {
       'choose_delete_option': 'กรุณาเลือกลบ',
       'delete_data_subtitle': 'ลบการหรือข้อมูลทั้งหมด',
       'edit_saving_goal': 'แก้ไขเป้าหมายการออม',
-    
+
       'delete_chat': 'ลบข้อมูล bot',
-            'about_us':"เกี่ยวกับเรา",
-'version_app':'เวอร์ชัน 1.0.1'
+      'about_us': "เกี่ยวกับเรา",
+      'version_app': 'เวอร์ชัน 1.0.1'
     },
     'Khmer': {
       // ReportScreen
+      'FinancialReport': 'របាយការណ៍ហិរញ្ញវត្ថុ',
       'report': 'របាយការណ៍',
-      'income': 'ចំណូល',
-      'expense': 'ចំណាយ',
+      'Income': 'ចំណូល',
+      'Expense': 'ចំណាយ',
+      'Saving': 'សន្សំ',
       'balance': 'សមតុល្យ',
       'income_vs_expense': 'ចំណូលប្រកួតប្រជែងចំណាយ',
       'donut_chart': 'គំនូសតួអង្កាំ',
@@ -166,9 +190,18 @@ class LanguageProvider with ChangeNotifier {
       // settings screen
       'settings': 'ការកំណត់',
       'edit_user_name': 'កែប្រែឈ្មោះអ្នកប្រើ',
-       'category': 'ប្រភេទ',
+      'currency': 'រូបិយប័ណ្ណ',
+      'savingGoal': 'គោលដៅសន្សំ',
+      'dataTable': 'តារាងទិន្នន័យ',
+      'Trashbin': 'ធុងសំរាម',
+      'appearance': 'កាកាំណត់',
+      'AboutMe': 'អំពីខ្ញុំ',
+      'OpenSource': 'Open Source',
+      'datatotal': 'ទិន្នន័យសរុប',
+
+      'category': 'ប្រភេទ',
       'save': 'រក្សាទុក',
-      'profile_updated': 'ប្រវត្តិរូបត្រូវបានធ្វើបច្ចុប្បន្នភាពដោយជោគជ័យ!',
+      'profile_updated': 'ប្រវត្តិរូបបានធ្វើបច្ចុប្បន្នភាពជោគជ័យ!',
       'name': 'ឈ្មោះ',
       'default_username': 'ឈ្មោះអ្នកប្រើ',
       'select_language': 'ជ្រើសរើសភាសា',
@@ -180,14 +213,14 @@ class LanguageProvider with ChangeNotifier {
       'light': 'ភ្លឺ',
       'export_data': 'នាំចេញទិន្នន័យ',
       'export_data_subtitle': 'នាំចេញទិន្នន័យទៅ Excel',
-      
+
       'delete_all': 'លុបទិន្នន័យ',
-      'delete_data': 'លុបសារ ទិន្នន័យ',
-      'delete_data_subtitle': 'លុបសារ ទិន្នន័យ',
+      'delete_data': 'លុបទិន្នន័យ',
+      'delete_data_subtitle': 'លុបទិន្នន័យ',
       'edit_saving_goal': 'កែសម្រួលគោលដៅសន្សំ',
       'delete_chat': 'លុបទិន្នន័យសារ',
-      'about_us':"អំពី អ្នកបង្កើតកម្មវិធី",
-      'version_app':'កំណែ 1.0.1'
+      'about_us': "អំពី អ្នកបង្កើតកម្មវិធី",
+      'version_app': 'កំណែ 1.0.1'
     },
   };
 }

@@ -7,9 +7,7 @@ import 'provider/theme_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/report_screen.dart';
 import 'screens/chat_bot.dart';
-import 'screens/splash_screen.dart';
 import 'screens/setting_screenui.dart';
-import 'screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

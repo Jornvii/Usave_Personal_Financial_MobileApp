@@ -178,9 +178,9 @@ class _Setting2ScreenState extends State<Setting2Screen> {
               backgroundImage: AssetImage('assets/images/logoapp.png'),
             ),
             const SizedBox(height: 10),
-            Text(
+            const Text(
               "iSAVE",
-              style: const TextStyle(
+              style: TextStyle(
                   fontWeight: FontWeight.bold, fontSize: 20, letterSpacing: 1),
             ),
             const SizedBox(height: 15),

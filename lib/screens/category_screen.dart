@@ -73,7 +73,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Categories'),
-        elevation: 0,
+        // elevation: 2,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -289,7 +289,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     filled: true,
-                    fillColor: Colors.grey[100],
+                    // fillColor: Colors.grey[100],
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -301,7 +301,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     filled: true,
-                    fillColor: Colors.grey[100],
+                    // fillColor: Colors.grey[100],
                   ),
                   items: ['Income', 'Expense', 'Saving']
                       .map((type) => DropdownMenuItem<String>(
