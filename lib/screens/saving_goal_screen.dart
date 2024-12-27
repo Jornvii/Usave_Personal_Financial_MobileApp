@@ -12,9 +12,7 @@ class SavingGoalScreen extends StatefulWidget {
 class _SavingGoalScreenState extends State<SavingGoalScreen> {
   final List<String> defaultSavingCategories = [
     'Emergency Fund',
-    'Healthcare',
-    'Travel',
-    'Debt Reduction',
+    'Investments',
   ];
 
   List<String> dynamicCategories = [];
@@ -174,45 +172,146 @@ class _SavingGoalScreenState extends State<SavingGoalScreen> {
                 itemBuilder: (context, index) {
                   final category = categoryGoals.keys.elementAt(index);
                   final goalAmount = categoryGoals[category];
+                  final isDefaultCategory =
+                      defaultSavingCategories.contains(category);
 
-                  return Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    elevation: 5,
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    child: ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: Theme.of(context).primaryColor,
-                        child: Text(
-                          '${index + 1}',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      title: Text(
-                        category,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      subtitle: Text(
-                        goalAmount != null
-                            ? 'Goal: \$${goalAmount.toStringAsFixed(2)}'
-                            : 'No goal set yet', // Default message for unset goals
-                        style: TextStyle(
-                            color: goalAmount != null
-                                ? Colors.greenAccent
-                                : Colors.grey,
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.edit, color: Colors.blue),
-                        onPressed: () => _showAddGoalDialog(category),
-                      ),
-                    ),
-                  );
+                  // Prevent deletion for default categories
+                  return isDefaultCategory
+                      ? Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          elevation: 5,
+                          margin: const EdgeInsets.symmetric(vertical: 8),
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: Theme.of(context).primaryColor,
+                              child: Text(
+                                '${index + 1}',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            title: Text(
+                              category,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            subtitle: Text(
+                              goalAmount != null
+                                  ? 'Goal: \$${goalAmount.toStringAsFixed(2)}'
+                                  : 'No goal set yet',
+                              style: TextStyle(
+                                  color: goalAmount != null
+                                      ? Colors.greenAccent
+                                      : Colors.grey,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.edit, color: Colors.blue),
+                              onPressed: () => _showAddGoalDialog(category),
+                            ),
+                          ),
+                        )
+                      : Dismissible(
+                          key: ValueKey(category),
+                          direction: DismissDirection.endToStart,
+                          confirmDismiss: (direction) async {
+                            return await showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  title: const Text('Confirm Deletion'),
+                                  content: Text(
+                                    'Are you sure you want to delete the saving goal for "$category"?',
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(false),
+                                      child: const Text('Cancel'),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () async {
+                                        await SavingGoalDB()
+                                            .deleteSavingGoal(category);
+                                        await CategoryDB().deleteCategory(
+                                          (await CategoryDB()
+                                                  .fetchCategoriesByType(
+                                                      'Saving'))
+                                              .firstWhere(
+                                            (cat) => cat['name'] == category,
+                                            orElse: () => {'id': null},
+                                          )['id'],
+                                        );
+                                        Navigator.of(context).pop(true);
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.redAccent,
+                                      ),
+                                      child: const Text('Delete'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                          onDismissed: (direction) {
+                            setState(() {
+                              categoryGoals.remove(category);
+                            });
+                          },
+                          background: Container(
+                            alignment: Alignment.centerRight,
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            color: Colors.red,
+                            child:
+                                const Icon(Icons.delete, color: Colors.white),
+                          ),
+                          child: Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            elevation: 5,
+                            margin: const EdgeInsets.symmetric(vertical: 8),
+                            child: ListTile(
+                              leading: CircleAvatar(
+                                backgroundColor: Theme.of(context).primaryColor,
+                                child: Text(
+                                  '${index + 1}',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              title: Text(
+                                category,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              subtitle: Text(
+                                goalAmount != null
+                                    ? 'Goal: \$${goalAmount.toStringAsFixed(2)}'
+                                    : 'No goal set yet',
+                                style: TextStyle(
+                                    color: goalAmount != null
+                                        ? Colors.greenAccent
+                                        : Colors.grey,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              trailing: IconButton(
+                                icon:
+                                    const Icon(Icons.edit, color: Colors.blue),
+                                onPressed: () => _showAddGoalDialog(category),
+                              ),
+                            ),
+                          ),
+                        );
                 },
               ),
             ),

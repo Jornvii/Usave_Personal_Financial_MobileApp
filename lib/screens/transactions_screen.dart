@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
 
-import '../models/transaction_db.dart';
 import '../models/currency_db.dart';
+import '../models/transaction_db.dart';
 import '../widgets/add_ddtransaction.dart';
 import '../widgets/edit_transaction.dart';
 
@@ -18,14 +18,14 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   late DateTime selectedStartDate;
   late DateTime selectedEndDate;
   List<Map<String, dynamic>> transactions = [];
-  String currencySymbol = '\$'; // Default currency symbol
+  String currencySymbol = '\$';
 
   @override
   void initState() {
     super.initState();
     _loadCurrency();
     _loadTransactions();
-    // Default date range set to the current month
+    
     selectedStartDate = DateTime(DateTime.now().year, DateTime.now().month, 1);
     selectedEndDate =
         DateTime(DateTime.now().year, DateTime.now().month + 1, 0);
@@ -36,7 +36,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     final defaultCurrency = await db.getDefaultCurrency();
     setState(() {
       currencySymbol =
-          defaultCurrency?['symbol'] ?? '\$'; // Use default if null
+          defaultCurrency?['symbol'] ?? '\$'; 
     });
   }
 
@@ -71,8 +71,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Move to Trash?'),
-        content: const Text(
-            'This will move the transaction to Trashbin ?'),
+        content: const Text('This will move the transaction to Trashbin ?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -274,7 +273,12 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                                                 : const Color.fromARGB(
                                                     255, 255, 215, 0),
                                   ),
-                                  title: Text(transaction['category'],style: const TextStyle(fontWeight: FontWeight.w400,fontSize: 15),),
+                                  title: Text(
+                                    transaction['category'],
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.w400,
+                                        fontSize: 15),
+                                  ),
                                   trailing: Text(
                                     '$currencySymbol ${transaction['amount']}',
                                     style: TextStyle(

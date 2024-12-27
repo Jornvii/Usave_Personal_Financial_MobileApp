@@ -47,9 +47,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   ];
   final List<String> defaultSavingCategories = [
     'Emergency Fund',
-    'Retirement',
     'Investments',
-    'Vacation Fund',
   ];
 
   final _formKey = GlobalKey<FormState>();

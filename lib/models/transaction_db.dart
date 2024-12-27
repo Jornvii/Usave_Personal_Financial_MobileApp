@@ -22,9 +22,9 @@ class TransactionDB {
 
     return await openDatabase(
       path,
-      version: 2, // Increment the version number for migration
+      version: 2, 
       onCreate: (db, version) async {
-        // Create table with 'deleted' column
+        
         await db.execute('''
           CREATE TABLE transactions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,

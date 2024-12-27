@@ -17,9 +17,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
   ];
   final List<String> defaultSavingCayegories = [
     'Emergency Fund',
-    'Healthcare',
-    'Travel',
-    'Debt Reduction'
+    'Investments',
   ];
   final List<String> defaultExpenseCategories = [
     'Miscellaneous',

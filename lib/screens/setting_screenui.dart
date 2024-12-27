@@ -110,7 +110,7 @@ class _SettingScreenUiState extends State<SettingScreenUi> {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
+    // final themeProvider = Provider.of<ThemeProvider>(context);
     final languageProvider = Provider.of<LanguageProvider>(context);
     return Scaffold(
       // appBar: AppBar(
@@ -316,7 +316,7 @@ class _SettingScreenUiState extends State<SettingScreenUi> {
                   physics: const NeverScrollableScrollPhysics(),
                   crossAxisCount: 2,
                   childAspectRatio: 3,
-                  padding:  EdgeInsets.only(left: 8, right: 8),
+                  padding:  const EdgeInsets.only(left: 8, right: 8),
                   children: [
                     _BuildSecMenuItem(
                         context,

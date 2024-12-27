@@ -31,7 +31,7 @@ class _ReportScreenState extends State<ReportScreen> {
   void initState() {
     super.initState();
     _loadDefaultCurrency();
-    _loadTransactions();
+    _loadTransactions(context);
   }
 
   // Fetch the default currency symbol from CurrencyDB
@@ -47,10 +47,11 @@ class _ReportScreenState extends State<ReportScreen> {
   }
 
   // Fetch transactions from the database and prepare data for the chart
-  Future<void> _loadTransactions() async {
+  Future<void> _loadTransactions(BuildContext context) async {
+    final languageProvider =
+        Provider.of<LanguageProvider>(context, listen: false);
     final db = TransactionDB();
-    final allTransactions =
-        await db.getTransactions(); // Assuming this fetches all transactions
+    final allTransactions = await db.getTransactions();
 
     Map<String, double> categoryTotals = {
       'Income': 0.0,
@@ -58,7 +59,7 @@ class _ReportScreenState extends State<ReportScreen> {
       'Saving': 0.0,
     };
 
-    // Calculate total amount per typeCategory (Income, Expense, Saving)
+    // Calculate total amount per(Income, Expense, Saving)
     for (var transaction in allTransactions) {
       if (transaction['typeCategory'] == 'Income') {
         categoryTotals['Income'] =
@@ -79,13 +80,33 @@ class _ReportScreenState extends State<ReportScreen> {
       savingTotal = categoryTotals['Saving']!;
       chartData = [
         ChartData(
-          'Income',
+          languageProvider.translate('Income'),
           incomeTotal,
           const Color.fromARGB(255, 17, 215, 119),
         ),
-        ChartData('Expense', expenseTotal, Colors.red.shade400),
-        ChartData('Saving', savingTotal, Colors.orange.shade400),
+        ChartData(
+          languageProvider.translate('Expense'),
+          expenseTotal,
+          Colors.red.shade400,
+        ),
+        ChartData(
+          languageProvider.translate('Saving'),
+          savingTotal,
+          Colors.orange.shade400,
+        ),
       ];
+
+      // chartData = [
+
+      //   ChartData( languageProvider.translate('Income'), incomeTotal,
+      //       const Color.fromARGB(255, 17, 215, 119)),
+      //   //   'Income',
+      //   //   incomeTotal,
+      //   //   const Color.fromARGB(255, 17, 215, 119),
+      //   // ),
+      //   ChartData('Expense', expenseTotal, Colors.red.shade400),
+      //   ChartData('Saving', savingTotal, Colors.orange.shade400),
+      // ];
     });
   }
 
@@ -161,8 +182,6 @@ class _ReportScreenState extends State<ReportScreen> {
               ),
               const SizedBox(height: 10),
               _buildChart(),
-              const SizedBox(height: 20),
-              _buildChartLegend(),
             ],
           ),
         ),
@@ -276,7 +295,8 @@ class _ReportScreenState extends State<ReportScreen> {
           children: [
             Icon(icon, size: 15),
             const SizedBox(height: 8),
-            Text(languageProvider.translate(title),
+            Text(
+              languageProvider.translate(title),
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
@@ -296,36 +316,123 @@ class _ReportScreenState extends State<ReportScreen> {
     );
   }
 
-  // Donut chart widget
   Widget _buildChart() {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: SizedBox(
-        height: 300,
+        height: 350, // Slightly taller for better visibility
         child: SfCircularChart(
+          title: const ChartTitle(
+            textStyle: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+              color: Colors.black87,
+            ),
+          ),
+          legend: const Legend(
+            isVisible: true,
+            position: LegendPosition.right, // Place legend on the right
+            overflowMode: LegendItemOverflowMode.wrap,
+            textStyle: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+            iconHeight: 14,
+            iconWidth: 14,
+          ),
           series: <CircularSeries>[
             DoughnutSeries<ChartData, String>(
               dataSource: chartData,
               pointColorMapper: (ChartData data, _) => data.color,
               xValueMapper: (ChartData data, _) => data.name,
               yValueMapper: (ChartData data, _) => data.amount,
-              radius: '100%',
-              innerRadius: '10%',
-              dataLabelSettings: const DataLabelSettings(
+              radius: '90%',
+              innerRadius: '10%', // More distinct donut shape
+              dataLabelSettings: DataLabelSettings(
                 isVisible: true,
-                textStyle: TextStyle(
-                  fontWeight: FontWeight.bold,
+                labelPosition: ChartDataLabelPosition.outside,
+                connectorLineSettings: const ConnectorLineSettings(
+                  type: ConnectorType.curve,
+                  color: Colors.grey,
+                  length: '20%',
                 ),
+                textStyle: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+                builder: (data, point, series, pointIndex, seriesIndex) {
+                  final formatter = NumberFormat.compactCurrency(
+                    symbol: currencySymbol,
+                    decimalDigits: 2,
+                  );
+                  return Column(
+                    children: [
+                      Text(
+                        '${data.name}',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        formatter.format(data.amount),
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ],
+                  );
+                },
               ),
-              animationDuration: 2000,
+              explode: true,
+              explodeOffset: '5%', // Add a subtle explode effect
+              strokeWidth: 2,
+              strokeColor: Colors.white, // Add stroke for clean separation
             ),
           ],
+          tooltipBehavior: TooltipBehavior(
+            enable: true,
+            color: Colors.white,
+            borderColor: Colors.grey,
+            borderWidth: 1,
+            textStyle: const TextStyle(
+              fontSize: 12,
+              color: Colors.black,
+              fontWeight: FontWeight.w500,
+            ),
+            header: '',
+            format: 'point.x: ${currencySymbol}point.y',
+          ),
         ),
       ),
     );
   }
 
-  // Chart legend
+// Donut chart widget
+  // Widget _buildChart() {
+  //   return Padding(
+  //     padding: const EdgeInsets.all(8.0),
+  //     child: SizedBox(
+  //       height: 300,
+  //       child: SfCircularChart(
+  //         series: <CircularSeries>[
+  //           DoughnutSeries<ChartData, String>(
+  //             dataSource: chartData,
+  //             pointColorMapper: (ChartData data, _) => data.color,
+  //             xValueMapper: (ChartData data, _) => data.name,
+  //             yValueMapper: (ChartData data, _) => data.amount,
+  //             radius: '100%',
+  //             innerRadius: '10%',
+  //             dataLabelSettings: const DataLabelSettings(
+  //               isVisible: true,
+  //               textStyle: TextStyle(
+  //                 fontWeight: FontWeight.bold,
+  //               ),
+  //             ),
+  //             animationDuration: 2000,
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
+
   Widget _buildChartLegend() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
