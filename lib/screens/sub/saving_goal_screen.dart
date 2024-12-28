@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/category_db.dart';
-import '../models/saving_goaldb.dart';
+import '../../models/category_db.dart';
+import '../../models/saving_goaldb.dart';
 
 class SavingGoalScreen extends StatefulWidget {
   const SavingGoalScreen({super.key});

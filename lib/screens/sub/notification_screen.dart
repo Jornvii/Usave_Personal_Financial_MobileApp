@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../models/saving_goaldb.dart';
-import '../models/transaction_db.dart'; // Your transaction database model
+import '../../models/saving_goaldb.dart';
+import '../../models/transaction_db.dart'; // Your transaction database model
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});

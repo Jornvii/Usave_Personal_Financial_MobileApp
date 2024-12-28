@@ -17,7 +17,7 @@ class _ListSummaryScreenState extends State<ListSummaryScreen> {
   DateTime selectedEndDate =
       DateTime(DateTime.now().year, DateTime.now().month + 1, 0);
   List<Map<String, dynamic>> transactions = [];
-  String currencySymbol = '\$'; // Default currency symbol
+  String currencySymbol = '\$'; 
 
   @override
   void initState() {
@@ -61,13 +61,12 @@ class _ListSummaryScreenState extends State<ListSummaryScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     Map<String, Map<String, List<Map<String, dynamic>>>> groupedTransactions = {
       'Income': {},
       'Expense': {},
-      'Savings': {}, 
+      'Savings': {},
     };
 
     for (var transaction in transactions) {
@@ -122,7 +121,6 @@ class _ListSummaryScreenState extends State<ListSummaryScreen> {
           final type = entry.key;
           final categories = entry.value;
 
-
           if (type == 'Savings' && categories.isNotEmpty) {
             return _buildCategorySummary(type, categories);
           }
@@ -170,7 +168,13 @@ class _ListSummaryScreenState extends State<ListSummaryScreen> {
                   ? Colors.red[50]
                   : Colors.orange[50],
           borderRadius: BorderRadius.circular(12),
-          
+          border: Border.all(
+            color: type == 'Income'
+                ? Colors.green[200]!
+                : type == 'Expense'
+                    ? Colors.red[200]!
+                    : Colors.orange[200]!,
+          ),
         ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -195,10 +199,9 @@ class _ListSummaryScreenState extends State<ListSummaryScreen> {
                   Text(
                     '$type (${totalAmount.toStringAsFixed(2)})',
                     style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black
-                    ),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black),
                   ),
                 ],
               ),
@@ -240,8 +243,8 @@ class _ListSummaryScreenState extends State<ListSummaryScreen> {
                               Text(
                                 DateFormat('dd/MM/yyyy').format(
                                     DateTime.parse(transaction['date'])),
-                                style: const TextStyle(fontSize: 14,color: Colors.black),
-                                
+                                style: const TextStyle(
+                                    fontSize: 14, color: Colors.black),
                               ),
                               Text(
                                 '${transaction['amount']}',

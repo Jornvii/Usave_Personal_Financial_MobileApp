@@ -1,14 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_bot/screens/dev_pf.dart';
-import 'package:flutter_chat_bot/screens/trashbin_screen.dart';
+import 'package:flutter_chat_bot/screens/sub/dev_pf.dart';
+import 'package:flutter_chat_bot/screens/sub/trashbin_screen.dart';
 import 'package:provider/provider.dart';
-import '../models/chat_db.dart';
-import '../provider/langguages_provider.dart';
-import '../provider/theme_provider.dart';
-import '../widgets/profile_widget.dart';
-import 'category_screen.dart';
-import 'saving_goal_screen.dart';
+import '../../models/chat_db.dart';
+import '../../provider/langguages_provider.dart';
+import '../../provider/theme_provider.dart';
+import '../../widgets/profile_widget.dart';
+import '../sub/category_screen.dart';
+import '../sub/saving_goal_screen.dart';
 
 class SettingsScreenv1 extends StatefulWidget {
   const SettingsScreenv1({super.key});

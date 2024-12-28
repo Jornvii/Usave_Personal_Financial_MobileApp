@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_bot/provider/langguages_provider.dart';
 import 'package:provider/provider.dart';
-import 'saving_goal_screen.dart';
-import 'notification_screen.dart';
-import '../models/saving_goaldb.dart';
+import '../sub/saving_goal_screen.dart';
+import '../sub/notification_screen.dart';
+import '../../models/saving_goaldb.dart';
 import 'transactions_screen.dart';
 
 class MyHomePage extends StatefulWidget {

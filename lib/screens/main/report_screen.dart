@@ -3,10 +3,10 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-import '../models/transaction_db.dart';
-import '../models/currency_db.dart';
-import '../provider/langguages_provider.dart';
-import '../widgets/lsit_summary.dart';
+import '../../models/transaction_db.dart';
+import '../../models/currency_db.dart';
+import '../../provider/langguages_provider.dart';
+import '../../widgets/lsit_summary.dart';
 
 class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});
@@ -320,18 +320,11 @@ class _ReportScreenState extends State<ReportScreen> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: SizedBox(
-        height: 350, // Slightly taller for better visibility
+        height: 350,
         child: SfCircularChart(
-          title: const ChartTitle(
-            textStyle: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-              color: Colors.black87,
-            ),
-          ),
           legend: const Legend(
             isVisible: true,
-            position: LegendPosition.right, // Place legend on the right
+            position: LegendPosition.bottom,
             overflowMode: LegendItemOverflowMode.wrap,
             textStyle: TextStyle(
               fontSize: 14,
@@ -346,7 +339,7 @@ class _ReportScreenState extends State<ReportScreen> {
               pointColorMapper: (ChartData data, _) => data.color,
               xValueMapper: (ChartData data, _) => data.name,
               yValueMapper: (ChartData data, _) => data.amount,
-              radius: '90%',
+              radius: '100%',
               innerRadius: '10%', // More distinct donut shape
               dataLabelSettings: DataLabelSettings(
                 isVisible: true,
@@ -381,9 +374,9 @@ class _ReportScreenState extends State<ReportScreen> {
                 },
               ),
               explode: true,
-              explodeOffset: '5%', // Add a subtle explode effect
+              explodeOffset: '2%',
               strokeWidth: 2,
-              strokeColor: Colors.white, // Add stroke for clean separation
+              strokeColor: Colors.white,
             ),
           ],
           tooltipBehavior: TooltipBehavior(

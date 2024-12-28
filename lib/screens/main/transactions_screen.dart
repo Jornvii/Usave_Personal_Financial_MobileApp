@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
 
-import '../models/currency_db.dart';
-import '../models/transaction_db.dart';
-import '../widgets/add_ddtransaction.dart';
-import '../widgets/edit_transaction.dart';
+import '../../models/currency_db.dart';
+import '../../models/transaction_db.dart';
+import '../../widgets/add_ddtransaction.dart';
+import '../../widgets/edit_transaction.dart';
 
 class TransactionsScreen extends StatefulWidget {
   const TransactionsScreen({super.key});

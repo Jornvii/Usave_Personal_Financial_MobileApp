@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
-import '../models/transaction_db.dart';
+import '../../models/transaction_db.dart';
 
 class TrashBinScreen extends StatefulWidget {
   const TrashBinScreen({super.key});

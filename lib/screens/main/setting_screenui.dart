@@ -1,20 +1,19 @@
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_bot/screens/appearance_screen.dart';
-import 'package:flutter_chat_bot/screens/saving_goal_screen.dart';
+import 'package:flutter_chat_bot/screens/sub/appearance_screen.dart';
+import 'package:flutter_chat_bot/screens/sub/saving_goal_screen.dart';
 import 'package:flutter_chat_bot/widgets/add_currency.dart';
 import 'package:provider/provider.dart';
-import '../models/chat_db.dart';
-import '../models/transaction_db.dart';
-import '../provider/langguages_provider.dart';
-import '../provider/theme_provider.dart';
-import '../models/profile_db.dart';
-import '../widgets/lsit_summary.dart';
-import '../widgets/table_transactions.dart';
-import 'category_screen.dart';
-import 'dev_pf.dart';
-import 'opensource_screen.dart';
-import 'trashbin_screen.dart';
+import '../../models/chat_db.dart';
+import '../../models/transaction_db.dart';
+import '../../provider/langguages_provider.dart';
+import '../../models/profile_db.dart';
+import '../../widgets/lsit_summary.dart';
+import '../../widgets/table_transactions.dart';
+import '../sub/category_screen.dart';
+import '../sub/dev_pf.dart';
+import '../sub/opensource_screen.dart';
+import '../sub/trashbin_screen.dart';
 
 class SettingScreenUi extends StatefulWidget {
   final List<Map<String, dynamic>> transactions;
@@ -304,7 +303,7 @@ class _SettingScreenUiState extends State<SettingScreenUi> {
                 const SizedBox(height: 15),
                 const Divider(
                   height: 20.0,
-                  thickness: 1 / 2,
+                  thickness: 1 / 3,
                   color: Color.fromARGB(255, 17, 215, 119),
                   indent: 25.0,
                   endIndent: 25.0,
@@ -315,8 +314,8 @@ class _SettingScreenUiState extends State<SettingScreenUi> {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   crossAxisCount: 2,
-                  childAspectRatio: 3,
-                  padding:  const EdgeInsets.only(left: 8, right: 8),
+                  childAspectRatio: 7/2,
+                  padding: const EdgeInsets.only(left: 8, right: 8),
                   children: [
                     _BuildSecMenuItem(
                         context,
@@ -332,7 +331,6 @@ class _SettingScreenUiState extends State<SettingScreenUi> {
                         Colors.amber),
                     _BuildSecMenuItem(
                         context,
-                        
                         Icons.delete_forever,
                         languageProvider,
                         'delete_data',
@@ -405,16 +403,14 @@ class _SettingScreenUiState extends State<SettingScreenUi> {
         ),
       ],
       isRepeatingAnimation: true,
-      
     );
   }
 
   Widget _BuildSecMenuItem(
     BuildContext context,
     IconData secicon,
-     LanguageProvider languageProvider,
+    LanguageProvider languageProvider,
     String sectitle,
-   
     VoidCallback onTap,
     Color secmenucolor,
   ) {
@@ -433,14 +429,11 @@ class _SettingScreenUiState extends State<SettingScreenUi> {
         onTap: onTap,
         child: ListTile(
           leading: Icon(secicon, size: 18, color: secmenucolor),
-          title:
-          
-          
-           Text(
-             languageProvider.translate(sectitle),
+          title: Text(
+            languageProvider.translate(sectitle),
             style: const TextStyle(
               fontSize: 14,
-              fontWeight: FontWeight.bold,
+              // fontWeight: FontWeight.bold,
             ),
           ),
         ),

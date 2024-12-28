@@ -71,7 +71,7 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
                 animationFadeText2(
                   "Your Personal Financial Management App",
-                  18,
+                  14,
                   FontWeight.w500,
                 ),
               ],

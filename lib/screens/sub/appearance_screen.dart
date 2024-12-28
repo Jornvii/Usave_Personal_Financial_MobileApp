@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../provider/langguages_provider.dart';
-import '../provider/theme_provider.dart';
+import '../../provider/langguages_provider.dart';
+import '../../provider/theme_provider.dart';
 
 class AppearanceScreen extends StatefulWidget {
   const AppearanceScreen({super.key});

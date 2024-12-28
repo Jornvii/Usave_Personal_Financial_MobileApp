@@ -4,10 +4,10 @@ import 'package:provider/provider.dart';
 
 import 'provider/langguages_provider.dart'; 
 import 'provider/theme_provider.dart';
-import 'screens/home_screen.dart';
-import 'screens/report_screen.dart';
-import 'screens/chat_bot.dart';
-import 'screens/setting_screenui.dart';
+import 'screens/main/home_screen.dart';
+import 'screens/main/report_screen.dart';
+import 'screens/main/chat_bot.dart';
+import 'screens/main/setting_screenui.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

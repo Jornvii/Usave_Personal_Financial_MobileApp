@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_bot/screens/saving_goal_screen.dart';
+import 'package:flutter_chat_bot/screens/sub/saving_goal_screen.dart';
 import 'package:flutter_chat_bot/widgets/add_currency.dart';
 import 'package:provider/provider.dart';
-import '../models/chat_db.dart';
-import '../models/transaction_db.dart';
-import '../provider/langguages_provider.dart';
-import '../provider/theme_provider.dart';
-import '../models/profile_db.dart';
-import '../widgets/lsit_summary.dart';
-import 'category_screen.dart';
+import '../../models/chat_db.dart';
+import '../../models/transaction_db.dart';
+import '../../provider/langguages_provider.dart';
+import '../../provider/theme_provider.dart';
+import '../../models/profile_db.dart';
+import '../../widgets/lsit_summary.dart';
+import '../sub/category_screen.dart';
 
 class Setting2Screen extends StatefulWidget {
   final List<Map<String, dynamic>> transactions;
