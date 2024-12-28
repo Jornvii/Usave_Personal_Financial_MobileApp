@@ -28,9 +28,9 @@ class TransactionDB {
         await db.execute('''
           CREATE TABLE transactions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            category TEXT NOT NULL,
+            category TEXT NOT NULL, -- Category of the typeCategory
             amount REAL NOT NULL,
-            typeCategory INTEGER NOT NULL,
+            typeCategory INTEGER NOT NULL,  -- Expense, Income,Saving
             description TEXT,
             date TEXT NOT NULL,
             deleted INTEGER DEFAULT 0 -- New column to mark deleted transactions
@@ -115,6 +115,15 @@ class TransactionDB {
       where: 'id = ?',
       whereArgs: [id],
     );
+  }
+  Future<double> getSavingAmountByCategory(String category) async {
+    final db = await database;
+    var result = await db.rawQuery(
+        'SELECT SUM(amount) as totalAmount FROM transactions WHERE typeCategory = 2 AND category = ? AND deleted = 0',
+        [category]);
+    return result.isNotEmpty && result.first['totalAmount'] != null
+        ? result.first['totalAmount'] as double
+        : 0.0;
   }
 
   Future<double> getTotalIncome() async {
