@@ -43,10 +43,6 @@ class _SavingDetailScreenState extends State<SavingDetailScreen> {
       savingTransactions = categoryTransactions;
       totalSavings = total; // Calculate total savings
     });
-
-    // Debugging output
-    debugPrint('Total Savings: $totalSavings');
-    debugPrint('Transactions: $savingTransactions');
   }
 
   Widget _buildHorizontalBar() {
@@ -54,18 +50,15 @@ class _SavingDetailScreenState extends State<SavingDetailScreen> {
         ? (totalSavings / widget.goalAmount!).clamp(0.0, 1.0)
         : 0.0;
 
-    // Debugging output for progress
-    debugPrint('Progress: ${progress * 100}%');
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'Savings Progress',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: Colors.black,
           ),
         ),
         const SizedBox(height: 8),
@@ -89,7 +82,12 @@ class _SavingDetailScreenState extends State<SavingDetailScreen> {
                   width: barWidth,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: progress >= 1.0 ? Colors.green : Colors.blueAccent,
+                    gradient: LinearGradient(
+                      colors: [
+                         const Color.fromARGB(255, 33, 243, 86).withOpacity(0.6),
+                        progress >= 1.0 ? const Color.fromARGB(255, 0, 252, 92) : const Color.fromARGB(255, 33, 243, 86),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -99,7 +97,7 @@ class _SavingDetailScreenState extends State<SavingDetailScreen> {
         const SizedBox(height: 8),
         Text(
           progress >= 1.0
-              ? 'Goal Achieved!'
+              ? '🎉 Goal Achieved!'
               : 'Progress: ${(progress * 100).toStringAsFixed(1)}%',
           style: TextStyle(
             fontSize: 16,
@@ -113,9 +111,14 @@ class _SavingDetailScreenState extends State<SavingDetailScreen> {
 
   Widget _buildSavingTransactionsList() {
     if (savingTransactions.isEmpty) {
-      return const Text(
-        'No transactions found for this saving category.',
-        style: TextStyle(color: Colors.grey),
+      return const Center(
+        child: Text(
+          'No Saving transactions ',
+          style: TextStyle(
+            color: Colors.grey,
+            fontSize: 16,
+          ),
+        ),
       );
     }
 
@@ -126,30 +129,33 @@ class _SavingDetailScreenState extends State<SavingDetailScreen> {
       itemBuilder: (context, index) {
         final transaction = savingTransactions[index];
         return Card(
-          elevation: 4,
+          elevation: 3,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           margin: const EdgeInsets.symmetric(vertical: 8),
-          child: InkWell(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    '${transaction['date']}',
-                    style: const TextStyle(
-                      color: Color.fromARGB(255, 77, 76, 76),
-                    ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  transaction['date'] ?? 'Unknown Date',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
                   ),
-                  Text(
-                    '\$${transaction['amount']?.toStringAsFixed(2) ?? '0.00'}',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
+                ),
+                Text(
+                  'Saved: \$${transaction['amount']?.toStringAsFixed(2) ?? '0.00'}',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
                   ),
-                ],
-              ),
+                ),
+               
+              ],
             ),
           ),
         );
@@ -161,12 +167,10 @@ class _SavingDetailScreenState extends State<SavingDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blueAccent,
         title: Text(
-          'Saving Details - ${widget.category}',
-          style: const TextStyle(fontSize: 20),
+          '${widget.category} Details',
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
         ),
-        elevation: 0,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -174,41 +178,52 @@ class _SavingDetailScreenState extends State<SavingDetailScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Category: ${widget.category}',
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 16),
+              // Goal Amount Section
               Text(
                 'Goal Amount: ${widget.goalAmount != null ? '\$${widget.goalAmount!.toStringAsFixed(2)}' : 'Not Set'}',
-                style: TextStyle(fontSize: 18, color: Colors.grey.shade700),
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.orange,
+                ),
               ),
               const SizedBox(height: 16),
 
-              // Horizontal Bar Chart for Savings Progress
+              // Horizontal Bar Chart
               _buildHorizontalBar(),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
 
-              // Total Transaction Saving Amount
-              Text(
-                'Total Savings: \$${totalSavings.toStringAsFixed(2)}',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+              // Total Savings Section
+              RichText(
+                text: TextSpan(
+                  text: 'Total Savings: ',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    color: Colors.black,
+                  ),
+                  children: [
+                    TextSpan(
+                      text: '\$${totalSavings.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.orange,
+                      ),
+                    ),
+                  ],
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const Divider(
+                color: Colors.grey,
+                thickness: 1.2,
+                height: 32,
+              ),
 
-              // List of transactions
+              // Transactions Section
               const Text(
-                'Saving Transactions:',
+                'Saving Transactions',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
