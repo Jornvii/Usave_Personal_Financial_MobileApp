@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import '../../models/category_db.dart';
 import '../../models/saving_goaldb.dart';
 import 'saving_detail.dart';
