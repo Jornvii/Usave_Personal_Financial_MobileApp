@@ -50,6 +50,14 @@ class _CurrencyScreenState extends State<CurrencyScreen> {
     );
   }
 
+  Future<void> _deleteCurrency(int id) async {
+    await _currencyDB.deleteCurrency(id); // Add this method in CurrencyDB
+    _loadCurrencies();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Currency deleted successfully')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -87,17 +95,67 @@ class _CurrencyScreenState extends State<CurrencyScreen> {
               itemBuilder: (context, index) {
                 final currency = currencies[index];
                 final isDefault = currency['isDefault'] == 1;
-                return ListTile(
-                  title: Text('${currency['name']} (${currency['symbol']})'),
-                  trailing: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isDefault
-                          ? Theme.of(context).primaryColor.withOpacity(0.5)
-                          : null,
+
+                return Dismissible(
+                  key: Key(currency['id'].toString()),
+                  direction: DismissDirection.endToStart,
+                  confirmDismiss: (direction) async {
+                    if (isDefault) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Cannot delete the default currency.'),
+                        ),
+                      );
+                      return false; // Prevent dismissal
+                    }
+
+                    // Show confirmation dialog
+                    final result = await showDialog<bool>(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: const Text('Delete Currency'),
+                          content: Text(
+                            'Are you sure you want to delete ${currency['name']} (${currency['symbol']})?',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(false),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(true),
+                              child: const Text('Delete',
+                                  style: TextStyle(color: Colors.red)),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+
+                    return result == true; // Delete only if user confirms
+                  },
+                  onDismissed: (direction) {
+                    _deleteCurrency(currency['id']);
+                  },
+                  background: Container(
+                    color: Colors.red,
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: const Icon(Icons.delete, color: Colors.white),
+                  ),
+                  child: ListTile(
+                    title: Text('${currency['name']} (${currency['symbol']})'),
+                    trailing: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: isDefault
+                            ? Theme.of(context).primaryColor.withOpacity(0.5)
+                            : null,
+                      ),
+                      onPressed: () => _setDefaultCurrency(
+                          currency['id'], currency['symbol']),
+                      child: Text(isDefault ? 'Default' : 'Set as Default'),
                     ),
-                    onPressed: () =>
-                        _setDefaultCurrency(currency['id'], currency['symbol']),
-                    child: Text(isDefault ? 'Default' : 'Set as Default'),
                   ),
                 );
               },

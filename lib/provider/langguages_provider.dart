@@ -119,10 +119,10 @@ class LanguageProvider with ChangeNotifier {
       'dark': 'Dark',
       'light': 'Light',
 
-      'delete_all': 'Delete Your Data',
+      'delete_all': 'Delete Data',
       'choose_delete_option': 'Please choose to delete',
 
-      'delete_data': 'Delete your data',
+      'delete_data': 'Delete data',
       'delete_data_subtitle': 'Delete your chat or all data',
       'edit_saving_goal': 'Edit Saving Goal',
       'delete_chat': 'Delete Chat Data',
@@ -325,7 +325,7 @@ class LanguageProvider with ChangeNotifier {
       'saving_goal': 'គោលដៅសន្សំ',
       'not_set': 'មិនបានកំណត់',
       'your_saving_goal': 'គោលដៅសន្សំរបស់អ្នក:',
-      'theme': 'ស្ប៉ាត',
+      'theme': 'ធីមកម្មវិធី',
       'dark': 'ងងឹត',
       'light': 'ភ្លឺ',
       'export_data': 'នាំចេញទិន្នន័យ',

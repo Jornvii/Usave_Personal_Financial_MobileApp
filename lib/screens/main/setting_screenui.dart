@@ -300,7 +300,7 @@ class _SettingScreenUiState extends State<SettingScreenUi> {
                         Colors.red),
                   ],
                 ),
-                const SizedBox(height: 15),
+                const SizedBox(height: 5),
                 const Divider(
                   height: 20.0,
                   thickness: 1 / 3,
@@ -308,13 +308,13 @@ class _SettingScreenUiState extends State<SettingScreenUi> {
                   indent: 25.0,
                   endIndent: 25.0,
                 ),
-                const SizedBox(height: 15),
+                const SizedBox(height: 5),
                 //  Grid Items
                 GridView.count(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   crossAxisCount: 2,
-                  childAspectRatio: 7/2,
+                  childAspectRatio: 6/2,
                   padding: const EdgeInsets.only(left: 8, right: 8),
                   children: [
                     _BuildSecMenuItem(
@@ -415,7 +415,7 @@ class _SettingScreenUiState extends State<SettingScreenUi> {
     Color secmenucolor,
   ) {
     return Card(
-      elevation: 5,
+      elevation: 2,
       shadowColor: Theme.of(context).primaryColor.withOpacity(0.4),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
@@ -450,7 +450,7 @@ class _SettingScreenUiState extends State<SettingScreenUi> {
     Color menuColor,
   ) {
     return Card(
-      elevation: 5,
+      elevation: 2,
       shadowColor: Theme.of(context).primaryColor.withOpacity(0.4),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),

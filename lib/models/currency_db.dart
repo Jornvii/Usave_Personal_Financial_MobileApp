@@ -61,6 +61,10 @@ class CurrencyDB {
     await dbClient.update('currencies', {'isDefault': 0});
     await dbClient.update('currencies', {'isDefault': 1}, where: 'id = ?', whereArgs: [id]);
   }
+Future<void> deleteCurrency(int id) async {
+  final dbClient = await db;
+  await dbClient.delete('currencies', where: 'id = ?', whereArgs: [id]);
+}
 
   Future<Map<String, dynamic>?> getDefaultCurrency() async {
     final dbClient = await db;
