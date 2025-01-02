@@ -20,6 +20,7 @@ class _SavingDetailScreenState extends State<SavingDetailScreen> {
   List<Map<String, dynamic>> savingTransactions = [];
   double totalSavings = 0.0;
   int savingPeriodDays = 0;
+  String savingPeriod = "0 days";
 
   @override
   void initState() {
@@ -42,19 +43,43 @@ class _SavingDetailScreenState extends State<SavingDetailScreen> {
         0.0, (sum, transaction) => sum + (transaction['amount'] ?? 0.0));
 
     // Calculate saving period from the first transaction date
-    int periodDays = 0;
+    String period = "0 days";
     if (categoryTransactions.isNotEmpty) {
       categoryTransactions.sort((a, b) =>
           DateTime.parse(a['date']).compareTo(DateTime.parse(b['date'])));
       final firstDate = DateTime.parse(categoryTransactions.first['date']);
       final today = DateTime.now();
-      periodDays = today.difference(firstDate).inDays;
+
+      int years = today.year - firstDate.year;
+      int months = today.month - firstDate.month;
+      int days = today.day - firstDate.day;
+
+      if (days < 0) {
+        months -= 1;
+        final previousMonth = DateTime(today.year, today.month, 0)
+            .day; // Last day of the previous month
+        days += previousMonth;
+      }
+      if (months < 0) {
+        years -= 1;
+        months += 12;
+      }
+
+      List<String> components = [];
+      if (years > 0) components.add("$years year${years > 1 ? 's' : ''}");
+      if (months > 0) components.add("$months month${months > 1 ? 's' : ''}");
+      if (days > 0 || components.isEmpty) {
+        // Include days if it's the only component
+        components.add("$days day${days > 1 ? 's' : ''}");
+      }
+
+      period = components.join(" ");
     }
 
     setState(() {
       savingTransactions = categoryTransactions;
       totalSavings = total;
-      savingPeriodDays = periodDays;
+      savingPeriod = period;
     });
   }
 
@@ -64,7 +89,7 @@ class _SavingDetailScreenState extends State<SavingDetailScreen> {
         : 0.0;
 
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      // mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         Stack(
           alignment: Alignment.center,
@@ -75,20 +100,20 @@ class _SavingDetailScreenState extends State<SavingDetailScreen> {
               child: PieChart(
                 PieChartData(
                   sectionsSpace: 2,
-                  centerSpaceRadius: 75,
+                  centerSpaceRadius: 65,
                   startDegreeOffset: -90,
                   sections: [
                     PieChartSectionData(
                       value: progress * 100,
-                      color: const Color.fromARGB(255, 42, 221, 48)
-                          .withOpacity(.9),
-                      radius: 18,
+                      color: Colors.orange,
+                      // color: const Color.fromARGB(255, 42, 221, 48).withOpacity(.9),
+                      radius: 15,
                       showTitle: false,
                     ),
                     PieChartSectionData(
                       value: (1 - progress) * 100,
                       color: Colors.grey.shade300,
-                      radius: 18,
+                      radius: 15,
                       showTitle: false,
                     ),
                   ],
@@ -101,7 +126,7 @@ class _SavingDetailScreenState extends State<SavingDetailScreen> {
                 Text(
                   '${(progress * 100).toStringAsFixed(0)}%',
                   style: const TextStyle(
-                    fontSize: 45,
+                    fontSize: 40,
                     color: Colors.lightBlue,
                     fontWeight: FontWeight.bold,
                   ),
@@ -110,7 +135,7 @@ class _SavingDetailScreenState extends State<SavingDetailScreen> {
                 Text(
                   '\$ ${totalSavings.toStringAsFixed(2)}',
                   style: const TextStyle(
-                    fontSize: 12,
+                    fontSize: 10,
                     color: Colors.grey,
                   ),
                 ),
@@ -118,40 +143,42 @@ class _SavingDetailScreenState extends State<SavingDetailScreen> {
             ),
           ],
         ),
-        Container(
-          width: 150,
-          height: 120,
-          decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 74, 254, 80).withOpacity(0.4),
-            borderRadius: BorderRadius.circular(30),
+        Card(
+          elevation: 3,
+          shadowColor: Theme.of(context).primaryColor.withOpacity(0.4),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+            side: BorderSide(
+              color: Theme.of(context).primaryColor.withOpacity(0.8),
+              width: 0.1,
+            ),
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'Saving Period',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.all(9),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    'Saving Period',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    savingPeriod,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.lightBlue,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
-              Text(
-                '$savingPeriodDays',
-                style: const TextStyle(
-                  fontSize: 24,
-                  color: Colors.lightBlue,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const Text(
-                'days',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ],
@@ -170,7 +197,7 @@ class _SavingDetailScreenState extends State<SavingDetailScreen> {
         ),
       );
     }
-    
+
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -207,7 +234,6 @@ class _SavingDetailScreenState extends State<SavingDetailScreen> {
       },
     );
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -221,9 +247,10 @@ class _SavingDetailScreenState extends State<SavingDetailScreen> {
               Center(
                 child: Text(
                   '${widget.category} ',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
+                    color: Colors.orange.withOpacity(0.8),
                   ),
                 ),
               ),
@@ -235,8 +262,13 @@ class _SavingDetailScreenState extends State<SavingDetailScreen> {
                 width: double.infinity,
                 decoration: BoxDecoration(
                   color:
-                      const Color.fromARGB(255, 18, 243, 26).withOpacity(0.3),
+                      const Color.fromARGB(255, 18, 243, 26).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(15),
+                  border: Border.all(
+                    color:
+                        const Color.fromARGB(255, 18, 243, 26).withOpacity(0.8),
+                    width: 0.5,
+                  ),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(15),

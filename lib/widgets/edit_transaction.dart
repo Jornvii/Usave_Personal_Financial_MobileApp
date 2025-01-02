@@ -31,23 +31,13 @@ class _UpdateTransactionScreenState extends State<UpdateTransactionScreen> {
     'Salary',
   ];
   final List<String> defaultExpenseCategories = [
-    'Miscellaneous',
-    'Childcare',
-    'Business Expense',
-    'Travel',
-    'Taxes',
+    'Food and Drinks',
     'Gifts and Donations',
-    'Personal Care',
-    'Education',
-    'Insurances',
-    'Healthcare',
     'Transportation',
   ];
   final List<String> defaultSavingCategories = [
     'Emergency Fund',
-    'Retirement',
     'Investments',
-    'Vacation Fund',
   ];
 
   @override

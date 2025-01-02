@@ -33,16 +33,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     'Salary',
   ];
   final List<String> defaultExpenseCategories = [
-    'Miscellaneous',
-    'Childcare',
-    'Business Expense',
-    'Travel',
-    'Taxes',
+    'Food and Drinks',
     'Gifts and Donations',
-    'Personal Care',
-    'Education',
-    'Insurances',
-    'Healthcare',
     'Transportation',
   ];
   final List<String> defaultSavingCategories = [

@@ -348,8 +348,7 @@ class _SavingGoalScreenState extends State<SavingGoalScreen> {
                                             style: TextStyle(
                                               color: (goalAmount != null &&
                                                       goalAmount > 0)
-                                                  ? const Color.fromARGB(
-                                                      255, 204, 135, 7)
+                                                  ? Colors.orange
                                                   : Colors.grey,
                                               fontSize: (goalAmount != null &&
                                                       goalAmount > 0)

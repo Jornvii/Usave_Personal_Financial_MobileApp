@@ -20,16 +20,8 @@ class _CategoryScreenState extends State<CategoryScreen> {
     'Investments',
   ];
   final List<String> defaultExpenseCategories = [
-    'Miscellaneous',
-    'Childcare',
-    'Business Expense',
-    'Travel',
-    'Taxes',
+    'Food and Drinks',
     'Gifts and Donations',
-    'Personal Care',
-    'Education',
-    'Insurances',
-    'Healthcare',
     'Transportation',
   ];
 
