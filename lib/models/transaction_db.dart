@@ -33,7 +33,7 @@ class TransactionDB {
             typeCategory INTEGER NOT NULL,  -- Expense, Income,Saving
             description TEXT,
             date TEXT NOT NULL,
-            deleted INTEGER DEFAULT 0 -- New column to mark deleted transactions
+            deleted INTEGER DEFAULT 0 -- New column to mark deleted transactions  
           )
         ''');
       },
@@ -41,7 +41,7 @@ class TransactionDB {
         if (oldVersion < 2) {
           // Handle the migration by adding the 'deleted' column if upgrading from version 1 to 2
           await db.execute('ALTER TABLE transactions ADD COLUMN deleted INTEGER DEFAULT 0');
-        }
+        } 
       },
     );
   }

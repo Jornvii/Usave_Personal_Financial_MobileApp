@@ -28,6 +28,124 @@ class _SavingDetailScreenState extends State<SavingDetailScreen> {
     _fetchSavingDetails();
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Text(
+                  '${widget.category} ',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.orange.withOpacity(0.8),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 15),
+              _buildDonutChart(),
+              const SizedBox(height: 15),
+              Container(
+                height: 90,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color:
+                      const Color.fromARGB(255, 18, 243, 26).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(15),
+                  border: Border.all(
+                    color:
+                        const Color.fromARGB(255, 18, 243, 26).withOpacity(0.8),
+                    width: 0.5,
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(15),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Column(
+                        children: [
+                          Text(
+                            'Saving Total',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey.withOpacity(0.7),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            '\$ ${totalSavings.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.lightBlue,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 50,
+                        child: VerticalDivider(
+                          color: Colors.grey,
+                          thickness: 1.2,
+                        ),
+                      ),
+                      Column(
+                        children: [
+                          Text(
+                            'Goal Amount',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey.withOpacity(0.7),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            widget.goalAmount != null
+                                ? '\$ ${widget.goalAmount!.toStringAsFixed(2)}'
+                                : 'Not Set',
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.lightBlue,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              const Divider(
+                color: Colors.grey,
+                thickness: 1.2,
+                height: 32,
+              ),
+              const Text(
+                'Transactions',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              _buildSavingTransactionsList(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _fetchSavingDetails() async {
     final transactionDB = TransactionDB();
 
@@ -105,8 +223,9 @@ class _SavingDetailScreenState extends State<SavingDetailScreen> {
                   sections: [
                     PieChartSectionData(
                       value: progress * 100,
-                      color: Colors.orange,
-                      // color: const Color.fromARGB(255, 42, 221, 48).withOpacity(.9),
+                      // color: Colors.orange,
+                      color: const Color.fromARGB(255, 42, 221, 48)
+                          .withOpacity(.9),
                       radius: 15,
                       showTitle: false,
                     ),
@@ -232,123 +351,6 @@ class _SavingDetailScreenState extends State<SavingDetailScreen> {
           ),
         );
       },
-    );
-  }
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Text(
-                  '${widget.category} ',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.orange.withOpacity(0.8),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 15),
-              _buildDonutChart(),
-              const SizedBox(height: 15),
-              Container(
-                height: 90,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color:
-                      const Color.fromARGB(255, 18, 243, 26).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(15),
-                  border: Border.all(
-                    color:
-                        const Color.fromARGB(255, 18, 243, 26).withOpacity(0.8),
-                    width: 0.5,
-                  ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(15),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Column(
-                        children: [
-                          Text(
-                            'Saving Total',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.grey.withOpacity(0.7),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          Text(
-                            '\$ ${totalSavings.toStringAsFixed(2)}',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.lightBlue,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 50,
-                        child: VerticalDivider(
-                          color: Colors.grey,
-                          thickness: 1.2,
-                        ),
-                      ),
-                      Column(
-                        children: [
-                          Text(
-                            'Goal Amount',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.grey.withOpacity(0.7),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          Text(
-                            widget.goalAmount != null
-                                ? '\$ ${widget.goalAmount!.toStringAsFixed(2)}'
-                                : 'Not Set',
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.lightBlue,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              const Divider(
-                color: Colors.grey,
-                thickness: 1.2,
-                height: 32,
-              ),
-              const Text(
-                'Transactions',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              _buildSavingTransactionsList(),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

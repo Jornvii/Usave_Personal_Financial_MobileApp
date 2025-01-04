@@ -217,7 +217,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         child: Container(
                           decoration: BoxDecoration(
                             color: typeCategory == 'Saving'
-                                ? const Color.fromARGB(255, 255, 215, 0)
+                                ? const Color.fromARGB(255, 255, 160, 18)
                                 : Colors.grey[200],
                             borderRadius: BorderRadius.circular(8),
                           ),
