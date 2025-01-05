@@ -123,7 +123,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                 title: 'Saving Categories',
                 categories: defaultSavingCayegories,
                 newCategories: savingCategories,
-                color: Colors.yellow,
+                color: Colors.orange,
                 type: 'Saving',
               ),
             ],
@@ -147,7 +147,17 @@ class _CategoryScreenState extends State<CategoryScreen> {
   }) {
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: type == 'Income'
+              ? Colors.green
+              : type == 'Expense'
+                  ? Colors.red
+                  : Colors.orange,
+          width: 0.5,
+        ),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -177,10 +187,18 @@ class _CategoryScreenState extends State<CategoryScreen> {
             Column(
               children: [
                 ...categories.map((category) => Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      padding: EdgeInsets.symmetric(vertical: 8.0),
                       child: Row(
                         children: [
-                          const Icon(Icons.circle, size: 8, color: Colors.grey),
+                          Icon(
+                            Icons.circle,
+                            size: 8,
+                            color: type == 'Income'
+                                ? Colors.green
+                                : type == 'Expense'
+                                    ? Colors.red
+                                    : Colors.orange,
+                          ),
                           const SizedBox(width: 12),
                           Text(
                             category,
@@ -223,13 +241,20 @@ class _CategoryScreenState extends State<CategoryScreen> {
                         color: Colors.red,
                         alignment: Alignment.centerRight,
                         child: const Padding(
-                          padding: EdgeInsets.all(8.0),
+                          padding: EdgeInsets.all(8),
                           child: Icon(Icons.delete, color: Colors.white),
                         ),
                       ),
                       child: ListTile(
-                        leading: const Icon(Icons.circle,
-                            size: 8, color: Colors.grey),
+                        leading: Icon(
+                          Icons.circle,
+                          size: 8,
+                          color: category['type'] == 'Income'
+                              ? Colors.green
+                              : category['type'] == 'Expense'
+                                  ? Colors.red
+                                  : Colors.orange,
+                        ),
                         title: Text(category['name']),
                         trailing: IconButton(
                           icon: const Icon(Icons.edit),
@@ -278,8 +303,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    filled: true,
-                    // fillColor: Colors.grey[100],
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -290,8 +313,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    filled: true,
-                    // fillColor: Colors.grey[100],
                   ),
                   items: ['Income', 'Expense', 'Saving']
                       .map((type) => DropdownMenuItem<String>(
@@ -318,13 +339,43 @@ class _CategoryScreenState extends State<CategoryScreen> {
                     ElevatedButton(
                       onPressed: () async {
                         final newCategory = categoryController.text.trim();
+
                         if (newCategory.isNotEmpty) {
-                          await CategoryDB().insertCategory({
-                            'name': newCategory,
-                            'type': selectedType,
-                          });
-                          _loadCategories();
-                          Navigator.pop(context);
+                          // Check for duplicates
+                          final existingCategories = await CategoryDB()
+                              .fetchCategoriesByType(selectedType);
+                          final isDuplicate = existingCategories.any(
+                            (category) =>
+                                category['name'].toLowerCase() ==
+                                newCategory.toLowerCase(),
+                          );
+
+                          if (isDuplicate) {
+                            // Show alert if duplicate
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text('Category Exists'),
+                                content: const Text(
+                                    'This category already exists in the selected type.'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(),
+                                    child: const Text('OK'),
+                                  ),
+                                ],
+                              ),
+                            );
+                          } else {
+                            // Add the category if no duplicate
+                            await CategoryDB().insertCategory({
+                              'name': newCategory,
+                              'type': selectedType,
+                            });
+                            _loadCategories();
+                            Navigator.pop(context);
+                          }
                         }
                       },
                       style: ElevatedButton.styleFrom(

@@ -76,4 +76,15 @@ Future<void> deleteCurrency(int id) async {
     );
     return result.isNotEmpty ? result.first : null;
   }
+  Future<bool> isCurrencyExist(String name, String symbol) async {
+  final dbClient = await db;
+  final result = await dbClient.query(
+    'currencies',
+    where: 'name = ? COLLATE NOCASE OR symbol = ?',
+    whereArgs: [name, symbol],
+  );
+  return result.isNotEmpty;
+}
+
+
 }

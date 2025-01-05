@@ -27,20 +27,65 @@ class _CurrencyScreenState extends State<CurrencyScreen> {
     });
   }
 
-  Future<void> _addCurrency() async {
-    final name = _nameController.text;
-    final symbol = _symbolController.text;
+  // Future<void> _addCurrency() async {
+  //   final name = _nameController.text;
+  //   final symbol = _symbolController.text;
 
-    if (name.isNotEmpty && symbol.isNotEmpty) {
-      await _currencyDB.insertCurrency(name, symbol);
-      _nameController.clear();
-      _symbolController.clear();
-      _loadCurrencies();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Currency added successfully')),
-      );
-    }
+  //   if (name.isNotEmpty && symbol.isNotEmpty) {
+  //     await _currencyDB.insertCurrency(name, symbol);
+  //     _nameController.clear();
+  //     _symbolController.clear();
+  //     _loadCurrencies();
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text('Currency added successfully')),
+  //     );
+  //   }
+  // }
+
+
+  // Add this method to handle adding currencies incase of duplicates and empty fields
+ Future<void> _addCurrency() async {
+  final name = _nameController.text.trim();
+  final symbol = _symbolController.text.trim();
+
+  if (name.isEmpty || symbol.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Please fill in both fields.')),
+    );
+    return;
   }
+
+  // Check for duplicates in SQLite
+  final exists = await _currencyDB.isCurrencyExist(name, symbol);
+  if (exists) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Duplicate Currency'),
+        content: const Text(
+          'A currency with the same name or symbol already exists.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+    return;
+  }
+
+  // Insert the currency if no duplicates
+  await _currencyDB.insertCurrency(name, symbol);
+  _nameController.clear();
+  _symbolController.clear();
+  _loadCurrencies();
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text('Currency added successfully')),
+  );
+}
+
 
   Future<void> _setDefaultCurrency(int id, String symbol) async {
     await _currencyDB.setDefaultCurrency(id);
