@@ -33,62 +33,43 @@ class _NotificationScreenState extends State<NotificationScreen> {
       // Fetch transactions from the database
       final transactions = await transactionDB.getTransactions();
 
-      // Group transactions by type and category
-      Map<String, Map<String, List<Map<String, dynamic>>>> groupedTransactions =
-          {
-        'Income': {},
-        'Expense': {},
-        'Saving': {},
-      };
-
-      for (var transaction in transactions) {
-        final type = transaction['typeCategory'];
-        final category = transaction['category'];
-
-        if (!groupedTransactions.containsKey(type)) {
-          groupedTransactions[type] = {};
-        }
-        if (!groupedTransactions[type]!.containsKey(category)) {
-          groupedTransactions[type]![category] = [];
-        }
-        groupedTransactions[type]![category]?.add(transaction);
-      }
-
-      // Filter and calculate totals
+      // Group and calculate totals
       double totalIncome = 0.0;
       double totalExpenses = 0.0;
       double totalSaving = 0.0;
 
-      for (var type in groupedTransactions.keys) {
-        groupedTransactions[type]?.forEach((category, transactions) {
-          double categoryTotal = transactions.fold(
-            0.0,
-            (sum, transaction) => sum + transaction['amount'],
-          );
+      Map<String, double> categoryExpenses = {};
 
-          if (type == 'Income') {
-            totalIncome += categoryTotal;
-          } else if (type == 'Expense') {
-            totalExpenses += categoryTotal;
-          } else if (type == 'Saving') {
-            totalSaving += categoryTotal;
-          }
-        });
+      for (var transaction in transactions) {
+        final type = transaction['typeCategory'];
+        final amount = transaction['amount'] as double;
+        final category = transaction['category'] ?? "Uncategorized";
+
+        if (type == 'Income') {
+          totalIncome += amount;
+        } else if (type == 'Expense') {
+          totalExpenses += amount;
+          categoryExpenses[category] =
+              (categoryExpenses[category] ?? 0) + amount;
+        } else if (type == 'Saving') {
+          totalSaving += amount;
+        }
       }
 
       double balance = totalIncome - totalExpenses;
 
-      // Generate a prompt for Gemini API
+      // Generate prompt for Gemini
       String prompt = """
-      Analyze the following financial data and generate short, actionable notifications for each type of transaction:
+      Analyze this financial data and generate a short notification:
       - Total Income: \$${totalIncome.toStringAsFixed(2)}
       - Total Expenses: \$${totalExpenses.toStringAsFixed(2)}
       - Total Saving: \$${totalSaving.toStringAsFixed(2)}
       - Balance: \$${balance.toStringAsFixed(2)}
-      Provide insights for each category (e.g., "Entertainment Expenses: \$200 this month, consider cutting down.") if totals are significant.
+      Key Expense Categories: ${categoryExpenses.entries.map((e) => '${e.key}: \$${e.value.toStringAsFixed(2)}').join(', ')}
+      Provide a concise alert based on the data, no longer than one sentence.
     """;
 
-      // Fetch response from the Gemini API
+      // Fetch response from Gemini API
       final response = await gemini.generateFromText(prompt);
       String notificationText = response.text.trim();
 
@@ -98,7 +79,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
         notifications.add({"message": notificationText, "time": time});
       });
     } catch (e) {
-      _showErrorDialog(e.toString());
+      _showErrorDialog("Error fetching transactions: $e");
     } finally {
       setState(() {
         loading = false;
