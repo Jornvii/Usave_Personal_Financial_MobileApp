@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_bot/screens/splash_screen.dart';
 import 'package:provider/provider.dart';
-
-import 'provider/langguages_provider.dart'; 
+import 'provider/langguages_provider.dart';
 import 'provider/theme_provider.dart';
 import 'screens/main/home_screen.dart';
 import 'screens/main/report_screen.dart';
@@ -12,19 +10,17 @@ import 'screens/main/setting_screenui.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-
   final themeProvider = ThemeProvider();
   await themeProvider.loadTheme();
-  
+
   final languageProvider = LanguageProvider();
-  await languageProvider.loadLanguage(); 
+  await languageProvider.loadLanguage();
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => themeProvider),
-        ChangeNotifierProvider(
-            create: (_) => languageProvider),
+        ChangeNotifierProvider(create: (_) => languageProvider),
       ],
       child: const MyApp(),
     ),
@@ -45,15 +41,14 @@ class MyApp extends StatelessWidget {
       theme: themeProvider.lightTheme,
       darkTheme: themeProvider.darkTheme,
       themeMode: themeProvider.isDarkTheme ? ThemeMode.dark : ThemeMode.light,
-      home:   const SplashScreen(),
+      home: const MainScreen(),
       // home:  const SettingUi(transactions: [],),
-      // home: const LineChartSample10(),
-      localizationsDelegates: const [], 
+      localizationsDelegates: const [],
       supportedLocales: const [
         Locale('en'),
         Locale('th'),
         Locale('km')
-      ], // Add more as needed
+      ], 
       locale: Locale(languageProvider.selectedLanguage.toLowerCase()),
     );
   }
@@ -71,9 +66,11 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _screens = [
     const MyHomePage(),
-     const ReportScreen(),
+    const ReportScreen(),
     const ChatBotScreen(),
-    const SettingScreenUi(transactions: [],),
+    const SettingScreenUi(
+      transactions: [],
+    ),
   ];
 
   @override
@@ -90,20 +87,19 @@ class _MainScreenState extends State<MainScreen> {
           });
         },
         backgroundColor: Theme.of(context).brightness == Brightness.dark
-            ? Colors.grey[850] 
-            : Colors.white, 
-            
-        selectedItemColor: const Color.fromARGB(255, 52, 214, 136), 
-        unselectedItemColor: Colors.grey, 
-        showSelectedLabels: true, 
-        showUnselectedLabels: true, 
-        selectedFontSize: 14, 
+            ? Colors.grey[850]
+            : Colors.white,
+        selectedItemColor: const Color.fromARGB(255, 52, 214, 136),
+        unselectedItemColor: Colors.grey,
+        showSelectedLabels: true,
+        showUnselectedLabels: true,
+        selectedFontSize: 14,
         unselectedFontSize: 12,
         type: BottomNavigationBarType.fixed,
         items: [
           BottomNavigationBarItem(
             icon: const Icon(Icons.home),
-            label: languageProvider.translate('home'), 
+            label: languageProvider.translate('home'),
           ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.bar_chart),

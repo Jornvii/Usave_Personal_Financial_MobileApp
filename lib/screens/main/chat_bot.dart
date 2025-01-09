@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_gemini/google_gemini.dart';
 
-const apiKey = "AIzaSyDISHUkyGSIRJjt5pb9uGICZpFQbB9o6DA";
+// google_gemini: ^0.1.2  google gimini api key
+const apiKey = "AIzaSyDu8b8nBCg5ZzH0WNEGsLLn_Rb4oZYabVI";
 
 class ChatBotScreen extends StatefulWidget {
   const ChatBotScreen({super.key});

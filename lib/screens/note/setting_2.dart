@@ -7,7 +7,7 @@ import '../../models/transaction_db.dart';
 import '../../provider/langguages_provider.dart';
 import '../../provider/theme_provider.dart';
 import '../../models/profile_db.dart';
-import '../../widgets/lsit_summary.dart';
+import '../../widgets/summary_category.dart';
 import '../sub/category_screen.dart';
 
 class Setting2Screen extends StatefulWidget {

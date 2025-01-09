@@ -8,7 +8,7 @@ import '../../models/chat_db.dart';
 import '../../models/transaction_db.dart';
 import '../../provider/langguages_provider.dart';
 import '../../models/profile_db.dart';
-import '../../widgets/lsit_summary.dart';
+import '../../widgets/summary_category.dart';
 import '../../widgets/table_transactions.dart';
 import '../sub/category_screen.dart';
 import '../sub/dev_pf.dart';

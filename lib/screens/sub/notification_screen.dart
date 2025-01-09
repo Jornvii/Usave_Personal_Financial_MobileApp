@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:google_gemini/google_gemini.dart';
 import 'package:intl/intl.dart';
-import '../../models/saving_goaldb.dart';
-import '../../models/transaction_db.dart'; // Your transaction database model
+import '../../models/transaction_db.dart';
+
+const apiKey = "AIzaSyDu8b8nBCg5ZzH0WNEGsLLn_Rb4oZYabVI";
 
 class NotificationScreen extends StatefulWidget {
-  const NotificationScreen({super.key});
+  const NotificationScreen({Key? key}) : super(key: key);
 
   @override
   _NotificationScreenState createState() => _NotificationScreenState();
@@ -13,50 +15,87 @@ class NotificationScreen extends StatefulWidget {
 class _NotificationScreenState extends State<NotificationScreen> {
   bool loading = false;
   List<Map<String, String>> notifications = [];
+  final GoogleGemini gemini = GoogleGemini(apiKey: apiKey);
+  final TransactionDB transactionDB = TransactionDB();
 
   @override
   void initState() {
     super.initState();
+    _generateNotification();
   }
 
-  /// Function to generate financial notifications
-  Future<void> _generateFinancialNotification() async {
+  Future<void> _generateNotification() async {
     setState(() {
       loading = true;
     });
 
     try {
-      // Fetch income, expenses, and saving goals
-      double income = await TransactionDB().getTotalIncome();
-      double expenses = await TransactionDB().getTotalExpenses();
+      // Fetch transactions from the database
+      final transactions = await transactionDB.getTransactions();
 
-      // Fetch all saving goals
-      final savingGoals = await SavingGoalDB().fetchSavingGoals();
+      // Group transactions by type and category
+      Map<String, Map<String, List<Map<String, dynamic>>>> groupedTransactions =
+          {
+        'Income': {},
+        'Expense': {},
+        'Saving': {},
+      };
 
-      if (savingGoals.isEmpty) {
-        _showNoSavingGoalsDialog();
-        setState(() {
-          loading = false;
-        });
-        return;
+      for (var transaction in transactions) {
+        final type = transaction['typeCategory'];
+        final category = transaction['category'];
+
+        if (!groupedTransactions.containsKey(type)) {
+          groupedTransactions[type] = {};
+        }
+        if (!groupedTransactions[type]!.containsKey(category)) {
+          groupedTransactions[type]![category] = [];
+        }
+        groupedTransactions[type]![category]?.add(transaction);
       }
 
-      // Calculate the first goal amount as an example (expand as needed)
-      double savingsGoal = savingGoals[0]['goalAmount'] ?? 0.0;
-      double savingsProgress = income - expenses;
+      // Filter and calculate totals
+      double totalIncome = 0.0;
+      double totalExpenses = 0.0;
+      double totalSaving = 0.0;
 
-      // Generate advice
-      String message =
-          _generateAdvice(income, expenses, savingsGoal, savingsProgress);
+      for (var type in groupedTransactions.keys) {
+        groupedTransactions[type]?.forEach((category, transactions) {
+          double categoryTotal = transactions.fold(
+            0.0,
+            (sum, transaction) => sum + transaction['amount'],
+          );
 
-      // Get the current time formatted as "hour:minute AM/PM"
-      String time = _formatCurrentTime();
-
-      setState(() {
-        notifications.add({
-          "message": message,
-          "time": time,
+          if (type == 'Income') {
+            totalIncome += categoryTotal;
+          } else if (type == 'Expense') {
+            totalExpenses += categoryTotal;
+          } else if (type == 'Saving') {
+            totalSaving += categoryTotal;
+          }
         });
+      }
+
+      double balance = totalIncome - totalExpenses;
+
+      // Generate a prompt for Gemini API
+      String prompt = """
+      Analyze the following financial data and generate short, actionable notifications for each type of transaction:
+      - Total Income: \$${totalIncome.toStringAsFixed(2)}
+      - Total Expenses: \$${totalExpenses.toStringAsFixed(2)}
+      - Total Saving: \$${totalSaving.toStringAsFixed(2)}
+      - Balance: \$${balance.toStringAsFixed(2)}
+      Provide insights for each category (e.g., "Entertainment Expenses: \$200 this month, consider cutting down.") if totals are significant.
+    """;
+
+      // Fetch response from the Gemini API
+      final response = await gemini.generateFromText(prompt);
+      String notificationText = response.text.trim();
+
+      // Save the notification with a timestamp
+      String time = _formatCurrentTime();
+      setState(() {
+        notifications.add({"message": notificationText, "time": time});
       });
     } catch (e) {
       _showErrorDialog(e.toString());
@@ -67,101 +106,30 @@ class _NotificationScreenState extends State<NotificationScreen> {
     }
   }
 
-  /// Generates financial advice based on calculations
-  String _generateAdvice(
-      double income, double expenses, double savingsGoal, double savingsProgress) {
-    if (savingsGoal <= 0) {
-      return "Your saving goal is not properly set. Please update your saving goals.";
-    }
-
-
-    if (savingsProgress < savingsGoal) {
-      return "Based on your income of \$${income.toStringAsFixed(2)}, expenses of \$${expenses.toStringAsFixed(2)}, and a savings goal of \$${savingsGoal.toStringAsFixed(2)}, you're saving \$${savingsProgress.toStringAsFixed(2)}. Consider cutting discretionary expenses by 10% to reach your goal faster.";
-    } else {
-      return "Great job! You've saved \$${savingsProgress.toStringAsFixed(2)} towards your goal of \$${savingsGoal.toStringAsFixed(2)}. Keep up the great work!";
-    }
-  }
-
-  /// Format the current time to "hour:minute AM/PM"
   String _formatCurrentTime() {
     final DateFormat timeFormat = DateFormat.jm();
     return timeFormat.format(DateTime.now());
   }
 
-  /// Delete a notification
   void _deleteNotification(int index) {
     setState(() {
       notifications.removeAt(index);
     });
   }
 
-  /// Show a dialog for deleting a notification
-  void _showDeleteDialog(BuildContext context, int index) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Delete Notification"),
-          content:
-              const Text("Are you sure you want to delete this notification?"),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text("Cancel"),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _deleteNotification(index);
-              },
-              child: const Text("Delete"),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  /// Show a dialog if no saving goals are available
-  void _showNoSavingGoalsDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("No Saving Goals"),
-          content: const Text(
-              "You haven't set any saving goals yet. Please set at least one saving goal to generate notifications."),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text("Okay"),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  /// Show an error dialog if something goes wrong
   void _showErrorDialog(String error) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Error"),
-          content: Text(error),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text("Okay"),
-            ),
-          ],
-        );
-      },
+      builder: (context) => AlertDialog(
+        title: const Text("Error"),
+        content: Text(error),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("Okay"),
+          ),
+        ],
+      ),
     );
   }
 
@@ -169,7 +137,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Financial Notifications"),
+        title: const Text("Notifications"),
         elevation: 4,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -183,7 +151,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: ElevatedButton(
-                  onPressed: _generateFinancialNotification,
+                  onPressed: _generateNotification,
                   child: const Text("Generate Notification"),
                 ),
               ),
@@ -196,7 +164,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       key: UniqueKey(),
                       direction: DismissDirection.endToStart,
                       confirmDismiss: (direction) async {
-                        _showDeleteDialog(context, index);
+                        _deleteNotification(index);
                         return false;
                       },
                       background: Container(
@@ -225,12 +193,12 @@ class _NotificationScreenState extends State<NotificationScreen> {
   }
 }
 
-/// NotificationCard Widget
 class NotificationCard extends StatelessWidget {
   final String message;
   final String time;
 
-  const NotificationCard({super.key, required this.message, required this.time});
+  const NotificationCard({Key? key, required this.message, required this.time})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -240,13 +208,19 @@ class NotificationCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(message, style: const TextStyle(fontSize: 16)),
-            const SizedBox(height: 10),
-            Text(time,
-                style: const TextStyle(fontSize: 12, color: Colors.grey)),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(fontSize: 16),
+              ),
+            ),
+            Text(
+              time,
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
+            ),
           ],
         ),
       ),

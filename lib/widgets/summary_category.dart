@@ -17,7 +17,7 @@ class _ListSummaryScreenState extends State<ListSummaryScreen> {
   DateTime selectedEndDate =
       DateTime(DateTime.now().year, DateTime.now().month + 1, 0);
   List<Map<String, dynamic>> transactions = [];
-  String currencySymbol = '\$'; 
+  String currencySymbol = '\$';
 
   @override
   void initState() {
@@ -152,11 +152,20 @@ class _ListSummaryScreenState extends State<ListSummaryScreen> {
   // Method to build a summary block for each category
   Widget _buildCategorySummary(
       String type, Map<String, List<Map<String, dynamic>>> categories) {
+    // Calculate total amount and filter out categories with total amount = 0
     double totalAmount = 0;
-    categories.forEach((category, transactions) {
-      totalAmount += transactions.fold(
-          0.0, (sum, transaction) => sum + transaction['amount']);
-    });
+    final filteredCategories = categories.entries.where((categoryEntry) {
+      final categoryTotal = categoryEntry.value
+          .fold(0.0, (sum, transaction) => sum + transaction['amount']);
+      if (categoryTotal > 0) {
+        totalAmount += categoryTotal;
+        return true;
+      }
+      return false;
+    }).toList();
+
+    // Skip rendering if no valid categories
+    if (filteredCategories.isEmpty) return const SizedBox.shrink();
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -206,7 +215,7 @@ class _ListSummaryScreenState extends State<ListSummaryScreen> {
                 ],
               ),
               const SizedBox(height: 10),
-              ...categories.entries.map((categoryEntry) {
+              ...filteredCategories.map((categoryEntry) {
                 final category = categoryEntry.key;
                 final categoryTransactions = categoryEntry.value;
                 double categoryTotal = categoryTransactions.fold(
