@@ -6,7 +6,7 @@ import '../../models/transaction_db.dart';
 const apiKey = "AIzaSyDu8b8nBCg5ZzH0WNEGsLLn_Rb4oZYabVI";
 
 class NotificationScreen extends StatefulWidget {
-  const NotificationScreen({Key? key}) : super(key: key);
+  const NotificationScreen({super.key});
 
   @override
   _NotificationScreenState createState() => _NotificationScreenState();
@@ -60,13 +60,13 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
       // Generate prompt for Gemini
       String prompt = """
-      Analyze this financial data and generate a short notification:
+      Analyze my financial data and generate a short notification:
       - Total Income: \$${totalIncome.toStringAsFixed(2)}
       - Total Expenses: \$${totalExpenses.toStringAsFixed(2)}
       - Total Saving: \$${totalSaving.toStringAsFixed(2)}
       - Balance: \$${balance.toStringAsFixed(2)}
       Key Expense Categories: ${categoryExpenses.entries.map((e) => '${e.key}: \$${e.value.toStringAsFixed(2)}').join(', ')}
-      Provide a concise alert based on the data, no longer than one sentence.
+      Provide a concise alert based on the data or with a sentence alert me better financial like a quote or sth, generate in short not too long.
     """;
 
       // Fetch response from Gemini API
@@ -178,8 +178,7 @@ class NotificationCard extends StatelessWidget {
   final String message;
   final String time;
 
-  const NotificationCard({Key? key, required this.message, required this.time})
-      : super(key: key);
+  const NotificationCard({super.key, required this.message, required this.time});
 
   @override
   Widget build(BuildContext context) {
@@ -193,9 +192,8 @@ class NotificationCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Expanded(
-              child: Text(
-                message,
-                style: const TextStyle(fontSize: 16),
+              child: RichText(
+                text: _formatText(message),
               ),
             ),
             Text(
@@ -207,4 +205,54 @@ class NotificationCard extends StatelessWidget {
       ),
     );
   }
+
+  TextSpan _formatText(String text) {
+    final boldPattern = RegExp(r'\*\*(.*?)\*\*'); // Matches **bold text**
+    final bulletPattern = RegExp(r'^\* (.*?)'); // Matches * bullet text at the start
+    final spans = <TextSpan>[];
+
+    if (bulletPattern.hasMatch(text)) {
+      // Case 1: Single '*' at the start (bullet point)
+      final match = bulletPattern.firstMatch(text);
+      spans.add(TextSpan(
+        text: '• ${match?.group(1)}', // Replace '*' with '•'
+        style: const TextStyle(fontWeight: FontWeight.normal),
+      ));
+    } else {
+      // Case 2: Handle normal text and **bold text**
+      int lastIndex = 0;
+      final matches = boldPattern.allMatches(text);
+
+      for (final match in matches) {
+        // Add normal text before the bold section
+        if (match.start > lastIndex) {
+          spans.add(TextSpan(
+            text: text.substring(lastIndex, match.start),
+            style: const TextStyle(fontWeight: FontWeight.normal),
+          ));
+        }
+        // Add bold text
+        spans.add(TextSpan(
+          text: match.group(1),
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ));
+        lastIndex = match.end;
+      }
+
+      // Add any remaining normal text
+      if (lastIndex < text.length) {
+        spans.add(TextSpan(
+          text: text.substring(lastIndex),
+          style: const TextStyle(fontWeight: FontWeight.normal),
+        ));
+      }
+    }
+
+    return TextSpan(
+      children: spans,
+      style: const TextStyle(fontSize: 16, color: Colors.black),
+    );
+  }
 }
+
+

@@ -187,7 +187,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
             Column(
               children: [
                 ...categories.map((category) => Padding(
-                      padding: EdgeInsets.symmetric(vertical: 8.0),
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child: Row(
                         children: [
                           Icon(
