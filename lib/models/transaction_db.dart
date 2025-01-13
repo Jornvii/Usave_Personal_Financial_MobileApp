@@ -39,7 +39,7 @@ class TransactionDB {
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
-          // Handle the migration by adding the 'deleted' column if upgrading from version 1 to 2
+          // migration by adding the 'deleted' column if upgrading from version 1 to 2
           await db.execute('ALTER TABLE transactions ADD COLUMN deleted INTEGER DEFAULT 0');
         } 
       },

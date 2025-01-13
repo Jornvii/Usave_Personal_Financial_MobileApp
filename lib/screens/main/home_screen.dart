@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_bot/provider/langguages_provider.dart';
 import 'package:provider/provider.dart';
+import '../../provider/langguages_provider.dart';
 import '../sub/saving_goal_screen.dart';
 import '../sub/notification_screen.dart';
 import '../../models/saving_goaldb.dart';
+import '../../models/notification_db.dart'; // Assume this is where NotificationDB is implemented
 import 'transactions_screen.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -19,12 +20,23 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    _updateNotificationCount(); // Fetch the initial notification count
+  }
+
+  /// Fetch the current notification count from the database
+  Future<void> _updateNotificationCount() async {
+    final notificationDB = NotificationDB();
+    final count = await notificationDB.getNotificationCount();
+    setState(() {
+      _notificationCount = count;
+    });
   }
 
   /// Check if at least one saving goal is filled
   Future<bool> _hasFilledSavingGoals() async {
     final savingGoals = await SavingGoalDB().fetchSavingGoals();
-    return savingGoals.any((goal) => goal['goalAmount'] != null && goal['goalAmount'] > 0);
+    return savingGoals
+        .any((goal) => goal['goalAmount'] != null && goal['goalAmount'] > 0);
   }
 
   /// Show a dialog to prompt the user to set a saving goal
@@ -34,14 +46,16 @@ class _MyHomePageState extends State<MyHomePage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Set a Saving Goal'),
-          content: const Text('Please set at least one saving goal before accessing notifications.'),
+          content: const Text(
+              'Please set at least one saving goal before accessing notifications.'),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const SavingGoalScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const SavingGoalScreen()),
                 );
               },
               child: const Text('Go to Saving Goals'),
@@ -63,32 +77,27 @@ class _MyHomePageState extends State<MyHomePage> {
     final languageProvider = Provider.of<LanguageProvider>(context);
     return Scaffold(
       appBar: AppBar(
-        title:  Text( languageProvider.translate ("Transactions"),
+        title: Text(
+          languageProvider.translate("MonthlyTransactions"),
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         elevation: 4,
         actions: [
-          IconButton(
-            onPressed: () {
-              setState(() {
-                _notificationCount++;
-              });
-            },
-            icon: const Icon(Icons.add),
-          ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Stack(
               children: [
                 IconButton(
-                  icon: const Icon(Icons.notifications),
+                  icon:  const Icon(Icons.notifications,size: 30,),
                   onPressed: () async {
                     final hasGoals = await _hasFilledSavingGoals();
                     if (hasGoals) {
-                      Navigator.push(
+                      await Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const NotificationScreen()),
+                        MaterialPageRoute(
+                            builder: (context) => const NotificationScreen()),
                       );
+                      _updateNotificationCount(); 
                     } else {
                       _showSetSavingGoalDialog();
                     }

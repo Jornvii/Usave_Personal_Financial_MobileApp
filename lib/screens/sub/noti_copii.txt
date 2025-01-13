@@ -21,30 +21,30 @@ class _NotificationScreenState extends State<NotificationScreen> {
   final TransactionDB transactionDB = TransactionDB();
   Timer? _timer;
 
-  @override
-  void initState() {
-    super.initState();
-    _loadNotifications(); // Load existing notifications
-    _generateNotification(); // Initial generation
-    _startAutoNotification(); // Start timer for periodic updates
-  }
+@override
+void initState() {
+  super.initState();
+  _loadNotifications(); // Load existing notifications
+  _generateNotification(); // Initial generation
+  _startAutoNotification(); // Start timer for periodic updates
+}
+
 
   void _scheduleNotification(DateTime scheduledTime) {
     final duration = scheduledTime.difference(DateTime.now());
     Future.delayed(duration, () {
-      _generateNotification();
-      _scheduleNotification(scheduledTime.add(const Duration(days: 1)));
+      _generateNotification(); // Generate notification
+      _scheduleNotification(scheduledTime
+          .add(const Duration(days: 1))); // Reschedule for the next day
     });
   }
-
-  void _startAutoNotification() {
+void _startAutoNotification() {
     _timer = Timer.periodic(const Duration(hours: 12), (timer) {
       _generateNotification();
     });
   }
-
   Future<void> _generateNotification() async {
-    setState(() {
+       setState(() {
       loading = true;
     });
     try {
