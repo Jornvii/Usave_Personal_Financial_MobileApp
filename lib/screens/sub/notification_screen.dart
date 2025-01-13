@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_gemini/google_gemini.dart';
 import 'package:intl/intl.dart';
 import '../../models/notification_db.dart';
+import '../../models/saving_goaldb.dart';
 import '../../models/transaction_db.dart';
 
 const apiKey = "AIzaSyDu8b8nBCg5ZzH0WNEGsLLn_Rb4oZYabVI";
@@ -25,25 +26,28 @@ class _NotificationScreenState extends State<NotificationScreen> {
   void initState() {
     super.initState();
     _loadNotifications(); // Load existing notifications
-    _generateNotification(); // Initial generation
+    // _generateNotification1();
+    _generateNotification2();
     _startAutoNotification(); // Start timer for periodic updates
   }
 
   void _scheduleNotification(DateTime scheduledTime) {
     final duration = scheduledTime.difference(DateTime.now());
     Future.delayed(duration, () {
-      _generateNotification();
+      // _generateNotification1();
+      _generateNotification2();
       _scheduleNotification(scheduledTime.add(const Duration(days: 1)));
     });
   }
 
   void _startAutoNotification() {
     _timer = Timer.periodic(const Duration(hours: 12), (timer) {
-      _generateNotification();
+      // _generateNotification1();
+      _generateNotification2();
     });
   }
 
-  Future<void> _generateNotification() async {
+  Future<void> _generateNotification1() async {
     setState(() {
       loading = true;
     });
@@ -76,8 +80,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
       double balance = totalIncome - totalExpenses;
 
-      // Generate prompt for Gemini
-      String prompt = """
+      // Generate prompt1 for Gemini
+      String prompt1 = """
     Analyze my financial data and generate a short notification:
     - Total Income: \$${totalIncome.toStringAsFixed(2)}
     - Total Expenses: \$${totalExpenses.toStringAsFixed(2)}
@@ -85,11 +89,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
     - Balance: \$${balance.toStringAsFixed(2)}
     Key Expense Categories: ${categoryExpenses.entries.map((e) => '${e.key}: \$${e.value.toStringAsFixed(2)}').join(', ')}
 
-    Provide a concise alert based on the data or with a sentence alert me better financial like a quote or sth, generate in short not too long.
+    Provide a concise alert based on the data or with a sentence alert me better financial like a quote or sth, ( write all in just short paragraph)
     """;
 
       // Fetch response from Gemini API
-      final response = await gemini.generateFromText(prompt);
+      final response = await gemini.generateFromText(prompt1);
       String notificationText = response.text.trim();
 
       // Save the notification with a timestamp
@@ -108,6 +112,89 @@ class _NotificationScreenState extends State<NotificationScreen> {
       await _loadNotifications();
     } catch (e) {
       _showErrorDialog("Error generating notification: $e");
+    }
+  }
+
+  Future<void> _generateNotification2() async {
+    setState(() {
+      loading = true;
+    });
+    try {
+      // Fetch saving goals from SavingGoalDB
+      final savingGoalDB = SavingGoalDB();
+      final savingGoals = await savingGoalDB.fetchSavingGoals();
+
+      // Fetch savings transactions from TransactionDB
+      final transactions = await transactionDB.getTransactions();
+      Map<String, double> savingsByCategory = {};
+
+      for (var transaction in transactions) {
+        final type = transaction['typeCategory'];
+        final amount = transaction['amount'] as double;
+        final category = transaction['category'] ?? "Uncategorized";
+
+        if (type == 'Saving') {
+          savingsByCategory[category] =
+              (savingsByCategory[category] ?? 0) + amount;
+        }
+      }
+
+      // Compare saving amounts with goals
+      List<String> notificationsList = [];
+      for (var goal in savingGoals) {
+        final savingCategory = goal['savingCategory'] as String;
+        final goalAmount = goal['goalAmount'] as double;
+        final savedAmount = savingsByCategory[savingCategory] ?? 0.0;
+
+        if (savedAmount >= goalAmount) {
+          // Calculate percentage complete
+          double percentComplete =
+              ((savedAmount / goalAmount) * 100).clamp(0, 100);
+
+          notificationsList.add(
+              "🎉 Congratulations! You've reached your saving goal for $savingCategory! You've saved \$${savedAmount.toStringAsFixed(2)} (Goal: \$${goalAmount.toStringAsFixed(2)}) and are ${percentComplete.toStringAsFixed(1)}% complete.");
+        } else {
+          // Calculate remaining amount and percentage
+          final remaining = goalAmount - savedAmount;
+          double percentComplete =
+              ((savedAmount / goalAmount) * 100).clamp(0, 100);
+
+          notificationsList.add(
+              "Keep going! You've saved ${percentComplete.toStringAsFixed(2)}% of your goal for $savingCategory. You're \$${remaining.toStringAsFixed(2)} away from completing it.");
+        }
+      }
+
+      // Generate prompt2 for Gemini
+      String prompt2 = """
+      Based on the following saving goal and transaction data, provide a short summary notification or motivation:
+      - Saving Goals: ${savingGoals.map((g) => '${g['savingCategory']}: Goal \$${g['goalAmount']}').join(', ')}
+      - Savings by Category: ${savingsByCategory.entries.map((e) => '${e.key}: \$${e.value.toStringAsFixed(2)}').join(', ')}
+      
+      Include a percentage to complete reach for each goal. Provide a short concise and motivational messages about achieving these goals and some short idea to reach goal. ( write all in just short paragraph)
+    """;
+
+      final response = await gemini.generateFromText(prompt2);
+      String notificationText = response.text.trim();
+
+      // Save the notification with a timestamp
+      String time = _formatCurrentTime();
+      int timestamp = DateTime.now().millisecondsSinceEpoch;
+
+      final notificationDB = NotificationDB();
+      await notificationDB.insertNotification({
+        'message': notificationText,
+        'time': time,
+        'timestamp': timestamp,
+      });
+
+      // Refresh notifications list
+      await _loadNotifications();
+    } catch (e) {
+      _showErrorDialog("Error generating notification: $e");
+    } finally {
+      setState(() {
+        loading = false;
+      });
     }
   }
 
@@ -197,18 +284,17 @@ class _NotificationScreenState extends State<NotificationScreen> {
       ),
       body: ListView.builder(
         itemCount: notifications.length,
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(2),
         itemBuilder: (context, index) {
           final notification = notifications[index];
-          final id =
-              int.parse(notification['id']!); // Parse the notification ID
+          final id = int.parse(notification['id']!);
 
           return Dismissible(
             key: UniqueKey(),
             direction: DismissDirection.endToStart,
             confirmDismiss: (direction) async {
               _showDeleteConfirmation(id); // Use the ID here for confirmation
-              return false; // Prevent automatic dismissal
+              return false;
             },
             background: Container(
               color: Colors.red,
@@ -248,12 +334,12 @@ class _NotificationCardState extends State<NotificationCard> {
   Widget build(BuildContext context) {
     // Limit the message length to 150 characters
     final displayMessage = widget.message.length > 150 && !_isExpanded
-        ? '${widget.message.substring(0, 100)}...'
+        ? '${widget.message.substring(0, 100)} ...'
         : widget.message;
 
     return Card(
       elevation: 3,
-      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
