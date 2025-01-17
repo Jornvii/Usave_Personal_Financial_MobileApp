@@ -114,37 +114,41 @@ class _NotificationScreenState extends State<NotificationScreen> {
       _showErrorDialog("Error generating notification: $e");
     }
   }
+Future<void> _generateNotification2() async {
+  setState(() {
+    loading = true;
+  });
+  try {
+    // Fetch saving goals from SavingGoalDB
+    final savingGoalDB = SavingGoalDB();
+    final savingGoals = await savingGoalDB.fetchSavingGoals();
 
-  Future<void> _generateNotification2() async {
-    setState(() {
-      loading = true;
-    });
-    try {
-      // Fetch saving goals from SavingGoalDB
-      final savingGoalDB = SavingGoalDB();
-      final savingGoals = await savingGoalDB.fetchSavingGoals();
+    // Fetch savings transactions from TransactionDB
+    final transactions = await transactionDB.getTransactions();
+    Map<String, double> savingsByCategory = {};
 
-      // Fetch savings transactions from TransactionDB
-      final transactions = await transactionDB.getTransactions();
-      Map<String, double> savingsByCategory = {};
+    for (var transaction in transactions) {
+      final type = transaction['typeCategory'];
+      final amount = transaction['amount'] as double;
+      final category = transaction['category'] ?? "Uncategorized";
 
-      for (var transaction in transactions) {
-        final type = transaction['typeCategory'];
-        final amount = transaction['amount'] as double;
-        final category = transaction['category'] ?? "Uncategorized";
-
-        if (type == 'Saving') {
-          savingsByCategory[category] =
-              (savingsByCategory[category] ?? 0) + amount;
-        }
+      if (type == 'Saving') {
+        savingsByCategory[category] =
+            (savingsByCategory[category] ?? 0) + amount;
       }
+    }
 
-      // Compare saving amounts with goals
-      List<String> notificationsList = [];
-      for (var goal in savingGoals) {
-        final savingCategory = goal['savingCategory'] as String;
-        final goalAmount = goal['goalAmount'] as double;
-        final savedAmount = savingsByCategory[savingCategory] ?? 0.0;
+    // Compare saving amounts with goals
+    List<String> notificationsList = [];
+    bool hasValidSavings = false;
+
+    for (var goal in savingGoals) {
+      final savingCategory = goal['savingCategory'] as String;
+      final goalAmount = goal['goalAmount'] as double;
+      final savedAmount = savingsByCategory[savingCategory] ?? 0.0;
+
+      if (savedAmount > 0) {
+        hasValidSavings = true; // Ensure at least one valid saving exists
 
         if (savedAmount >= goalAmount) {
           // Calculate percentage complete
@@ -160,17 +164,20 @@ class _NotificationScreenState extends State<NotificationScreen> {
               ((savedAmount / goalAmount) * 100).clamp(0, 100);
 
           notificationsList.add(
-              "Keep going! You've saved ${percentComplete.toStringAsFixed(2)}% of your goal for $savingCategory. You're \$${remaining.toStringAsFixed(2)} away from completing it.");
+              "Keep going! You've saved ${percentComplete.toStringAsFixed(1)}% of your goal for $savingCategory. You're \$${remaining.toStringAsFixed(2)} away from completing it.");
         }
       }
+    }
 
+    // Proceed with Gemini prompt only if there are valid savings
+    if (hasValidSavings) {
       // Generate prompt2 for Gemini
       String prompt2 = """
       Based on the following saving goal and transaction data, provide a short summary notification or motivation:
       - Saving Goals: ${savingGoals.map((g) => '${g['savingCategory']}: Goal \$${g['goalAmount']}').join(', ')}
       - Savings by Category: ${savingsByCategory.entries.map((e) => '${e.key}: \$${e.value.toStringAsFixed(2)}').join(', ')}
       
-      Include a percentage to complete reach for each goal. Provide a short concise and motivational messages about achieving these goals and some short idea to reach goal. ( write all in just short paragraph)
+      Include a percentage to complete reach for each goal. Provide a short concise and motivational message about achieving these goals and some short idea to reach goal. (write all in just short paragraph)
     """;
 
       final response = await gemini.generateFromText(prompt2);
@@ -189,14 +196,16 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
       // Refresh notifications list
       await _loadNotifications();
-    } catch (e) {
-      _showErrorDialog("Error generating notification: $e");
-    } finally {
-      setState(() {
-        loading = false;
-      });
     }
+  } catch (e) {
+    _showErrorDialog("Error generating notification: $e");
+  } finally {
+    setState(() {
+      loading = false;
+    });
   }
+}
+
 
   Future<void> _loadNotifications() async {
     final notificationDB = NotificationDB();
@@ -333,8 +342,8 @@ class _NotificationCardState extends State<NotificationCard> {
   @override
   Widget build(BuildContext context) {
     // Limit the message length to 150 characters
-    final displayMessage = widget.message.length > 150 && !_isExpanded
-        ? '${widget.message.substring(0, 100)} ...'
+    final displayMessage = widget.message.length > 100 && !_isExpanded
+        ? '${widget.message.substring(0, 60)} ...'
         : widget.message;
 
     return Card(

@@ -206,8 +206,12 @@ class _SettingScreenUiState extends State<SettingScreenUi> {
                                 ?.copyWith(fontSize: 18),
                           ),
                           trailing: IconButton(
-                            icon: Icon(Icons.more_vert,
-                                color: Theme.of(context).iconTheme.color),
+                            icon: CircleAvatar(
+                              backgroundColor: Colors.amber,
+
+                              child: Icon(Icons.edit,
+                                  color: Theme.of(context).iconTheme.color),
+                            ),
                             onPressed: () => _showEditDialog(languageProvider),
                           ),
                         ),
