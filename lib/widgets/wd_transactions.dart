@@ -1,22 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 
 import '../../models/currency_db.dart';
 import '../../models/transaction_db.dart';
-import '../../provider/langguages_provider.dart';
 import '../../widgets/add_ddtransaction.dart';
 import '../../widgets/edit_transaction.dart';
 
-class TransactionsScreen extends StatefulWidget {
-  const TransactionsScreen({super.key});
+class WDTransactionsScreen extends StatefulWidget {
+  const WDTransactionsScreen({super.key});
 
   @override
-  _TransactionsScreenState createState() => _TransactionsScreenState();
+  _WDTransactionsScreenState createState() => _WDTransactionsScreenState();
 }
 
-class _TransactionsScreenState extends State<TransactionsScreen> {
+class _WDTransactionsScreenState extends State<WDTransactionsScreen> {
   late DateTime selectedStartDate;
   late DateTime selectedEndDate;
   List<Map<String, dynamic>> transactions = [];
@@ -123,7 +121,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
   @override
   Widget build(BuildContext context) {
-     final languageProvider = Provider.of<LanguageProvider>(context);
     Map<String, List<Map<String, dynamic>>> groupedTransactions = {};
     for (var transaction in transactions) {
       final dateKey = transaction['date'];
@@ -144,18 +141,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       ..sort((a, b) => DateTime.parse(b.key).compareTo(DateTime.parse(a.key)));
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          languageProvider.translate("MonthlyTransactions"),
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadTransactions,
-          ),
-        ],
-      ),
       body: Column(
         children: [
           Row(
@@ -316,11 +301,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _openAddTransactionScreen,
-        backgroundColor: const Color.fromARGB(255, 17, 215, 119),
-        child: const Icon(Icons.add),
-      ),
+     
     );
   }
 }

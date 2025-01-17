@@ -66,7 +66,7 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _screens = [
     const MyHomePage(),
-    const ReportScreen(),
+    // const ReportScreen(),
     const ChatBotScreen(),
     const SettingScreenUi(
       transactions: [],
@@ -101,10 +101,10 @@ class _MainScreenState extends State<MainScreen> {
             icon: const Icon(Icons.home),
             label: languageProvider.translate('home'),
           ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.bar_chart),
-            label: languageProvider.translate('report'),
-          ),
+          // BottomNavigationBarItem(
+          //   icon: const Icon(Icons.bar_chart),
+          //   label: languageProvider.translate('report'),
+          // ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.smart_toy),
             label: languageProvider.translate('chatbot'),

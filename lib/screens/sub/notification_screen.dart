@@ -114,65 +114,66 @@ class _NotificationScreenState extends State<NotificationScreen> {
       _showErrorDialog("Error generating notification: $e");
     }
   }
-Future<void> _generateNotification2() async {
-  setState(() {
-    loading = true;
-  });
-  try {
-    // Fetch saving goals from SavingGoalDB
-    final savingGoalDB = SavingGoalDB();
-    final savingGoals = await savingGoalDB.fetchSavingGoals();
 
-    // Fetch savings transactions from TransactionDB
-    final transactions = await transactionDB.getTransactions();
-    Map<String, double> savingsByCategory = {};
+  Future<void> _generateNotification2() async {
+    setState(() {
+      loading = true;
+    });
+    try {
+      // Fetch saving goals from SavingGoalDB
+      final savingGoalDB = SavingGoalDB();
+      final savingGoals = await savingGoalDB.fetchSavingGoals();
 
-    for (var transaction in transactions) {
-      final type = transaction['typeCategory'];
-      final amount = transaction['amount'] as double;
-      final category = transaction['category'] ?? "Uncategorized";
+      // Fetch savings transactions from TransactionDB
+      final transactions = await transactionDB.getTransactions();
+      Map<String, double> savingsByCategory = {};
 
-      if (type == 'Saving') {
-        savingsByCategory[category] =
-            (savingsByCategory[category] ?? 0) + amount;
-      }
-    }
+      for (var transaction in transactions) {
+        final type = transaction['typeCategory'];
+        final amount = transaction['amount'] as double;
+        final category = transaction['category'] ?? "Uncategorized";
 
-    // Compare saving amounts with goals
-    List<String> notificationsList = [];
-    bool hasValidSavings = false;
-
-    for (var goal in savingGoals) {
-      final savingCategory = goal['savingCategory'] as String;
-      final goalAmount = goal['goalAmount'] as double;
-      final savedAmount = savingsByCategory[savingCategory] ?? 0.0;
-
-      if (savedAmount > 0) {
-        hasValidSavings = true; // Ensure at least one valid saving exists
-
-        if (savedAmount >= goalAmount) {
-          // Calculate percentage complete
-          double percentComplete =
-              ((savedAmount / goalAmount) * 100).clamp(0, 100);
-
-          notificationsList.add(
-              "🎉 Congratulations! You've reached your saving goal for $savingCategory! You've saved \$${savedAmount.toStringAsFixed(2)} (Goal: \$${goalAmount.toStringAsFixed(2)}) and are ${percentComplete.toStringAsFixed(1)}% complete.");
-        } else {
-          // Calculate remaining amount and percentage
-          final remaining = goalAmount - savedAmount;
-          double percentComplete =
-              ((savedAmount / goalAmount) * 100).clamp(0, 100);
-
-          notificationsList.add(
-              "Keep going! You've saved ${percentComplete.toStringAsFixed(1)}% of your goal for $savingCategory. You're \$${remaining.toStringAsFixed(2)} away from completing it.");
+        if (type == 'Saving') {
+          savingsByCategory[category] =
+              (savingsByCategory[category] ?? 0) + amount;
         }
       }
-    }
 
-    // Proceed with Gemini prompt only if there are valid savings
-    if (hasValidSavings) {
-      // Generate prompt2 for Gemini
-      String prompt2 = """
+      // Compare saving amounts with goals
+      List<String> notificationsList = [];
+      bool hasValidSavings = false;
+
+      for (var goal in savingGoals) {
+        final savingCategory = goal['savingCategory'] as String;
+        final goalAmount = goal['goalAmount'] as double;
+        final savedAmount = savingsByCategory[savingCategory] ?? 0.0;
+
+        if (savedAmount > 0) {
+          hasValidSavings = true; // Ensure at least one valid saving exists
+
+          if (savedAmount >= goalAmount) {
+            // Calculate percentage complete
+            double percentComplete =
+                ((savedAmount / goalAmount) * 100).clamp(0, 100);
+
+            notificationsList.add(
+                "🎉 Congratulations! You've reached your saving goal for $savingCategory! You've saved \$${savedAmount.toStringAsFixed(2)} (Goal: \$${goalAmount.toStringAsFixed(2)}) and are ${percentComplete.toStringAsFixed(1)}% complete.");
+          } else {
+            // Calculate remaining amount and percentage
+            final remaining = goalAmount - savedAmount;
+            double percentComplete =
+                ((savedAmount / goalAmount) * 100).clamp(0, 100);
+
+            notificationsList.add(
+                "Keep going! You've saved ${percentComplete.toStringAsFixed(1)}% of your goal for $savingCategory. You're \$${remaining.toStringAsFixed(2)} away from completing it.");
+          }
+        }
+      }
+
+      // Proceed with Gemini prompt only if there are valid savings
+      if (hasValidSavings) {
+        // Generate prompt2 for Gemini
+        String prompt2 = """
       Based on the following saving goal and transaction data, provide a short summary notification or motivation:
       - Saving Goals: ${savingGoals.map((g) => '${g['savingCategory']}: Goal \$${g['goalAmount']}').join(', ')}
       - Savings by Category: ${savingsByCategory.entries.map((e) => '${e.key}: \$${e.value.toStringAsFixed(2)}').join(', ')}
@@ -180,32 +181,31 @@ Future<void> _generateNotification2() async {
       Include a percentage to complete reach for each goal. Provide a short concise and motivational message about achieving these goals and some short idea to reach goal. (write all in just short paragraph)
     """;
 
-      final response = await gemini.generateFromText(prompt2);
-      String notificationText = response.text.trim();
+        final response = await gemini.generateFromText(prompt2);
+        String notificationText = response.text.trim();
 
-      // Save the notification with a timestamp
-      String time = _formatCurrentTime();
-      int timestamp = DateTime.now().millisecondsSinceEpoch;
+        // Save the notification with a timestamp
+        String time = _formatCurrentTime();
+        int timestamp = DateTime.now().millisecondsSinceEpoch;
 
-      final notificationDB = NotificationDB();
-      await notificationDB.insertNotification({
-        'message': notificationText,
-        'time': time,
-        'timestamp': timestamp,
+        final notificationDB = NotificationDB();
+        await notificationDB.insertNotification({
+          'message': notificationText,
+          'time': time,
+          'timestamp': timestamp,
+        });
+
+        // Refresh notifications list
+        await _loadNotifications();
+      }
+    } catch (e) {
+      _showErrorDialog("Error generating notification: $e");
+    } finally {
+      setState(() {
+        loading = false;
       });
-
-      // Refresh notifications list
-      await _loadNotifications();
     }
-  } catch (e) {
-    _showErrorDialog("Error generating notification: $e");
-  } finally {
-    setState(() {
-      loading = false;
-    });
   }
-}
-
 
   Future<void> _loadNotifications() async {
     final notificationDB = NotificationDB();
@@ -302,7 +302,7 @@ Future<void> _generateNotification2() async {
             key: UniqueKey(),
             direction: DismissDirection.endToStart,
             confirmDismiss: (direction) async {
-              _showDeleteConfirmation(id); // Use the ID here for confirmation
+              _showDeleteConfirmation(id);
               return false;
             },
             background: Container(
@@ -341,55 +341,57 @@ class _NotificationCardState extends State<NotificationCard> {
 
   @override
   Widget build(BuildContext context) {
-    // Limit the message length to 150 characters
     final displayMessage = widget.message.length > 100 && !_isExpanded
         ? '${widget.message.substring(0, 60)} ...'
         : widget.message;
 
     return Card(
-      elevation: 3,
+      elevation: 5,
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
+        // side: BorderSide(color: Colors.blue,)
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            RichText(
-              text: _formatText(displayMessage),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment
-                  .spaceBetween, // Spacing between time and 'Read More' button
-              children: [
-                Text(
-                  widget.time,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: const Color.fromARGB(112, 139, 195, 74),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              RichText(
+                text: _formatText(displayMessage),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment
+                    .spaceBetween, // Spacing between time and 'Read More' button
+                children: [
+                  Text(
+                    widget.time,
+                    style: const TextStyle(
+                        fontSize: 13, fontWeight: FontWeight.bold),
                   ),
-                ),
-                if (widget.message.length > 100)
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _isExpanded = !_isExpanded;
-                      });
-                    },
-                    child: Text(
-                      _isExpanded ? "Read Less" : "Read More",
-                      style: const TextStyle(
-                        color: Colors.blue,
-                        fontSize: 14,
+                  if (widget.message.length > 100)
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _isExpanded = !_isExpanded;
+                        });
+                      },
+                      child: Text(
+                        _isExpanded ? "Read Less" : "Read More",
+                        style: const TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.bold),
                       ),
                     ),
-                  ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -37,6 +37,8 @@ class LanguageProvider with ChangeNotifier {
       'chatbot': 'Chat bot',
        //Home Screen
       'MonthlyTransactions': 'Monthly Transactions',
+      // sub home screen
+      "recent_transactions" : "Recent Transactions",
       //Add Transaction Screen
       'add_transaction': 'Add Transaction',
       'Amount': 'Amount',
@@ -124,6 +126,8 @@ class LanguageProvider with ChangeNotifier {
       'chatbot': 'Chat bot',
  //Home Screen
       'MonthlyTransactions': 'ธุรกรรมรายเดือน',
+      // sub home screen
+      "recent_transactions" : "ธุรกรรมล่าสุด",
       //Add Transaction Screen
       'add_transaction': 'เพิ่มรายการ',
       'Amount': 'จำนวนเงิน',
@@ -211,6 +215,8 @@ class LanguageProvider with ChangeNotifier {
       'chatbot': 'Chat bot',
       //Home Screen
       'MonthlyTransactions': 'ប្រតិបត្តិការប្រចាំខែ',
+      // sub home screen
+      "recent_transactions" : "ប្រតិបត្តិការថ្មី",
 
       //Add Transaction Screen
       'add_transaction': 'បញ្ចូលប្រតិបត្តិការ',

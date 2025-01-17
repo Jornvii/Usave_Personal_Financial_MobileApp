@@ -1,11 +1,12 @@
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_bot/screens/sub/sub_home_screen.dart';
 import 'package:provider/provider.dart';
 import '../../provider/langguages_provider.dart';
 import '../sub/saving_goal_screen.dart';
 import '../sub/notification_screen.dart';
 import '../../models/saving_goaldb.dart';
 import '../../models/notification_db.dart'; // Assume this is where NotificationDB is implemented
-import 'transactions_screen.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -77,18 +78,36 @@ class _MyHomePageState extends State<MyHomePage> {
     final languageProvider = Provider.of<LanguageProvider>(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          languageProvider.translate("MonthlyTransactions"),
-          style: const TextStyle(fontWeight: FontWeight.bold),
+        toolbarHeight: 120,
+        elevation: 2,
+        title: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: [
+              const Padding(
+                padding: EdgeInsets.only(top: 20, bottom: 20),
+                child: CircleAvatar(
+                  radius: 25,
+                  backgroundImage: AssetImage('assets/images/logoapp.png'),
+                ),
+              ),
+              const SizedBox(
+                width: 15,
+              ),
+              _buildAnimatedText()
+            ],
+          ),
         ),
-        elevation: 4,
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Stack(
               children: [
                 IconButton(
-                  icon:  const Icon(Icons.notifications,size: 30,),
+                  icon: const Icon(
+                    Icons.notifications,
+                    size: 30,
+                  ),
                   onPressed: () async {
                     final hasGoals = await _hasFilledSavingGoals();
                     if (hasGoals) {
@@ -97,7 +116,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         MaterialPageRoute(
                             builder: (context) => const NotificationScreen()),
                       );
-                      _updateNotificationCount(); 
+                      _updateNotificationCount();
                     } else {
                       _showSetSavingGoalDialog();
                     }
@@ -133,10 +152,29 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),
-      body: const Padding(
-        padding: EdgeInsets.all(16.0),
-        child: TransactionsScreen(),
-      ),
+      body: const SubHomeScreen(transactions: []),
+    );
+  }
+
+  List<MaterialColor> colorizeColors = [
+    Colors.green,
+    Colors.yellow,
+  ];
+
+  TextStyle colorizeTextStyle = const TextStyle(
+    fontSize: 28.0,
+  );
+
+  Widget _buildAnimatedText() {
+    return AnimatedTextKit(
+      animatedTexts: [
+        ColorizeAnimatedText(
+          'iSAVE',
+          textStyle: colorizeTextStyle.copyWith(fontWeight: FontWeight.bold),
+          colors: colorizeColors,
+        ),
+      ],
+      isRepeatingAnimation: true,
     );
   }
 }

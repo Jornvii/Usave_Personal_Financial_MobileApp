@@ -30,7 +30,7 @@ class _SavingGoalScreenState extends State<SavingGoalScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Saving Goals'),
+        title: const Text('Set Saving Goals'),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
