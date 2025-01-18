@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../models/currency_db.dart';
+import '../../provider/langguages_provider.dart';
 
 class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({super.key});
@@ -82,6 +84,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final languageProvider = Provider.of<LanguageProvider>(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Calculator'),
@@ -161,17 +164,38 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 ],
               ),
               const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _calculateResult,
-                child: const Text('Calculate'),
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 15),
+                  child: FloatingActionButton.extended(
+                    onPressed: _calculateResult,
+                    label: Text(languageProvider.translate("Calculate")),
+                    icon: const Icon(Icons.calculate),
+                    backgroundColor: const Color.fromARGB(255, 17, 215, 119),
+                  ),
+                ),
               ),
+              // Center(
+              //   child: ElevatedButton(
+              //     onPressed: _calculateResult,
+              //     child: const Text('Calculate'),
+              //   ),
+              // ),
               const SizedBox(height: 20),
               if (_resultDescription != null)
                 Expanded(
                   child: SingleChildScrollView(
-                    child: RichText(
-                      text: TextSpan(
-                        children: _parseResultDescription(_resultDescription!),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      padding: const EdgeInsets.all(8),
+                      child: SelectableText.rich(
+                        TextSpan(
+                          children:
+                              _parseResultDescription(_resultDescription!),
+                        ),
                       ),
                     ),
                   ),
@@ -189,17 +213,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     final List<TextSpan> spans = [];
     int lastIndex = 0;
 
-    // Find all the matches of numbers in the string
     final matches = numberRegex.allMatches(description);
     for (final match in matches) {
-      // Add text before the number with regular style
       if (match.start > lastIndex) {
         spans.add(TextSpan(
           text: description.substring(lastIndex, match.start),
           style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.blueGrey),
         ));
       }
 
@@ -219,9 +241,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       spans.add(TextSpan(
         text: description.substring(lastIndex),
         style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-        ),
+            fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blueGrey),
       ));
     }
 

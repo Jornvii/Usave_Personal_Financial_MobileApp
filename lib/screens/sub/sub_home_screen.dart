@@ -15,6 +15,7 @@ import '../../widgets/summary_category.dart';
 import '../../widgets/table_transactions.dart';
 import '../main/transactions_screen.dart';
 import 'sub_calculate.dart';
+import 'timer_test.dart';
 
 class SubHomeScreen extends StatefulWidget {
   final List transactions;
@@ -279,13 +280,13 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
                       'title': 'Data Table',
                       'screen':
                           DataTransactionTable(transactions: transactions),
-                      'color': Colors.lightGreen,
+                      'color': Colors.green,
                     },
                     {
                       'icon': Icons.add_circle,
                       'title': 'Transactions',
                       'screen': const TransactionsScreen(),
-                      'color': Colors.blue,
+                      'color': Colors.lightBlue,
                     },
                     {
                       'icon': Icons.dashboard,
@@ -303,8 +304,14 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
                       'icon': Icons.pie_chart,
                       'title': 'Reports',
                       'screen': const ReportScreen(),
-                      'color': Colors.lime,
+                      'color': Colors.purple,
                     },
+                    // {
+                    //   'icon': Icons.watch,
+                    //   'title': 'TIMER',
+                    //   'screen':  TimerScreen(),
+                    //   'color': Colors.purple,
+                    // },
                   ];
 
                   return _buildGridTile(

@@ -116,15 +116,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
   }
 
   Future<void> _generateNotification2() async {
-    setState(() {
-      loading = true;
-    });
     try {
-      // Fetch saving goals from SavingGoalDB
       final savingGoalDB = SavingGoalDB();
       final savingGoals = await savingGoalDB.fetchSavingGoals();
 
-      // Fetch savings transactions from TransactionDB
       final transactions = await transactionDB.getTransactions();
       Map<String, double> savingsByCategory = {};
 
@@ -149,17 +144,15 @@ class _NotificationScreenState extends State<NotificationScreen> {
         final savedAmount = savingsByCategory[savingCategory] ?? 0.0;
 
         if (savedAmount > 0) {
-          hasValidSavings = true; // Ensure at least one valid saving exists
+          hasValidSavings = true;
 
           if (savedAmount >= goalAmount) {
-            // Calculate percentage complete
             double percentComplete =
                 ((savedAmount / goalAmount) * 100).clamp(0, 100);
 
             notificationsList.add(
                 "🎉 Congratulations! You've reached your saving goal for $savingCategory! You've saved \$${savedAmount.toStringAsFixed(2)} (Goal: \$${goalAmount.toStringAsFixed(2)}) and are ${percentComplete.toStringAsFixed(1)}% complete.");
           } else {
-            // Calculate remaining amount and percentage
             final remaining = goalAmount - savedAmount;
             double percentComplete =
                 ((savedAmount / goalAmount) * 100).clamp(0, 100);
@@ -170,9 +163,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
         }
       }
 
-      // Proceed with Gemini prompt only if there are valid savings
       if (hasValidSavings) {
-        // Generate prompt2 for Gemini
         String prompt2 = """
       Based on the following saving goal and transaction data, provide a short summary notification or motivation:
       - Saving Goals: ${savingGoals.map((g) => '${g['savingCategory']}: Goal \$${g['goalAmount']}').join(', ')}
@@ -184,7 +175,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
         final response = await gemini.generateFromText(prompt2);
         String notificationText = response.text.trim();
 
-        // Save the notification with a timestamp
         String time = _formatCurrentTime();
         int timestamp = DateTime.now().millisecondsSinceEpoch;
 
@@ -195,7 +185,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
           'timestamp': timestamp,
         });
 
-        // Refresh notifications list
         await _loadNotifications();
       }
     } catch (e) {

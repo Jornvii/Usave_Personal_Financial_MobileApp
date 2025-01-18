@@ -342,10 +342,10 @@ class _SettingScreenUiState extends State<SettingScreenUi> {
           onTap: onTap,
           child: Container(
             decoration: BoxDecoration(
-              color: secmenucolor.withOpacity(0.1), 
+              color: secmenucolor.withOpacity(0.1),
               border: Border.all(
-                width: 0.5, 
-                color: secmenucolor, 
+                width: 0.5,
+                color: secmenucolor,
               ),
               borderRadius: BorderRadius.circular(12),
             ),
@@ -353,10 +353,9 @@ class _SettingScreenUiState extends State<SettingScreenUi> {
               leading: Icon(secicon, size: 20, color: secmenucolor),
               title: Text(
                 languageProvider.translate(sectitle),
-                style: const TextStyle(
-                  fontSize: 16, 
-                  color: Colors.black87, 
-                ),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold
+                    // color: Colors.black87,
+                    ),
               ),
             ),
           ),
@@ -374,100 +373,110 @@ class _SettingScreenUiState extends State<SettingScreenUi> {
     Color menuColor,
   ) {
     return Card(
-      elevation: 2,
-      shadowColor: Theme.of(context).primaryColor.withOpacity(0.4),
+      elevation: 4, // Slightly higher elevation for better depth
+      shadowColor: Theme.of(context).primaryColor.withOpacity(0.5),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12), // Consistent border radius
         side: BorderSide(
-          color: Theme.of(context).primaryColor.withOpacity(0.8),
-          width: 0.1,
+          color: Theme.of(context).primaryColor.withOpacity(0.5),
+          width: 0.2,
         ),
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
         onTap: onTap,
         child: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [menuColor.withOpacity(0.7), menuColor],
+              colors: [
+                menuColor.withOpacity(0.9),
+                menuColor.withOpacity(0.8),
+              ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  icon,
-                  size: 35,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  languageProvider.translate(titleKey),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      fontSize: 14, fontWeight: FontWeight.w500),
-                ),
-              ],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    icon,
+                    size: 40, 
+                    color: Colors.white.withOpacity(0.9), 
+                  ),
+                  const SizedBox(height: 12), 
+                  Text(
+                    languageProvider.translate(titleKey),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 16, 
+                      fontWeight: FontWeight.bold, 
+                      color: Colors.white.withOpacity(0.9),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
       ),
     );
   }
-}
 
-void _showDeleteOptionsDialog(
-    BuildContext context, LanguageProvider languageProvider) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text(languageProvider.translate('delete_data')),
-        content: Text(languageProvider.translate('choose_delete_option')),
-        actions: [
-          TextButton(
-            onPressed: () {
-              _deleteAllData(context, languageProvider);
-              Navigator.of(context).pop();
-            },
-            child: Text(languageProvider.translate('delete_all')),
-          ),
-          TextButton(
-            onPressed: () {
-              _deleteChatData(context, languageProvider);
-              Navigator.of(context).pop();
-            },
-            child: Text(languageProvider.translate('delete_chat')),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(languageProvider.translate('cancel')),
-          ),
-        ],
-      );
-    },
-  );
-}
+  void _showDeleteOptionsDialog(
+      BuildContext context, LanguageProvider languageProvider) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(languageProvider.translate('delete_data')),
+          content: Text(languageProvider.translate('choose_delete_option')),
+          actions: [
+            TextButton(
+              onPressed: () {
+                _deleteAllData(context, languageProvider);
+                Navigator.of(context).pop();
+              },
+              child: Text(languageProvider.translate('delete_all')),
+            ),
+            TextButton(
+              onPressed: () {
+                _deleteChatData(context, languageProvider);
+                Navigator.of(context).pop();
+              },
+              child: Text(languageProvider.translate('delete_chat')),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(languageProvider.translate('cancel')),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
-void _deleteChatData(
-    BuildContext context, LanguageProvider languageProvider) async {
-  final chatDatabase = ChatDB();
-  await chatDatabase.clearMessages();
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text(languageProvider.translate('chat_data_cleared'))),
-  );
-}
+  void _deleteChatData(
+      BuildContext context, LanguageProvider languageProvider) async {
+    final chatDatabase = ChatDB();
+    await chatDatabase.clearMessages();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(languageProvider.translate('chat_data_cleared'))),
+    );
+  }
 
-void _deleteAllData(
-    BuildContext context, LanguageProvider languageProvider) async {
-  // Clear all data from the database
-  // await TransactionDB().clearTransactions();
+  void _deleteAllData(
+      BuildContext context, LanguageProvider languageProvider) async {
+    // Clear all data from the database
+    // await TransactionDB().clearTransactions();
 
 // Show a confirmation message after clearing data
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text(languageProvider.translate('all_data_cleared'))),
-  );
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(languageProvider.translate('all_data_cleared'))),
+    );
+  }
 }
