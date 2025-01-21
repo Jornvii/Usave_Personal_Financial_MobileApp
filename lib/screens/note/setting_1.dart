@@ -7,8 +7,8 @@ import '../../models/chat_db.dart';
 import '../../provider/langguages_provider.dart';
 import '../../provider/theme_provider.dart';
 import '../../widgets/profile_widget.dart';
-import '../sub/category_screen.dart';
-import '../sub/saving_goal_screen.dart';
+import '../sub/addcategory_screen.dart';
+import '../sub/addsaving_goal_screen.dart';
 
 class SettingsScreenv1 extends StatefulWidget {
   const SettingsScreenv1({super.key});

@@ -42,50 +42,48 @@ class _CurrencyScreenState extends State<CurrencyScreen> {
   //   }
   // }
 
-
   // Add this method to handle adding currencies incase of duplicates and empty fields
- Future<void> _addCurrency() async {
-  final name = _nameController.text.trim();
-  final symbol = _symbolController.text.trim();
+  Future<void> _addCurrency() async {
+    final name = _nameController.text.trim();
+    final symbol = _symbolController.text.trim();
 
-  if (name.isEmpty || symbol.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Please fill in both fields.')),
-    );
-    return;
-  }
+    if (name.isEmpty || symbol.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in both fields.')),
+      );
+      return;
+    }
 
-  // Check for duplicates in SQLite
-  final exists = await _currencyDB.isCurrencyExist(name, symbol);
-  if (exists) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Duplicate Currency'),
-        content: const Text(
-          'A currency with the same name or symbol already exists.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+    // Check for duplicates in SQLite
+    final exists = await _currencyDB.isCurrencyExist(name, symbol);
+    if (exists) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Duplicate Currency'),
+          content: const Text(
+            'A currency with the same name or symbol already exists.',
           ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    // Insert the currency if no duplicates
+    await _currencyDB.insertCurrency(name, symbol);
+    _nameController.clear();
+    _symbolController.clear();
+    _loadCurrencies();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Currency added successfully')),
     );
-    return;
   }
-
-  // Insert the currency if no duplicates
-  await _currencyDB.insertCurrency(name, symbol);
-  _nameController.clear();
-  _symbolController.clear();
-  _loadCurrencies();
-  ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(content: Text('Currency added successfully')),
-  );
-}
-
 
   Future<void> _setDefaultCurrency(int id, String symbol) async {
     await _currencyDB.setDefaultCurrency(id);
@@ -102,6 +100,34 @@ class _CurrencyScreenState extends State<CurrencyScreen> {
       const SnackBar(content: Text('Currency deleted successfully')),
     );
   }
+void _alertDailogCurrencies() {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.info_outline),
+            SizedBox(width: 10),
+            Text('Currency Restriction',style: TextStyle(color: Colors.red,fontSize: 18,fontWeight: FontWeight.bold),),
+          ],
+        ),
+        content: const Text(
+          'You can use only one currency the default currency. Let add and set Your own currency below.',
+          style: TextStyle(fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Close the dialog
+            },
+            child: const Text('OK', style: TextStyle(color: Colors.blue)),
+          ),
+        ],
+      );
+    },
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -109,6 +135,18 @@ class _CurrencyScreenState extends State<CurrencyScreen> {
       appBar: AppBar(
         title: const Text('Manage Currencies'),
         centerTitle: true,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: IconButton(
+              onPressed: _alertDailogCurrencies,
+              icon: const Icon(
+                Icons.error,
+                color: Colors.red,
+              ),
+            ),
+          )
+        ],
       ),
       body: Column(
         children: [

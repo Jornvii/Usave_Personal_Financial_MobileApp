@@ -35,28 +35,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
     _loadCategories();
   }
 
-  Future<void> _loadCategories() async {
-    List<Map<String, dynamic>> categories = await CategoryDB().getCategories();
-    List<Map<String, dynamic>> income = [];
-    List<Map<String, dynamic>> expense = [];
-    List<Map<String, dynamic>> saving = [];
-
-    for (var category in categories) {
-      if (category['type'] == 'Income') {
-        income.add(category);
-      } else if (category['type'] == 'Expense') {
-        expense.add(category);
-      } else if (category['type'] == 'Saving') {
-        saving.add(category);
-      }
-    }
-
-    setState(() {
-      incomeCategories = income;
-      expenseCategories = expense;
-      savingCategories = saving;
-    });
-  }
+ 
 
   @override
   Widget build(BuildContext context) {
@@ -137,7 +116,28 @@ class _CategoryScreenState extends State<CategoryScreen> {
       ),
     );
   }
+ Future<void> _loadCategories() async {
+    List<Map<String, dynamic>> categories = await CategoryDB().getCategories();
+    List<Map<String, dynamic>> income = [];
+    List<Map<String, dynamic>> expense = [];
+    List<Map<String, dynamic>> saving = [];
 
+    for (var category in categories) {
+      if (category['type'] == 'Income') {
+        income.add(category);
+      } else if (category['type'] == 'Expense') {
+        expense.add(category);
+      } else if (category['type'] == 'Saving') {
+        saving.add(category);
+      }
+    }
+
+    setState(() {
+      incomeCategories = income;
+      expenseCategories = expense;
+      savingCategories = saving;
+    });
+  }
   Widget _buildCategorySection({
     required String title,
     required List<String> categories,
@@ -147,6 +147,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
   }) {
     return Card(
       elevation: 4,
+      color: color.withOpacity(0.15),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
@@ -155,7 +156,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
               : type == 'Expense'
                   ? Colors.red
                   : Colors.orange,
-          width: 0.5,
+          width: 0.8,
         ),
       ),
       child: Padding(

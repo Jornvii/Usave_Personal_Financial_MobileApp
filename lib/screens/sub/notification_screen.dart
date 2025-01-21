@@ -25,24 +25,31 @@ class _NotificationScreenState extends State<NotificationScreen> {
   @override
   void initState() {
     super.initState();
-    _loadNotifications(); // Load existing notifications
-    // _generateNotification1();
+    _loadNotifications();
+    _generateNotification1();
     _generateNotification2();
-    _startAutoNotification(); // Start timer for periodic updates
+    _startAutoNotification(); 
   }
 
   void _scheduleNotification(DateTime scheduledTime) {
     final duration = scheduledTime.difference(DateTime.now());
     Future.delayed(duration, () {
-      // _generateNotification1();
+      _generateNotification1();
       _generateNotification2();
       _scheduleNotification(scheduledTime.add(const Duration(days: 1)));
     });
   }
 
+  void clearNotifications() async {
+    final db = NotificationDB();
+    await db.deleteAllNotifications();
+    _loadNotifications();
+    print("All notifications deleted successfully.");
+  }
+
   void _startAutoNotification() {
     _timer = Timer.periodic(const Duration(hours: 12), (timer) {
-      // _generateNotification1();
+      _generateNotification1();
       _generateNotification2();
     });
   }
@@ -52,10 +59,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
       loading = true;
     });
     try {
-      // Fetch transactions from the database
       final transactions = await transactionDB.getTransactions();
 
-      // Group and calculate totals
       double totalIncome = 0.0;
       double totalExpenses = 0.0;
       double totalSaving = 0.0;
@@ -80,7 +85,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
       double balance = totalIncome - totalExpenses;
 
-      // Generate prompt1 for Gemini
       String prompt1 = """
     Analyze my financial data and generate a short notification:
     - Total Income: \$${totalIncome.toStringAsFixed(2)}
@@ -92,15 +96,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
     Provide a concise alert based on the data or with a sentence alert me better financial like a quote or sth, ( write all in just short paragraph)
     """;
 
-      // Fetch response from Gemini API
       final response = await gemini.generateFromText(prompt1);
       String notificationText = response.text.trim();
-
-      // Save the notification with a timestamp
       String time = _formatCurrentTime();
       int timestamp = DateTime.now().millisecondsSinceEpoch;
 
-      // Save to database
       final notificationDB = NotificationDB();
       await notificationDB.insertNotification({
         'message': notificationText,
@@ -108,7 +108,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
         'timestamp': timestamp,
       });
 
-      // Refresh notifications list
       await _loadNotifications();
     } catch (e) {
       _showErrorDialog("Error generating notification: $e");
@@ -133,8 +132,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
               (savingsByCategory[category] ?? 0) + amount;
         }
       }
-
-      // Compare saving amounts with goals
       List<String> notificationsList = [];
       bool hasValidSavings = false;
 
@@ -279,6 +276,13 @@ class _NotificationScreenState extends State<NotificationScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          TextButton.icon(
+            label: const Text("Clear All"),
+            onPressed: clearNotifications,
+            icon: const Icon(Icons.delete, color: Colors.red),
+          )
+        ],
       ),
       body: ListView.builder(
         itemCount: notifications.length,
@@ -339,7 +343,6 @@ class _NotificationCardState extends State<NotificationCard> {
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        // side: BorderSide(color: Colors.blue,)
       ),
       child: Container(
         decoration: BoxDecoration(
@@ -357,7 +360,7 @@ class _NotificationCardState extends State<NotificationCard> {
               const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment
-                    .spaceBetween, // Spacing between time and 'Read More' button
+                    .spaceBetween, 
                 children: [
                   Text(
                     widget.time,

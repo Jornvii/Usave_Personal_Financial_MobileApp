@@ -33,88 +33,6 @@ class _TrashBinScreenState extends State<TrashBinScreen> {
     });
   }
 
-  void _recoverTransaction(int id) async {
-    final db = TransactionDB();
-    await db.recoverTransaction(id);
-    _loadDeletedTransactions();
-  }
-
-  void _permanentlyDeleteTransaction(int id) async {
-    final db = TransactionDB();
-    await db.permanentlyDeleteTransaction(id);
-    _loadDeletedTransactions();
-  }
-
-  void _recoverAllTransactions() async {
-    final db = TransactionDB();
-    setState(() {
-      isLoading = true;
-    });
-    for (var transaction in deletedTransactions) {
-      await db.recoverTransaction(transaction['id']);
-    }
-    _loadDeletedTransactions();
-  }
-
-  void _deleteAllTransactions() async {
-    final db = TransactionDB();
-    setState(() {
-      isLoading = true;
-    });
-    for (var transaction in deletedTransactions) {
-      await db.permanentlyDeleteTransaction(transaction['id']);
-    }
-    _loadDeletedTransactions();
-  }
-
-  void _showDeleteAllConfirmation() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete All'),
-        content: const Text('Delete permanently all transactions ?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              _deleteAllTransactions();
-              Navigator.pop(context);
-            },
-            child:
-                const Text('Delete All', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showRestoreAllConfirmation() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Restore All'),
-        content: const Text('Restore all transactions from the trash?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              _recoverAllTransactions();
-              Navigator.pop(context);
-            },
-            child: const Text('Restore All',
-                style: TextStyle(color: Colors.green)),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     Map<String, List<Map<String, dynamic>>> groupedTransactions = {};
@@ -253,6 +171,88 @@ class _TrashBinScreenState extends State<TrashBinScreen> {
                 ),
               ],
             ),
+    );
+  }
+
+  void _recoverTransaction(int id) async {
+    final db = TransactionDB();
+    await db.recoverTransaction(id);
+    _loadDeletedTransactions();
+  }
+
+  void _permanentlyDeleteTransaction(int id) async {
+    final db = TransactionDB();
+    await db.permanentlyDeleteTransaction(id);
+    _loadDeletedTransactions();
+  }
+
+  void _recoverAllTransactions() async {
+    final db = TransactionDB();
+    setState(() {
+      isLoading = true;
+    });
+    for (var transaction in deletedTransactions) {
+      await db.recoverTransaction(transaction['id']);
+    }
+    _loadDeletedTransactions();
+  }
+
+  void _deleteAllTransactions() async {
+    final db = TransactionDB();
+    setState(() {
+      isLoading = true;
+    });
+    for (var transaction in deletedTransactions) {
+      await db.permanentlyDeleteTransaction(transaction['id']);
+    }
+    _loadDeletedTransactions();
+  }
+
+  void _showDeleteAllConfirmation() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete All'),
+        content: const Text('Delete permanently all transactions ?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              _deleteAllTransactions();
+              Navigator.pop(context);
+            },
+            child:
+                const Text('Delete All', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showRestoreAllConfirmation() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Restore All'),
+        content: const Text('Restore all transactions from the trash?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              _recoverAllTransactions();
+              Navigator.pop(context);
+            },
+            child: const Text('Restore All',
+                style: TextStyle(color: Colors.green)),
+          ),
+        ],
+      ),
     );
   }
 }

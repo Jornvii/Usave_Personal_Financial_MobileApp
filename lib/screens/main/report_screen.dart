@@ -34,81 +34,6 @@ class _ReportScreenState extends State<ReportScreen> {
     _loadTransactions(context);
   }
 
-  // Fetch the default currency symbol from CurrencyDB
-  Future<void> _loadDefaultCurrency() async {
-    final currencies = await _currencyDB.getCurrencies();
-    final defaultCurrency = currencies.firstWhere(
-      (currency) => currency['isDefault'] == 1,
-      orElse: () => {'symbol': '\$'},
-    );
-    setState(() {
-      currencySymbol = defaultCurrency['symbol'];
-    });
-  }
-
-  // Fetch transactions from the database and prepare data for the chart
-  Future<void> _loadTransactions(BuildContext context) async {
-    final languageProvider =
-        Provider.of<LanguageProvider>(context, listen: false);
-    final db = TransactionDB();
-    final allTransactions = await db.getTransactions();
-
-    Map<String, double> categoryTotals = {
-      'Income': 0.0,
-      'Expense': 0.0,
-      'Saving': 0.0,
-    };
-
-    // Calculate total amount per(Income, Expense, Saving)
-    for (var transaction in allTransactions) {
-      if (transaction['typeCategory'] == 'Income') {
-        categoryTotals['Income'] =
-            categoryTotals['Income']! + transaction['amount'];
-      } else if (transaction['typeCategory'] == 'Expense') {
-        categoryTotals['Expense'] =
-            categoryTotals['Expense']! + transaction['amount'];
-      } else if (transaction['typeCategory'] == 'Saving') {
-        categoryTotals['Saving'] =
-            categoryTotals['Saving']! + transaction['amount'];
-      }
-    }
-
-    // Update state with totals for each category
-    setState(() {
-      incomeTotal = categoryTotals['Income']!;
-      expenseTotal = categoryTotals['Expense']!;
-      savingTotal = categoryTotals['Saving']!;
-      chartData = [
-        ChartData(
-          languageProvider.translate('Income'),
-          incomeTotal,
-          const Color.fromARGB(255, 17, 215, 119),
-        ),
-        ChartData(
-          languageProvider.translate('Expense'),
-          expenseTotal,
-          Colors.red.shade400,
-        ),
-        ChartData(
-          languageProvider.translate('Saving'),
-          savingTotal,
-          Colors.orange.shade400,
-        ),
-      ];
-
-      // chartData = [
-
-      //   ChartData( languageProvider.translate('Income'), incomeTotal,
-      //       const Color.fromARGB(255, 17, 215, 119)),
-      //   //   'Income',
-      //   //   incomeTotal,
-      //   //   const Color.fromARGB(255, 17, 215, 119),
-      //   // ),
-      //   ChartData('Expense', expenseTotal, Colors.red.shade400),
-      //   ChartData('Saving', savingTotal, Colors.orange.shade400),
-      // ];
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -189,6 +114,81 @@ class _ReportScreenState extends State<ReportScreen> {
     );
   }
 
+  // Fetch the default currency symbol from CurrencyDB
+  Future<void> _loadDefaultCurrency() async {
+    final currencies = await _currencyDB.getCurrencies();
+    final defaultCurrency = currencies.firstWhere(
+      (currency) => currency['isDefault'] == 1,
+      orElse: () => {'symbol': '\$'},
+    );
+    setState(() {
+      currencySymbol = defaultCurrency['symbol'];
+    });
+  }
+
+  // Fetch transactions from the database and prepare data for the chart
+  Future<void> _loadTransactions(BuildContext context) async {
+    final languageProvider =
+        Provider.of<LanguageProvider>(context, listen: false);
+    final db = TransactionDB();
+    final allTransactions = await db.getTransactions();
+
+    Map<String, double> categoryTotals = {
+      'Income': 0.0,
+      'Expense': 0.0,
+      'Saving': 0.0,
+    };
+
+    // Calculate total amount per(Income, Expense, Saving)
+    for (var transaction in allTransactions) {
+      if (transaction['typeCategory'] == 'Income') {
+        categoryTotals['Income'] =
+            categoryTotals['Income']! + transaction['amount'];
+      } else if (transaction['typeCategory'] == 'Expense') {
+        categoryTotals['Expense'] =
+            categoryTotals['Expense']! + transaction['amount'];
+      } else if (transaction['typeCategory'] == 'Saving') {
+        categoryTotals['Saving'] =
+            categoryTotals['Saving']! + transaction['amount'];
+      }
+    }
+
+    // Update state with totals for each category
+    setState(() {
+      incomeTotal = categoryTotals['Income']!;
+      expenseTotal = categoryTotals['Expense']!;
+      savingTotal = categoryTotals['Saving']!;
+      chartData = [
+        ChartData(
+          languageProvider.translate('Income'),
+          incomeTotal,
+          const Color.fromARGB(255, 17, 215, 119),
+        ),
+        ChartData(
+          languageProvider.translate('Expense'),
+          expenseTotal,
+          Colors.red.shade400,
+        ),
+        ChartData(
+          languageProvider.translate('Saving'),
+          savingTotal,
+          Colors.orange.shade400,
+        ),
+      ];
+
+      // chartData = [
+
+      //   ChartData( languageProvider.translate('Income'), incomeTotal,
+      //       const Color.fromARGB(255, 17, 215, 119)),
+      //   //   'Income',
+      //   //   incomeTotal,
+      //   //   const Color.fromARGB(255, 17, 215, 119),
+      //   // ),
+      //   ChartData('Expense', expenseTotal, Colors.red.shade400),
+      //   ChartData('Saving', savingTotal, Colors.orange.shade400),
+      // ];
+    });
+  }
   // Modernized balance section
   Widget buildBalanceSection(LanguageProvider languageProvider) {
     return Column(

@@ -28,7 +28,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
     _loadNotifications(); // Load existing notifications
     // _generateNotification1();
     _generateNotification2();
-    _startAutoNotification(); // Start timer for periodic updates
+    _startAutoNotification(); 
   }
 
   void _scheduleNotification(DateTime scheduledTime) {
@@ -38,6 +38,13 @@ class _NotificationScreenState extends State<NotificationScreen> {
       _generateNotification2();
       _scheduleNotification(scheduledTime.add(const Duration(days: 1)));
     });
+  }
+
+  void clearNotifications() async {
+    final db = NotificationDB();
+    await db.deleteAllNotifications();
+    _loadNotifications();
+    print("All notifications deleted successfully.");
   }
 
   void _startAutoNotification() {
@@ -52,10 +59,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
       loading = true;
     });
     try {
-      // Fetch transactions from the database
       final transactions = await transactionDB.getTransactions();
 
-      // Group and calculate totals
       double totalIncome = 0.0;
       double totalExpenses = 0.0;
       double totalSaving = 0.0;
@@ -80,7 +85,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
       double balance = totalIncome - totalExpenses;
 
-      // Generate prompt1 for Gemini
       String prompt1 = """
     Analyze my financial data and generate a short notification:
     - Total Income: \$${totalIncome.toStringAsFixed(2)}
@@ -92,15 +96,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
     Provide a concise alert based on the data or with a sentence alert me better financial like a quote or sth, ( write all in just short paragraph)
     """;
 
-      // Fetch response from Gemini API
       final response = await gemini.generateFromText(prompt1);
       String notificationText = response.text.trim();
-
-      // Save the notification with a timestamp
       String time = _formatCurrentTime();
       int timestamp = DateTime.now().millisecondsSinceEpoch;
 
-      // Save to database
       final notificationDB = NotificationDB();
       await notificationDB.insertNotification({
         'message': notificationText,
@@ -108,71 +108,60 @@ class _NotificationScreenState extends State<NotificationScreen> {
         'timestamp': timestamp,
       });
 
-      // Refresh notifications list
       await _loadNotifications();
     } catch (e) {
       _showErrorDialog("Error generating notification: $e");
     }
   }
-Future<void> _generateNotification2() async {
-  setState(() {
-    loading = true;
-  });
-  try {
-    // Fetch saving goals from SavingGoalDB
-    final savingGoalDB = SavingGoalDB();
-    final savingGoals = await savingGoalDB.fetchSavingGoals();
 
-    // Fetch savings transactions from TransactionDB
-    final transactions = await transactionDB.getTransactions();
-    Map<String, double> savingsByCategory = {};
+  Future<void> _generateNotification2() async {
+    try {
+      final savingGoalDB = SavingGoalDB();
+      final savingGoals = await savingGoalDB.fetchSavingGoals();
 
-    for (var transaction in transactions) {
-      final type = transaction['typeCategory'];
-      final amount = transaction['amount'] as double;
-      final category = transaction['category'] ?? "Uncategorized";
+      final transactions = await transactionDB.getTransactions();
+      Map<String, double> savingsByCategory = {};
 
-      if (type == 'Saving') {
-        savingsByCategory[category] =
-            (savingsByCategory[category] ?? 0) + amount;
-      }
-    }
+      for (var transaction in transactions) {
+        final type = transaction['typeCategory'];
+        final amount = transaction['amount'] as double;
+        final category = transaction['category'] ?? "Uncategorized";
 
-    // Compare saving amounts with goals
-    List<String> notificationsList = [];
-    bool hasValidSavings = false;
-
-    for (var goal in savingGoals) {
-      final savingCategory = goal['savingCategory'] as String;
-      final goalAmount = goal['goalAmount'] as double;
-      final savedAmount = savingsByCategory[savingCategory] ?? 0.0;
-
-      if (savedAmount > 0) {
-        hasValidSavings = true; // Ensure at least one valid saving exists
-
-        if (savedAmount >= goalAmount) {
-          // Calculate percentage complete
-          double percentComplete =
-              ((savedAmount / goalAmount) * 100).clamp(0, 100);
-
-          notificationsList.add(
-              "🎉 Congratulations! You've reached your saving goal for $savingCategory! You've saved \$${savedAmount.toStringAsFixed(2)} (Goal: \$${goalAmount.toStringAsFixed(2)}) and are ${percentComplete.toStringAsFixed(1)}% complete.");
-        } else {
-          // Calculate remaining amount and percentage
-          final remaining = goalAmount - savedAmount;
-          double percentComplete =
-              ((savedAmount / goalAmount) * 100).clamp(0, 100);
-
-          notificationsList.add(
-              "Keep going! You've saved ${percentComplete.toStringAsFixed(1)}% of your goal for $savingCategory. You're \$${remaining.toStringAsFixed(2)} away from completing it.");
+        if (type == 'Saving') {
+          savingsByCategory[category] =
+              (savingsByCategory[category] ?? 0) + amount;
         }
       }
-    }
+      List<String> notificationsList = [];
+      bool hasValidSavings = false;
 
-    // Proceed with Gemini prompt only if there are valid savings
-    if (hasValidSavings) {
-      // Generate prompt2 for Gemini
-      String prompt2 = """
+      for (var goal in savingGoals) {
+        final savingCategory = goal['savingCategory'] as String;
+        final goalAmount = goal['goalAmount'] as double;
+        final savedAmount = savingsByCategory[savingCategory] ?? 0.0;
+
+        if (savedAmount > 0) {
+          hasValidSavings = true;
+
+          if (savedAmount >= goalAmount) {
+            double percentComplete =
+                ((savedAmount / goalAmount) * 100).clamp(0, 100);
+
+            notificationsList.add(
+                "🎉 Congratulations! You've reached your saving goal for $savingCategory! You've saved \$${savedAmount.toStringAsFixed(2)} (Goal: \$${goalAmount.toStringAsFixed(2)}) and are ${percentComplete.toStringAsFixed(1)}% complete.");
+          } else {
+            final remaining = goalAmount - savedAmount;
+            double percentComplete =
+                ((savedAmount / goalAmount) * 100).clamp(0, 100);
+
+            notificationsList.add(
+                "Keep going! You've saved ${percentComplete.toStringAsFixed(1)}% of your goal for $savingCategory. You're \$${remaining.toStringAsFixed(2)} away from completing it.");
+          }
+        }
+      }
+
+      if (hasValidSavings) {
+        String prompt2 = """
       Based on the following saving goal and transaction data, provide a short summary notification or motivation:
       - Saving Goals: ${savingGoals.map((g) => '${g['savingCategory']}: Goal \$${g['goalAmount']}').join(', ')}
       - Savings by Category: ${savingsByCategory.entries.map((e) => '${e.key}: \$${e.value.toStringAsFixed(2)}').join(', ')}
@@ -180,32 +169,29 @@ Future<void> _generateNotification2() async {
       Include a percentage to complete reach for each goal. Provide a short concise and motivational message about achieving these goals and some short idea to reach goal. (write all in just short paragraph)
     """;
 
-      final response = await gemini.generateFromText(prompt2);
-      String notificationText = response.text.trim();
+        final response = await gemini.generateFromText(prompt2);
+        String notificationText = response.text.trim();
 
-      // Save the notification with a timestamp
-      String time = _formatCurrentTime();
-      int timestamp = DateTime.now().millisecondsSinceEpoch;
+        String time = _formatCurrentTime();
+        int timestamp = DateTime.now().millisecondsSinceEpoch;
 
-      final notificationDB = NotificationDB();
-      await notificationDB.insertNotification({
-        'message': notificationText,
-        'time': time,
-        'timestamp': timestamp,
+        final notificationDB = NotificationDB();
+        await notificationDB.insertNotification({
+          'message': notificationText,
+          'time': time,
+          'timestamp': timestamp,
+        });
+
+        await _loadNotifications();
+      }
+    } catch (e) {
+      _showErrorDialog("Error generating notification: $e");
+    } finally {
+      setState(() {
+        loading = false;
       });
-
-      // Refresh notifications list
-      await _loadNotifications();
     }
-  } catch (e) {
-    _showErrorDialog("Error generating notification: $e");
-  } finally {
-    setState(() {
-      loading = false;
-    });
   }
-}
-
 
   Future<void> _loadNotifications() async {
     final notificationDB = NotificationDB();
@@ -290,6 +276,13 @@ Future<void> _generateNotification2() async {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          TextButton.icon(
+            label: const Text("Clear All"),
+            onPressed: clearNotifications,
+            icon: const Icon(Icons.delete, color: Colors.red),
+          )
+        ],
       ),
       body: ListView.builder(
         itemCount: notifications.length,
@@ -302,7 +295,7 @@ Future<void> _generateNotification2() async {
             key: UniqueKey(),
             direction: DismissDirection.endToStart,
             confirmDismiss: (direction) async {
-              _showDeleteConfirmation(id); // Use the ID here for confirmation
+              _showDeleteConfirmation(id);
               return false;
             },
             background: Container(
@@ -341,55 +334,56 @@ class _NotificationCardState extends State<NotificationCard> {
 
   @override
   Widget build(BuildContext context) {
-    // Limit the message length to 150 characters
     final displayMessage = widget.message.length > 100 && !_isExpanded
         ? '${widget.message.substring(0, 60)} ...'
         : widget.message;
 
     return Card(
-      elevation: 3,
+      elevation: 5,
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            RichText(
-              text: _formatText(displayMessage),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment
-                  .spaceBetween, // Spacing between time and 'Read More' button
-              children: [
-                Text(
-                  widget.time,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: const Color.fromARGB(112, 139, 195, 74),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              RichText(
+                text: _formatText(displayMessage),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment
+                    .spaceBetween, 
+                children: [
+                  Text(
+                    widget.time,
+                    style: const TextStyle(
+                        fontSize: 13, fontWeight: FontWeight.bold),
                   ),
-                ),
-                if (widget.message.length > 100)
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _isExpanded = !_isExpanded;
-                      });
-                    },
-                    child: Text(
-                      _isExpanded ? "Read Less" : "Read More",
-                      style: const TextStyle(
-                        color: Colors.blue,
-                        fontSize: 14,
+                  if (widget.message.length > 100)
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _isExpanded = !_isExpanded;
+                        });
+                      },
+                      child: Text(
+                        _isExpanded ? "Read Less" : "Read More",
+                        style: const TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.bold),
                       ),
                     ),
-                  ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -7,7 +7,7 @@ import '../../models/chat_db.dart';
 import '../../models/transaction_db.dart';
 import '../../provider/langguages_provider.dart';
 import '../../models/profile_db.dart';
-import '../sub/category_screen.dart';
+import '../sub/addcategory_screen.dart';
 import '../sub/dev_pf.dart';
 import '../sub/opensource_screen.dart';
 import '../sub/trashbin_screen.dart';
@@ -29,6 +29,198 @@ class _SettingScreenUiState extends State<SettingScreenUi> {
     super.initState();
     _loadUserProfile();
     _loadTransactions();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // final themeProvider = Provider.of<ThemeProvider>(context);
+    final languageProvider = Provider.of<LanguageProvider>(context);
+    return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        toolbarHeight: 200,
+        flexibleSpace: Padding(
+          padding: const EdgeInsets.only(top: 30),
+          child: Center(
+            child: Column(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(top: 20, bottom: 20),
+                  child: CircleAvatar(
+                    radius: 50,
+                    backgroundImage: AssetImage('assets/images/logoapp.png'),
+                  ),
+                ),
+                _buildAnimatedText()
+              ],
+            ),
+          ),
+        ),
+      ),
+      body: SingleChildScrollView(
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                  child: Card(
+                    elevation: 5,
+                    color: Theme.of(context).cardColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      side: BorderSide(
+                        color: Theme.of(context).primaryColor.withOpacity(0.8),
+                        width: 1.0,
+                      ),
+                    ),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(8),
+                      onTap: () {},
+                      child: Padding(
+                        padding: const EdgeInsets.all(5),
+                        child: ListTile(
+                          leading: Icon(Icons.person,
+                              color: Theme.of(context).iconTheme.color),
+                          title: Text(
+                            _username ??
+                                languageProvider.translate('default_username'),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyLarge
+                                ?.copyWith(fontSize: 18),
+                          ),
+                          trailing: IconButton(
+                            icon: CircleAvatar(
+                              backgroundColor: Colors.green.withOpacity(0.7),
+                              child: Icon(Icons.edit,
+                                  color: Theme.of(context).iconTheme.color),
+                            ),
+                            onPressed: () => _showEditDialog(languageProvider),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 5),
+
+                //  Grid Items
+                GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: 3,
+                  childAspectRatio: 1,
+                  padding: const EdgeInsets.all(8),
+                  children: [
+                    _buildMenuItem(
+                      context,
+                      languageProvider,
+                      Icons.category,
+                      'category',
+                      () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const CategoryScreen()),
+                      ),
+                      Colors.lightBlue,
+                    ),
+                    _buildMenuItem(
+                        context,
+                        languageProvider,
+                        Icons.paid,
+                        'currency',
+                        () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const CurrencyScreen()),
+                            ),
+                        const Color.fromARGB(255, 61, 196, 65)),
+                    _buildMenuItem(
+                        context,
+                        languageProvider,
+                        Icons.delete,
+                        'Trashbin',
+                        () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const TrashBinScreen()),
+                            ),
+                        Colors.red),
+                  ],
+                ),
+                const SizedBox(height: 5),
+                //  Grid Items
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  padding: const EdgeInsets.only(left: 8, right: 8),
+                  itemCount: 4,
+                  itemBuilder: (context, index) {
+                    switch (index) {
+                      case 0:
+                        return _BuildSecMenuItem(
+                            context,
+                            Icons.tune,
+                            languageProvider,
+                            'appearance',
+                            () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const AppearanceScreen()),
+                                ),
+                            Colors.amber);
+                      case 1:
+                        return _BuildSecMenuItem(
+                            context,
+                            Icons.delete_forever,
+                            languageProvider,
+                            'delete_data',
+                            () => _showDeleteOptionsDialog(
+                                context, languageProvider),
+                            const Color.fromARGB(255, 221, 25, 11));
+                      case 2:
+                        return _BuildSecMenuItem(
+                            context,
+                            Icons.code,
+                            languageProvider,
+                            'AboutMe',
+                            () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const DevPfScreen()),
+                                ),
+                            Colors.blueAccent);
+                      case 3:
+                        return _BuildSecMenuItem(
+                            context,
+                            Icons.error,
+                            languageProvider,
+                            'OpenSource',
+                            () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const OpenSourceScreen()),
+                                ),
+                            const Color.fromARGB(255, 47, 111, 96));
+                      default:
+                        return Container();
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _loadTransactions() async {
@@ -100,206 +292,6 @@ class _SettingScreenUiState extends State<SettingScreenUi> {
       SnackBar(
         content: Text(languageProvider.translate('profile_updated')),
         backgroundColor: Colors.green,
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // final themeProvider = Provider.of<ThemeProvider>(context);
-    final languageProvider = Provider.of<LanguageProvider>(context);
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        toolbarHeight: 200,
-        flexibleSpace: Padding(
-          padding: const EdgeInsets.only(top: 30),
-          child: Center(
-            child: Column(
-              children: [
-                const Padding(
-                  padding: EdgeInsets.only(top: 20, bottom: 20),
-                  child: CircleAvatar(
-                    radius: 50,
-                    backgroundImage: AssetImage('assets/images/logoapp.png'),
-                  ),
-                ),
-                _buildAnimatedText()
-              ],
-            ),
-          ),
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-                  child: Card(
-                    elevation: 5,
-                    color: Theme.of(context).cardColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      side: BorderSide(
-                        color: Theme.of(context).primaryColor.withOpacity(0.8),
-                        width: 1.0,
-                      ),
-                    ),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(8),
-                      onTap: () {},
-                      child: Padding(
-                        padding: const EdgeInsets.all(5),
-                        child: ListTile(
-                          leading: Icon(Icons.person,
-                              color: Theme.of(context).iconTheme.color),
-                          title: Text(
-                            _username ??
-                                languageProvider.translate('default_username'),
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyLarge
-                                ?.copyWith(fontSize: 18),
-                          ),
-                          trailing: IconButton(
-                            icon: CircleAvatar(
-                              backgroundColor: Colors.amber,
-                              child: Icon(Icons.edit,
-                                  color: Theme.of(context).iconTheme.color),
-                            ),
-                            onPressed: () => _showEditDialog(languageProvider),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 15),
-
-                //  Grid Items
-                GridView.count(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: 3,
-                  childAspectRatio: 1,
-                  padding: const EdgeInsets.all(8),
-                  children: [
-                    _buildMenuItem(
-                      context,
-                      languageProvider,
-                      Icons.category,
-                      'category',
-                      () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const CategoryScreen()),
-                      ),
-                      Colors.lightBlue,
-                    ),
-                    _buildMenuItem(
-                        context,
-                        languageProvider,
-                        Icons.paid,
-                        'currency',
-                        () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const CurrencyScreen()),
-                            ),
-                        const Color.fromARGB(255, 61, 196, 65)),
-                    _buildMenuItem(
-                        context,
-                        languageProvider,
-                        Icons.delete,
-                        'Trashbin',
-                        () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const TrashBinScreen()),
-                            ),
-                        Colors.red),
-                  ],
-                ),
-                const SizedBox(height: 5),
-                const Divider(
-                  height: 20.0,
-                  thickness: 1 / 3,
-                  color: Color.fromARGB(255, 17, 215, 119),
-                  indent: 25.0,
-                  endIndent: 25.0,
-                ),
-                const SizedBox(height: 5),
-                //  Grid Items
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  padding: const EdgeInsets.only(left: 8, right: 8),
-                  itemCount: 4,
-                  itemBuilder: (context, index) {
-                    switch (index) {
-                      case 0:
-                        return _BuildSecMenuItem(
-                            context,
-                            Icons.tune,
-                            languageProvider,
-                            'appearance',
-                            () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const AppearanceScreen()),
-                                ),
-                            Colors.amber);
-                      case 1:
-                        return _BuildSecMenuItem(
-                            context,
-                            Icons.delete_forever,
-                            languageProvider,
-                            'delete_data',
-                            () => _showDeleteOptionsDialog(
-                                context, languageProvider),
-                            const Color.fromARGB(255, 221, 25, 11));
-                      case 2:
-                        return _BuildSecMenuItem(
-                            context,
-                            Icons.code,
-                            languageProvider,
-                            'AboutMe',
-                            () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const DevPfScreen()),
-                                ),
-                            Colors.blueAccent);
-                      case 3:
-                        return _BuildSecMenuItem(
-                            context,
-                            Icons.error,
-                            languageProvider,
-                            'OpenSource',
-                            () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const OpenSourceScreen()),
-                                ),
-                            const Color.fromARGB(255, 47, 111, 96));
-                      default:
-                        return Container();
-                    }
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }

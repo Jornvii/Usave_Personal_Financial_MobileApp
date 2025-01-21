@@ -55,79 +55,6 @@ class _UpdateTransactionScreenState extends State<UpdateTransactionScreen> {
     _loadCategories();
   }
 
-  // Load categories from the database and merge with default categories
-  Future<void> _loadCategories() async {
-    final db = CategoryDB(); // Assuming this is your database helper
-    final allCategories = await db.getCategories();
-
-    setState(() {
-      incomeCategories = [
-        ...defaultIncomeCategories,
-        ...allCategories
-            .where((cat) => cat['type'] == 'Income')
-            .map((cat) => cat['name'] as String),
-      ];
-      expenseCategories = [
-        ...defaultExpenseCategories,
-        ...allCategories
-            .where((cat) => cat['type'] == 'Expense')
-            .map((cat) => cat['name'] as String),
-      ];
-      savingCategories = [
-        ...defaultSavingCategories,
-        ...allCategories
-            .where((cat) => cat['type'] == 'Saving')
-            .map((cat) => cat['name'] as String),
-      ];
-    });
-  }
-
-  void _pickDate() async {
-    final pickedDate = await showDatePicker(
-      context: context,
-      initialDate: transactionDate ?? DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-    );
-    if (pickedDate != null) {
-      setState(() {
-        transactionDate = pickedDate;
-      });
-    }
-  }
-
-  void _updateTransaction() {
-    if (amountController.text.isEmpty ||
-        double.tryParse(amountController.text) == null ||
-        selectedCategory == null ||
-        transactionDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill out all required fields correctly'),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
-      return;
-    }
-
-    final updatedTransaction = {
-      'id': widget.transaction['id'],
-      'typeCategory': typeCategory,
-      'category': selectedCategory!,
-      'amount': double.parse(amountController.text),
-      'description': descriptionController.text,
-      'date': DateFormat('yyyy-MM-dd').format(transactionDate!),
-    };
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Transaction updated successfully'),
-        backgroundColor: Colors.green,
-      ),
-    );
-
-    Navigator.pop(context, updatedTransaction);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -269,5 +196,79 @@ class _UpdateTransactionScreenState extends State<UpdateTransactionScreen> {
         ),
       ),
     );
+  }
+  
+  // Load categories from the database and merge with default categories
+  Future<void> _loadCategories() async {
+    final db = CategoryDB(); // Assuming this is your database helper
+    final allCategories = await db.getCategories();
+
+    setState(() {
+      incomeCategories = [
+        ...defaultIncomeCategories,
+        ...allCategories
+            .where((cat) => cat['type'] == 'Income')
+            .map((cat) => cat['name'] as String),
+      ];
+      expenseCategories = [
+        ...defaultExpenseCategories,
+        ...allCategories
+            .where((cat) => cat['type'] == 'Expense')
+            .map((cat) => cat['name'] as String),
+      ];
+      savingCategories = [
+        ...defaultSavingCategories,
+        ...allCategories
+            .where((cat) => cat['type'] == 'Saving')
+            .map((cat) => cat['name'] as String),
+      ];
+    });
+  }
+
+  void _pickDate() async {
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: transactionDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (pickedDate != null) {
+      setState(() {
+        transactionDate = pickedDate;
+      });
+    }
+  }
+
+  void _updateTransaction() {
+    if (amountController.text.isEmpty ||
+        double.tryParse(amountController.text) == null ||
+        selectedCategory == null ||
+        transactionDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please fill out all required fields correctly'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
+    final updatedTransaction = {
+      'id': widget.transaction['id'],
+      'typeCategory': typeCategory,
+      'category': selectedCategory!,
+      'amount': double.parse(amountController.text),
+      'description': descriptionController.text,
+      'date': DateFormat('yyyy-MM-dd').format(transactionDate!),
+    };
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Transaction updated successfully'),
+        backgroundColor: Colors.green,
+      ),
+    );
+
+    Navigator.pop(context, updatedTransaction);
   }
 }

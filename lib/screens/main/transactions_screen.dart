@@ -33,93 +33,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         DateTime(DateTime.now().year, DateTime.now().month + 1, 0);
   }
 
-  Future<void> _loadCurrency() async {
-    final db = CurrencyDB();
-    final defaultCurrency = await db.getDefaultCurrency();
-    setState(() {
-      currencySymbol =
-          defaultCurrency?['symbol'] ?? '\$'; 
-    });
-  }
-
-  Future<void> _loadTransactions() async {
-    final db = TransactionDB();
-    final data = await db.getTransactions();
-    setState(() {
-      transactions = List<Map<String, dynamic>>.from(data);
-    });
-  }
-
-  // Show the date range picker
-  void _pickDateRange() async {
-    final DateTimeRange? picked = await showDateRangePicker(
-      context: context,
-      initialDateRange:
-          DateTimeRange(start: selectedStartDate, end: selectedEndDate),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-    );
-
-    if (picked != null) {
-      setState(() {
-        selectedStartDate = picked.start;
-        selectedEndDate = picked.end;
-      });
-    }
-  }
-
-  void _confirmDeleteTransaction(int id) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Move to Trash?'),
-        content: const Text('This will move the transaction to Trashbin ?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              final db = TransactionDB();
-              await db.moveToTrash(id);
-              Navigator.pop(context);
-              _loadTransactions();
-            },
-            child: const Text('Move', style: TextStyle(color: Colors.orange)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _openAddTransactionScreen() async {
-    final newTransaction = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>
-            AddTransactionScreen(selectedDate: selectedStartDate),
-      ),
-    );
-
-//  Navigator.push(
-//             context,
-//             MaterialPageRoute(
-//               builder: (context) =>
-//                   DataTransactionTable(transactions: transactions),
-//             ),
-//           );
-
-    if (newTransaction != null) {
-      final db = TransactionDB();
-      await db.addTransaction({
-        ...newTransaction,
-        'date': DateFormat('yyyy-MM-dd').format(newTransaction['date']),
-        'typeCategory': newTransaction['typeCategory'],
-      });
-      _loadTransactions();
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -322,5 +235,93 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         child: const Icon(Icons.add),
       ),
     );
+  }
+  
+  Future<void> _loadCurrency() async {
+    final db = CurrencyDB();
+    final defaultCurrency = await db.getDefaultCurrency();
+    setState(() {
+      currencySymbol =
+          defaultCurrency?['symbol'] ?? '\$'; 
+    });
+  }
+
+  Future<void> _loadTransactions() async {
+    final db = TransactionDB();
+    final data = await db.getTransactions();
+    setState(() {
+      transactions = List<Map<String, dynamic>>.from(data);
+    });
+  }
+
+  // Show the date range picker
+  void _pickDateRange() async {
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      initialDateRange:
+          DateTimeRange(start: selectedStartDate, end: selectedEndDate),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+
+    if (picked != null) {
+      setState(() {
+        selectedStartDate = picked.start;
+        selectedEndDate = picked.end;
+      });
+    }
+  }
+
+  void _confirmDeleteTransaction(int id) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Move to Trash?'),
+        content: const Text('This will move the transaction to Trashbin ?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              final db = TransactionDB();
+              await db.moveToTrash(id);
+              Navigator.pop(context);
+              _loadTransactions();
+            },
+            child: const Text('Move', style: TextStyle(color: Colors.orange)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _openAddTransactionScreen() async {
+    final newTransaction = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            AddTransactionScreen(selectedDate: selectedStartDate),
+      ),
+    );
+
+//  Navigator.push(
+//             context,
+//             MaterialPageRoute(
+//               builder: (context) =>
+//                   DataTransactionTable(transactions: transactions),
+//             ),
+//           );
+
+    if (newTransaction != null) {
+      final db = TransactionDB();
+      await db.addTransaction({
+        ...newTransaction,
+        'date': DateFormat('yyyy-MM-dd').format(newTransaction['date']),
+        'typeCategory': newTransaction['typeCategory'],
+      });
+      _loadTransactions();
+    }
   }
 }

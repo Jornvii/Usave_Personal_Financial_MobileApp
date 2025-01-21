@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_bot/screens/main/report_screen.dart';
-import 'package:flutter_chat_bot/screens/sub/saving_goal_screen.dart';
+import 'package:flutter_chat_bot/screens/sub/addsaving_goal_screen.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -15,7 +15,6 @@ import '../../widgets/summary_category.dart';
 import '../../widgets/table_transactions.dart';
 import '../main/transactions_screen.dart';
 import 'sub_calculate.dart';
-import 'timer_test.dart';
 
 class SubHomeScreen extends StatefulWidget {
   final List transactions;
@@ -79,104 +78,6 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
     });
   }
 
-  Future<void> _loadCurrency() async {
-    final db = CurrencyDB();
-    final defaultCurrency = await db.getDefaultCurrency();
-    setState(() {
-      currencySymbol = defaultCurrency?['symbol'] ?? '\$';
-    });
-  }
-
-  Future<void> _loadUserProfile() async {
-    final userProfile = await _userDB.fetchUserProfile();
-    if (userProfile != null) {
-      setState(() {
-        _username = userProfile['username'];
-      });
-    }
-  }
-
-  Future<void> _showEditDialog(LanguageProvider languageProvider) async {
-    final TextEditingController usernameController =
-        TextEditingController(text: _username);
-
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(languageProvider.translate('edit_user_name')),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: usernameController,
-                decoration: InputDecoration(
-                  labelText: languageProvider.translate('username'),
-                  border: const OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 20),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(languageProvider.translate('cancel')),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final updatedUsername = usernameController.text.trim();
-                await _userDB.saveOrUpdateUserProfile(updatedUsername);
-                await _loadUserProfile();
-                setState(() {
-                  _username = updatedUsername;
-                });
-
-                Navigator.of(context).pop();
-                _showSuccessSnackbar(languageProvider);
-              },
-              child: Text(languageProvider.translate('save')),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showSuccessSnackbar(LanguageProvider languageProvider) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(languageProvider.translate('profile_updated')),
-        backgroundColor: Colors.green,
-      ),
-    );
-  }
-
-  void _confirmDeleteTransaction(int id) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Move to Trash?'),
-        content: const Text('This will move the transaction to Trashbin ?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              final db = TransactionDB();
-              await db.moveToTrash(id);
-              Navigator.pop(context);
-              _loadTransactions();
-            },
-            child: const Text('Move', style: TextStyle(color: Colors.orange)),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final languageProvider = Provider.of<LanguageProvider>(context);
@@ -200,20 +101,22 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
         elevation: 2,
         backgroundColor: theme.appBarTheme.backgroundColor,
         title: Padding(
-          padding: const EdgeInsets.only(bottom: 15),
+          padding: const EdgeInsets.only(bottom: 10),
           child: _username == null || _username!.isEmpty
               ? GestureDetector(
                   onTap: () => _showEditDialog(languageProvider),
                   child: Row(
                     children: [
-                       Text(
-                      '${_getGreetingMessage()}, ',
-                      style: const TextStyle(fontSize: 22),
-                    ),
+                      Text(
+                        '${_getGreetingMessage()}, ',
+                        style: const TextStyle(
+                          fontSize: 20,
+                        ),
+                      ),
                       Text(
                         languageProvider.translate('Tap here to set your name'),
                         style: const TextStyle(
-                          fontSize: 16,
+                          fontSize: 12,
                           color: Colors.blue,
                           decoration: TextDecoration.underline,
                         ),
@@ -253,7 +156,7 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 5),
 
             // GridView section
             Container(
@@ -310,6 +213,12 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
                     //   'icon': Icons.watch,
                     //   'title': 'TIMER',
                     //   'screen':  TimerScreen(),
+                    //   'color': Colors.purple,
+                    // },
+                    // {
+                    //   'icon': Icons.currency_bitcoin,
+                    //   'title': 'currency',
+                    //   'screen':  CurrencyConverterScreen(),
                     //   'color': Colors.purple,
                     // },
                   ];
@@ -458,6 +367,104 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Future<void> _loadCurrency() async {
+    final db = CurrencyDB();
+    final defaultCurrency = await db.getDefaultCurrency();
+    setState(() {
+      currencySymbol = defaultCurrency?['symbol'] ?? '\$';
+    });
+  }
+
+  Future<void> _loadUserProfile() async {
+    final userProfile = await _userDB.fetchUserProfile();
+    if (userProfile != null) {
+      setState(() {
+        _username = userProfile['username'];
+      });
+    }
+  }
+
+  Future<void> _showEditDialog(LanguageProvider languageProvider) async {
+    final TextEditingController usernameController =
+        TextEditingController(text: _username);
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(languageProvider.translate('edit_user_name')),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: usernameController,
+                decoration: InputDecoration(
+                  labelText: languageProvider.translate('username'),
+                  border: const OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(languageProvider.translate('cancel')),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final updatedUsername = usernameController.text.trim();
+                await _userDB.saveOrUpdateUserProfile(updatedUsername);
+                await _loadUserProfile();
+                setState(() {
+                  _username = updatedUsername;
+                });
+
+                Navigator.of(context).pop();
+                _showSuccessSnackbar(languageProvider);
+              },
+              child: Text(languageProvider.translate('save')),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showSuccessSnackbar(LanguageProvider languageProvider) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(languageProvider.translate('profile_updated')),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
+
+  void _confirmDeleteTransaction(int id) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Move to Trash?'),
+        content: const Text('This will move the transaction to Trashbin ?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              final db = TransactionDB();
+              await db.moveToTrash(id);
+              Navigator.pop(context);
+              _loadTransactions();
+            },
+            child: const Text('Move', style: TextStyle(color: Colors.orange)),
+          ),
+        ],
       ),
     );
   }

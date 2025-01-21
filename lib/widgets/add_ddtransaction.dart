@@ -50,104 +50,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     _loadCategories();
   }
 
-  // Load categories from the database and merge with default categories
-  Future<void> _loadCategories() async {
-    final db = CategoryDB();
-    final allCategories = await db.getCategories();
-
-    setState(() {
-      incomeCategories = [
-        ...defaultIncomeCategories,
-        ...allCategories
-            .where((cat) => cat['type'] == 'Income')
-            .map((cat) => cat['name'] as String),
-      ];
-
-      expenseCategories = [
-        ...defaultExpenseCategories,
-        ...allCategories
-            .where((cat) => cat['type'] == 'Expense')
-            .map((cat) => cat['name'] as String),
-      ];
-
-      savingCategories = [
-        ...defaultSavingCategories,
-        ...allCategories
-            .where((cat) => cat['type'] == 'Saving')
-            .map((cat) => cat['name'] as String),
-      ];
-    });
-  }
-
-  void _pickDate() async {
-    final pickedDate = await showDatePicker(
-      context: context,
-      initialDate: transactionDate ?? DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-    );
-    if (pickedDate != null) {
-      setState(() {
-        transactionDate = pickedDate;
-      });
-    }
-  }
-
-  void _addTransaction() {
-    if (_formKey.currentState!.validate()) {
-      if (transactionDate == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please select a date for the transaction'),
-            backgroundColor: Colors.redAccent,
-          ),
-        );
-        return;
-      }
-
-      final newTransaction = {
-        'category': selectedCategory,
-        'amount': double.parse(amountController.text),
-        'typeCategory': typeCategory,
-        'description': descriptionController.text,
-        'date': transactionDate,
-      };
-
-      setState(() {
-        hasTransactionBeenAdded = true;
-      });
-
-      Navigator.pop(context, newTransaction);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill out all required fields'),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
-    }
-  }
-
-  void _resetFields() {
-    selectedCategory = '';
-    transactionDate = null;
-    amountController.clear();
-    descriptionController.clear();
-  }
-
-  void _handleToggle(String selectedType) {
-    if (typeCategory != selectedType && !hasTransactionBeenAdded) {
-      setState(() {
-        typeCategory = selectedType;
-        _resetFields(); // Reset fields only if no transaction has been added
-      });
-    } else {
-      setState(() {
-        typeCategory = selectedType;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final languageProvider = Provider.of<LanguageProvider>(context);
@@ -376,4 +278,102 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       ),
     );
   }
+    // Load categories from the database and merge with default categories
+  Future<void> _loadCategories() async {
+    final db = CategoryDB();
+    final allCategories = await db.getCategories();
+
+    setState(() {
+      incomeCategories = [
+        ...defaultIncomeCategories,
+        ...allCategories
+            .where((cat) => cat['type'] == 'Income')
+            .map((cat) => cat['name'] as String),
+      ];
+
+      expenseCategories = [
+        ...defaultExpenseCategories,
+        ...allCategories
+            .where((cat) => cat['type'] == 'Expense')
+            .map((cat) => cat['name'] as String),
+      ];
+
+      savingCategories = [
+        ...defaultSavingCategories,
+        ...allCategories
+            .where((cat) => cat['type'] == 'Saving')
+            .map((cat) => cat['name'] as String),
+      ];
+    });
+  }
+
+  void _pickDate() async {
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: transactionDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (pickedDate != null) {
+      setState(() {
+        transactionDate = pickedDate;
+      });
+    }
+  }
+
+  void _addTransaction() {
+    if (_formKey.currentState!.validate()) {
+      if (transactionDate == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please select a date for the transaction'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+        return;
+      }
+
+      final newTransaction = {
+        'category': selectedCategory,
+        'amount': double.parse(amountController.text),
+        'typeCategory': typeCategory,
+        'description': descriptionController.text,
+        'date': transactionDate,
+      };
+
+      setState(() {
+        hasTransactionBeenAdded = true;
+      });
+
+      Navigator.pop(context, newTransaction);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please fill out all required fields'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    }
+  }
+
+  void _resetFields() {
+    selectedCategory = '';
+    transactionDate = null;
+    amountController.clear();
+    descriptionController.clear();
+  }
+
+  void _handleToggle(String selectedType) {
+    if (typeCategory != selectedType && !hasTransactionBeenAdded) {
+      setState(() {
+        typeCategory = selectedType;
+        _resetFields(); // Reset fields only if no transaction has been added
+      });
+    } else {
+      setState(() {
+        typeCategory = selectedType;
+      });
+    }
+  }
+
 }

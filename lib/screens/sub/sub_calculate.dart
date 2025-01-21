@@ -29,58 +29,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     });
   }
 
-  void _calculateResult() {
-    if (_formKey.currentState?.validate() ?? false) {
-      final double? amount = double.tryParse(_amountController.text);
-      final double interestrate =
-          double.tryParse(_interestrateController.text) ?? 0;
-      final int years = int.tryParse(_yearsController.text) ?? 0;
-      final int months = int.tryParse(_monthsController.text) ?? 0;
-      final int days = int.tryParse(_daysController.text) ?? 0;
-
-      final int totalDays = (years * 365) + (months * 30) + days;
-
-      if (amount == null && totalDays == 0) {
-        setState(() {
-          _resultDescription = 'Please enter either an Amount or a Duration.';
-        });
-        return;
-      }
-
-      double total = 0;
-      double interestvalue = 0;
-
-      if (amount != null) {
-        if (interestrate > 0) {
-          // With interest rate
-          total = amount * (1 + (interestrate / 100) * (totalDays / 365));
-          interestvalue = total - amount;
-        } else {
-          // No interest rate
-          total = amount * totalDays;
-        }
-      }
-
-      setState(() {
-        _loadCurrency();
-        if (interestrate > 0) {
-          _resultDescription =
-              'Based on your input:\n\n• Amount: ${amount != null ? '${amount.toStringAsFixed(2)} $currencySymbol' : 'Not provided'}\n'
-              '• interestRate: $interestrate %\n'
-              '• Duration: ${years > 0 ? '$years year(s)' : ''} ${months > 0 ? '$months month(s)' : ''} ${days > 0 ? '$days day(s)' : ''}\n\n'
-              'This means if you save ${amount?.toStringAsFixed(2)}$currencySymbol for a period of ${years > 0 ? '$years year(s)' : ''} ${months > 0 ? '$months month(s)' : ''} ${days > 0 ? '$days day(s)' : ''}, '
-              'you will got interest amount ${interestvalue.toStringAsFixed(2)}  $currencySymbol  your total amount, including interest, will be ${total.toStringAsFixed(2)}.\n\n'
-              'This includes your initial savings and the calculated interest based on the interestrate provided.';
-        } else {
-          _resultDescription =
-              'Based on your input:\n\n• Amount: ${amount != null ? '${amount.toStringAsFixed(2)} $currencySymbol' : 'Not provided'}\n'
-              '• Duration: ${years > 0 ? '$years year(s)' : ''} ${months > 0 ? '$months month(s)' : ''} ${days > 0 ? '$days day(s)' : ''}\n\n'
-              'This means if you save ${amount?.toStringAsFixed(2)} $currencySymbol everyday for ${years > 0 ? '$years year(s)' : ''} ${months > 0 ? '$months month(s)' : ''} ${days > 0 ? '$days day(s)' : ''}, '
-              'you will accumulate a total of ${total.toStringAsFixed(2)}  $currencySymbol. This total is based solely on your initial amount and the specified duration';
-        }
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -207,6 +155,58 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     );
   }
 
+  void _calculateResult() {
+    if (_formKey.currentState?.validate() ?? false) {
+      final double? amount = double.tryParse(_amountController.text);
+      final double interestrate =
+          double.tryParse(_interestrateController.text) ?? 0;
+      final int years = int.tryParse(_yearsController.text) ?? 0;
+      final int months = int.tryParse(_monthsController.text) ?? 0;
+      final int days = int.tryParse(_daysController.text) ?? 0;
+
+      final int totalDays = (years * 365) + (months * 30) + days;
+
+      if (amount == null && totalDays == 0) {
+        setState(() {
+          _resultDescription = 'Please enter either an Amount or a Duration.';
+        });
+        return;
+      }
+
+      double total = 0;
+      double interestvalue = 0;
+
+      if (amount != null) {
+        if (interestrate > 0) {
+          // With interest rate
+          total = amount * (1 + (interestrate / 100) * (totalDays / 365));
+          interestvalue = total - amount;
+        } else {
+          // No interest rate
+          total = amount * totalDays;
+        }
+      }
+
+      setState(() {
+        _loadCurrency();
+        if (interestrate > 0) {
+          _resultDescription =
+              'Based on your input:\n\n• Amount: ${amount != null ? '${amount.toStringAsFixed(2)} $currencySymbol' : 'Not provided'}\n'
+              '• interestRate: $interestrate %\n'
+              '• Duration: ${years > 0 ? '$years year(s)' : ''} ${months > 0 ? '$months month(s)' : ''} ${days > 0 ? '$days day(s)' : ''}\n\n'
+              'This means if you save ${amount?.toStringAsFixed(2)}$currencySymbol for a period of ${years > 0 ? '$years year(s)' : ''} ${months > 0 ? '$months month(s)' : ''} ${days > 0 ? '$days day(s)' : ''}, '
+              'you will got interest amount ${interestvalue.toStringAsFixed(2)}  $currencySymbol  your total amount, including interest, will be ${total.toStringAsFixed(2)}.\n\n'
+              'This includes your initial savings and the calculated interest based on the interestrate provided.';
+        } else {
+          _resultDescription =
+              'Based on your input:\n\n• Amount: ${amount != null ? '${amount.toStringAsFixed(2)} $currencySymbol' : 'Not provided'}\n'
+              '• Duration: ${years > 0 ? '$years year(s)' : ''} ${months > 0 ? '$months month(s)' : ''} ${days > 0 ? '$days day(s)' : ''}\n\n'
+              'This means if you save ${amount?.toStringAsFixed(2)} $currencySymbol everyday for ${years > 0 ? '$years year(s)' : ''} ${months > 0 ? '$months month(s)' : ''} ${days > 0 ? '$days day(s)' : ''}, '
+              'you will accumulate a total of ${total.toStringAsFixed(2)}  $currencySymbol. This total is based solely on your initial amount and the specified duration';
+        }
+      });
+    }
+  }
   List<TextSpan> _parseResultDescription(String description) {
     final RegExp numberRegex =
         RegExp(r'\d+(\.\d+)?'); // Matches integers or decimals
