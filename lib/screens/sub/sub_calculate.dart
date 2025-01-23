@@ -63,15 +63,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 },
               ),
               const SizedBox(height: 10),
-              TextFormField(
-                controller: _interestrateController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'interestRate (%)',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 10),
+              // TextFormField(
+              //   controller: _interestrateController,
+              //   keyboardType: TextInputType.number,
+              //   decoration: const InputDecoration(
+              //     labelText: 'interestRate (%)',
+              //     border: OutlineInputBorder(),
+              //   ),
+              // ),
+              // const SizedBox(height: 10),
               Row(
                 children: [
                   Expanded(
@@ -178,7 +178,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
       if (amount != null) {
         if (interestrate > 0) {
-          // With interest rate
           total = amount * (1 + (interestrate / 100) * (totalDays / 365));
           interestvalue = total - amount;
         } else {

@@ -113,13 +113,13 @@ void _alertDailogCurrencies() {
           ],
         ),
         content: const Text(
-          'You can use only one currency the default currency. Let add and set Your own currency below.',
+          'You can use only one currency the default currency. Let add and set if you want use Your own currency below.',
           style: TextStyle(fontSize: 14),
         ),
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.of(context).pop(); // Close the dialog
+              Navigator.of(context).pop(); 
             },
             child: const Text('OK', style: TextStyle(color: Colors.blue)),
           ),

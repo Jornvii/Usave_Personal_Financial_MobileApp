@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/transaction_db.dart';
 import '../models/currency_db.dart';
-import 'table_transactions.dart';
+import 'data_table.dart';
 
 class ListSummaryScreen extends StatefulWidget {
   const ListSummaryScreen({super.key});
@@ -18,6 +18,7 @@ class _ListSummaryScreenState extends State<ListSummaryScreen> {
       DateTime(DateTime.now().year, DateTime.now().month + 1, 0);
   List<Map<String, dynamic>> transactions = [];
   String currencySymbol = '\$';
+  String selectedFilter = 'All';
 
   @override
   void initState() {
@@ -34,7 +35,6 @@ class _ListSummaryScreenState extends State<ListSummaryScreen> {
           defaultCurrency?['symbol'] ?? '\$'; // Use default if null
     });
   }
-
   Future<void> _loadTransactions() async {
     final db = TransactionDB();
     final data = await db.getTransactions();
@@ -43,7 +43,6 @@ class _ListSummaryScreenState extends State<ListSummaryScreen> {
     });
   }
 
-  // Show the date range picker
   void _pickDateRange() async {
     final DateTimeRange? picked = await showDateRangePicker(
       context: context,
@@ -66,18 +65,18 @@ class _ListSummaryScreenState extends State<ListSummaryScreen> {
     Map<String, Map<String, List<Map<String, dynamic>>>> groupedTransactions = {
       'Income': {},
       'Expense': {},
-      'Savings': {},
+      'Saving': {},
     };
 
     for (var transaction in transactions) {
       final type = transaction['typeCategory'];
       final category = transaction['category'];
 
-      if (type == 'Savings') {
-        if (!groupedTransactions['Savings']!.containsKey(category)) {
-          groupedTransactions['Savings']![category] = [];
+      if (type == 'Saving') {
+        if (!groupedTransactions['Saving']!.containsKey(category)) {
+          groupedTransactions['Saving']![category] = [];
         }
-        groupedTransactions['Savings']![category]?.add(transaction);
+        groupedTransactions['Saving']![category]?.add(transaction);
       } else {
         if (!groupedTransactions.containsKey(type)) {
           groupedTransactions[type] = {};
@@ -89,7 +88,7 @@ class _ListSummaryScreenState extends State<ListSummaryScreen> {
       }
     }
 
-    // Filtering transactions based on selected date range
+    // Filtering transactions based on selected date range and filter
     for (var type in groupedTransactions.keys) {
       groupedTransactions[type]!.forEach((category, categoryTransactions) {
         categoryTransactions.removeWhere((transaction) {
@@ -98,6 +97,10 @@ class _ListSummaryScreenState extends State<ListSummaryScreen> {
               transactionDate.isAfter(selectedEndDate);
         });
       });
+    }
+
+    if (selectedFilter != 'All') {
+      groupedTransactions.removeWhere((key, value) => key != selectedFilter);
     }
 
     return Scaffold(
@@ -111,27 +114,79 @@ class _ListSummaryScreenState extends State<ListSummaryScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.calendar_today),
-            onPressed: _pickDateRange, // Call date range picker
+            onPressed: _pickDateRange,
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16.0),
-        children: groupedTransactions.entries.map((entry) {
-          final type = entry.key;
-          final categories = entry.value;
+      body: Column(
+        children: [
+          const SizedBox(
+            height: 30,
+          ),
+          Container(
+            width: 180,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.3),
+                  spreadRadius: 2,
+                  blurRadius: 5,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: selectedFilter,
+                  items: const [
+                    DropdownMenuItem(value: 'All', child: Text('All')),
+                    DropdownMenuItem(value: 'Income', child: Text('Income')),
+                    DropdownMenuItem(value: 'Expense', child: Text('Expense')),
+                    DropdownMenuItem(value: 'Saving', child: Text('Saving')),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      selectedFilter = value!;
+                    });
+                  },
+                  isExpanded: true,
+                  dropdownColor:
+                      Colors.white, 
+                  icon: const Icon(
+                    Icons.arrow_drop_down,
+                    color: Colors.blue, 
+                  ),
+                  style: const TextStyle(
+                    color: Colors.grey,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500, 
+                  ),
+                  borderRadius: BorderRadius.circular(
+                      12),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.all(16.0),
+              children: groupedTransactions.entries.map((entry) {
+                final type = entry.key;
+                final categories = entry.value;
 
-          if (type == 'Savings' && categories.isNotEmpty) {
-            return _buildCategorySummary(type, categories);
-          }
+                if (categories.isNotEmpty) {
+                  return _buildCategorySummary(type, categories);
+                }
 
-          // For Income and Expense
-          if (categories.isNotEmpty) {
-            return _buildCategorySummary(type, categories);
-          }
-
-          return const SizedBox.shrink();
-        }).toList(),
+                return const SizedBox.shrink();
+              }).toList(),
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {

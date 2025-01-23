@@ -11,8 +11,8 @@ import '../../models/profile_db.dart';
 import '../../models/transaction_db.dart';
 import '../../provider/langguages_provider.dart';
 import '../../widgets/edit_transaction.dart';
-import '../../widgets/summary_category.dart';
-import '../../widgets/table_transactions.dart';
+import '../../widgets/data_category.dart';
+import '../../widgets/data_table.dart';
 import '../main/transactions_screen.dart';
 import 'sub_calculate.dart';
 
@@ -110,7 +110,7 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
                       Text(
                         '${_getGreetingMessage()}, ',
                         style: const TextStyle(
-                          fontSize: 20,
+                          fontSize: 16,
                         ),
                       ),
                       Text(
@@ -186,11 +186,12 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
                       'color': Colors.green,
                     },
                     {
-                      'icon': Icons.add_circle,
-                      'title': 'Transactions',
-                      'screen': const TransactionsScreen(),
-                      'color': Colors.lightBlue,
+                      'icon': Icons.pie_chart,
+                      'title': 'Reports',
+                      'screen': const ReportScreen(),
+                      'color': Colors.lime,
                     },
+
                     {
                       'icon': Icons.dashboard,
                       'title': 'Saving Goal',
@@ -204,10 +205,10 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
                       'color': Colors.blueGrey,
                     },
                     {
-                      'icon': Icons.pie_chart,
-                      'title': 'Reports',
-                      'screen': const ReportScreen(),
-                      'color': Colors.purple,
+                      'icon': Icons.add_circle,
+                      'title': 'Transactions',
+                      'screen': const TransactionsScreen(),
+                      'color': Colors.lightBlue,
                     },
                     // {
                     //   'icon': Icons.watch,
