@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_bot/screens/main/report_screen.dart';
 import 'package:flutter_chat_bot/screens/sub/addsaving_goal_screen.dart';
+import 'package:flutter_chat_bot/screens/sub/myhome_screen.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -169,7 +170,7 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,
                 ),
-                itemCount: 6,
+                itemCount:6,
                 itemBuilder: (context, index) {
                   final options = [
                     {
@@ -213,7 +214,7 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
                     // {
                     //   'icon': Icons.watch,
                     //   'title': 'TIMER',
-                    //   'screen':  TimerScreen(),
+                    //   'screen':  const TestNotificatioScreen(),
                     //   'color': Colors.purple,
                     // },
                     // {

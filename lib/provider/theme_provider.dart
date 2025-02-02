@@ -148,7 +148,7 @@ class ThemeProvider extends ChangeNotifier {
     scaffoldBackgroundColor: lightBackground,
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.transparent,
-      elevation: 2,
+      elevation: 1,
       shadowColor: Colors.black12,
       titleTextStyle: TextStyle(
           color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),

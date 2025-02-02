@@ -26,7 +26,7 @@ class CategoryDB {
     );
   }
 
-  // Create table with a 'type' field (Income or Expense)
+  
   Future _onCreate(Database db, int version) async {
     await db.execute('''
       CREATE TABLE categories(

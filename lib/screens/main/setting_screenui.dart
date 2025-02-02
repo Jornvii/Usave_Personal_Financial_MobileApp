@@ -184,6 +184,15 @@ class _SettingScreenUiState extends State<SettingScreenUi> {
                             () => _showDeleteOptionsDialog(
                                 context, languageProvider),
                             const Color.fromARGB(255, 221, 25, 11));
+                      // case 1:
+                      //   return _BuildSecMenuItem(
+                      //       context,
+                      //       Icons.delete_forever,
+                      //       languageProvider,
+                      //       'delete_data',
+                      //       () => _showDeleteOptionsDialog(
+                      //           context, languageProvider),
+                      //       const Color.fromARGB(255, 221, 25, 11));
                       case 2:
                         return _BuildSecMenuItem(
                             context,
@@ -397,16 +406,16 @@ class _SettingScreenUiState extends State<SettingScreenUi> {
                 children: [
                   Icon(
                     icon,
-                    size: 40, 
-                    color: Colors.white.withOpacity(0.9), 
+                    size: 40,
+                    color: Colors.white.withOpacity(0.9),
                   ),
-                  const SizedBox(height: 12), 
+                  const SizedBox(height: 12),
                   Text(
                     languageProvider.translate(titleKey),
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 16, 
-                      fontWeight: FontWeight.bold, 
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
                       color: Colors.white.withOpacity(0.9),
                     ),
                   ),
