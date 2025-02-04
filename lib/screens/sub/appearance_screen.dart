@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../provider/langguages_provider.dart';
+import '../../provider/notification_service.dart';
 import '../../provider/theme_provider.dart';
 
 class AppearanceScreen extends StatefulWidget {
@@ -12,6 +13,239 @@ class AppearanceScreen extends StatefulWidget {
 }
 
 class _AppearanceScreenState extends State<AppearanceScreen> {
+  bool isNotificationOn = false;
+  int selectedHour = 9;
+  int selectedMinute = 0;
+  @override
+  void initState() {
+    super.initState();
+    _loadPreferences();
+  }
+
+  Future<void> _loadPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isNotificationOn = prefs.getBool('isNotificationOn') ?? false;
+      selectedHour = prefs.getInt('selectedHour') ?? 9;
+      selectedMinute = prefs.getInt('selectedMinute') ?? 0;
+    });
+    if (isNotificationOn) {
+      NotificationService().schaduleNotification(
+        title: "iSAVE",
+        body: "Hello, Do you have any transactions today?🤑",
+        hour: selectedHour,
+        minute: selectedMinute,
+      );
+    }
+  }
+
+  Future<void> _savePreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setBool('isNotificationOn', isNotificationOn);
+    prefs.setInt('selectedHour', selectedHour);
+    prefs.setInt('selectedMinute', selectedMinute);
+  }
+
+  void _toggleNotification(bool newValue) {
+    setState(() {
+      isNotificationOn = newValue;
+    });
+    if (isNotificationOn) {
+      NotificationService().schaduleNotification(
+        title: "iSAVE",
+        body: "Hello, Do you have any transactions today?🤑",
+        hour: selectedHour,
+        minute: selectedMinute,
+      );
+    } else {
+      NotificationService().cancelAllNotification();
+    }
+    _savePreferences();
+  }
+
+  Future<void> _pickTime() async {
+    TimeOfDay? pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: selectedHour, minute: selectedMinute),
+    );
+    if (pickedTime != null) {
+      setState(() {
+        selectedHour = pickedTime.hour;
+        selectedMinute = pickedTime.minute;
+      });
+      if (isNotificationOn) {
+        NotificationService().schaduleNotification(
+          title: "iSAVE",
+          body: "Hello, Do you have any transactions today?🤑",
+          hour: selectedHour,
+          minute: selectedMinute,
+        );
+      }
+      _savePreferences();
+    }
+  }
+
+  void _showNotificationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.0),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  "Daily Alert Notification",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: 150,
+                  child: DropdownButtonFormField<bool>(
+                    value: isNotificationOn,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 15, vertical: 5),
+                    ),
+                    onChanged: (bool? newValue) {
+                      if (newValue != null) {
+                        setState(() {
+                          isNotificationOn = newValue;
+                        });
+                      }
+                    },
+                    items: const [
+                      DropdownMenuItem(value: true, child: Text("On")),
+                      DropdownMenuItem(value: false, child: Text("Off")),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.blue,width: 0.5),
+                    color: Colors.green[50],
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                        left: 20, right: 20, top: 10, bottom: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        RichText(
+                          text: TextSpan(
+                            style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey),
+                            children: [
+                              const TextSpan(text: "Set Time : "),
+                              TextSpan(
+                                text:
+                                    "${selectedHour.toString().padLeft(2, '0')}:${selectedMinute.toString().padLeft(2, '0')}",
+                                style: const TextStyle(
+                                    color: Colors
+                                        .black,fontWeight: FontWeight.bold, fontSize: 24),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                              color: Colors.blue.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(50)),
+                          child: Padding(
+                            padding: const EdgeInsets.all(4),
+                            child: IconButton(
+                              icon: const Icon(
+                                Icons.access_time,
+                                size: 28,
+                                color: Colors.blue,
+                              ),
+                              onPressed: _pickTime,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                // Row(
+                //   children: [
+                //     ElevatedButton(
+                //       onPressed: _pickTime,
+                //       style: ElevatedButton.styleFrom(
+                //         shape: RoundedRectangleBorder(
+                //           borderRadius: BorderRadius.circular(10),
+                //         ),
+                //         padding: const EdgeInsets.symmetric(
+                //             vertical: 12, horizontal: 20),
+                //       ),
+                //       child: Row(
+                //         children: [
+                //           Text(
+                //             "Set Notification Time: ${selectedHour.toString().padLeft(2, '0')}:${selectedMinute.toString().padLeft(2, '0')}",
+                //           ),
+                //           IconButton(
+                //               onPressed: _pickTime,
+                //               icon: const Icon(Icons.edit))
+                //         ],
+                //       ),
+                //     ),
+                //   ],
+                // ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text("Close",
+                          style: TextStyle(color: Colors.red)),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        _savePreferences();
+                        Navigator.pop(context);
+                        if (isNotificationOn) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                  "Notification Time set: ${selectedHour.toString().padLeft(2, '0')}:${selectedMinute.toString().padLeft(2, '0')}"),
+                            ),
+                          );
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 10, horizontal: 20),
+                      ),
+                      child: const Text("Save"),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
@@ -25,42 +259,56 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
       ),
       body: SafeArea(
         child: Center(
-          child: Column(
-            children: [
-              Padding(
-                  padding: const EdgeInsets.all(4.0),
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: ListTile(
-                        onTap: () => showNotificationDialog(context),
-                        title: Text(
-                          languageProvider.translate('"Daily Notification"'),
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.notifications),
-                          onPressed: () => showNotificationDialog(context),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                //         DropdownButton<bool>(
+                //   value: isNotificationOn,
+                //   onChanged: (bool? newValue) {
+                //     if (newValue != null) {
+                //       _toggleNotification(newValue);
+                //     }
+                //   },
+                //   items: const [
+                //     DropdownMenuItem(value: true, child: Text("On")),
+                //     DropdownMenuItem(value: false, child: Text("Off")),
+                //   ],
+                // ),
+                // ElevatedButton(
+                //   onPressed: _pickTime,
+                //   child: Text("Set Notification Time: ${selectedHour.toString().padLeft(2, '0')}:${selectedMinute.toString().padLeft(2, '0')}"),
+                // ),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ListTile(
+                      onTap: _showNotificationDialog,
+                      title: Text(
+                        languageProvider.translate('"Daily Notification'),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.notifications),
+                        onPressed: () => _showNotificationDialog(),
+                      ),
                     ),
-                  )),
-              _appearancemenu(
-                context,
-                languageProvider,
-                Icons.translate,
-                'language',
-                languageProvider
-                    .translate(languageProvider.selectedLanguage.toUpperCase()),
-                () => _showLanguageSelectionDialog(context, languageProvider),
-                Colors.lightBlue,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(5),
-                child: Card(
+                  ),
+                ),
+                _appearancemenu(
+                  context,
+                  languageProvider,
+                  Icons.translate,
+                  'language',
+                  languageProvider
+                      .translate(languageProvider.selectedLanguage.toUpperCase()),
+                  () => _showLanguageSelectionDialog(context, languageProvider),
+                  Colors.lightBlue,
+                ),
+                Card(
                   elevation: 5,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
@@ -81,174 +329,12 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
-  }
-}
-
-void showNotificationDialog(BuildContext context) async {
-  bool isSwitched = await getSavedSwitchState(); // Load switch state
-  TimeOfDay selectedTime = await getSavedTime() ??
-      const TimeOfDay(hour: 9, minute: 0);
-
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return StatefulBuilder(
-        builder: (context, setState) {
-          return AlertDialog(
-            title: const Text("Alert Notification"),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // const Text("Enable daily notification?"),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Switch(
-                      value: isSwitched,
-                      onChanged: (value) {
-                        setState(() {
-                          isSwitched = value;
-                        });
-                        saveSwitchState(value);
-                        if (isSwitched) {
-                          NotificationService().scheduleNotification(
-                            title: "iSAVE",
-                            body:  "Hello, Do you have any transactions today?🤑",
-                            hour: selectedTime.hour,
-                            minute: selectedTime.minute,
-                          );
-                        } else {
-                          NotificationService().cancelAllNotifications();
-                        }
-                      },
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.blue),
-                        color: Colors.green[50],
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 20, right: 20),
-                        child: Row(
-                          children: [
-                            Text(
-                              selectedTime
-                                  .format(context), // Show selected time
-                              style: const TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.access_time,
-                                  color: Colors.blue),
-                              onPressed: () async {
-                                TimeOfDay? pickedTime = await showTimePicker(
-                                  context: context,
-                                  initialTime: selectedTime,
-                                );
-
-                                if (pickedTime != null) {
-                                  setState(() {
-                                    selectedTime = pickedTime;
-                                  });
-
-                                  saveTime(pickedTime); // Save time
-
-                                  if (isSwitched) {
-                                    NotificationService().scheduleNotification(
-                                      title: "iSAVE",
-                                      body:
-                                          "Hello, Do you have any transactions today?🤑",
-                                      hour: selectedTime.hour,
-                                      minute: selectedTime.minute,
-                                    );
-                                  }
-                                }
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  isSwitched
-                      ? "Daily notification is ON at ${selectedTime.format(context)}"
-                      : "Daily notification is OFF",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: isSwitched ? Colors.green : Colors.red,
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text("Close"),
-              ),
-            ],
-          );
-        },
-      );
-    },
-  );
-}
-
-// Save switch SharedPreferences
-Future<void> saveSwitchState(bool isEnabled) async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  await prefs.setBool('isSwitched', isEnabled);
-}
-
-// Load switch SharedPreferences
-Future<bool> getSavedSwitchState() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  return prefs.getBool('isSwitched') ?? false; 
-}
-
-// Save selected time
-Future<void> saveTime(TimeOfDay time) async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  await prefs.setInt('hour', time.hour);
-  await prefs.setInt('minute', time.minute);
-}
-
-// Load saved time
-Future<TimeOfDay?> getSavedTime() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  int? hour = prefs.getInt('hour');
-  int? minute = prefs.getInt('minute');
-
-  if (hour != null && minute != null) {
-    return TimeOfDay(hour: hour, minute: minute);
-  }
-  return null;
-}
-
-class NotificationService {
-  void scheduleNotification({
-    required String title,
-    required String body,
-    required int hour,
-    required int minute,
-  }) {
-    // Implement notification scheduling logic here
-    print("Notification Scheduled: $title - $body at $hour:$minute");
-  }
-
-  void cancelAllNotifications() {
-    // Implement notification cancellation logic here
-    print("All notifications canceled.");
   }
 }
 
@@ -291,32 +377,29 @@ Widget _appearancemenu(
   VoidCallback onTap,
   Color appearancemenucolor,
 ) {
-  return Padding(
-    padding: const EdgeInsets.all(5),
-    child: Card(
-      elevation: 5,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-        side: const BorderSide(
-          color: Colors.blue,
-          width: 0.1,
-        ),
+  return Card(
+    elevation: 5,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(15),
+      side: const BorderSide(
+        color: Colors.blue,
+        width: 0.1,
       ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(15),
-        onTap: onTap,
-        child: ListTile(
-          leading: Icon(appearanceicon, size: 25, color: appearancemenucolor),
-          title: Text(
-            languageProvider.translate(appearancetitle),
-            // appearancetitle,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-            ),
+    ),
+    child: InkWell(
+      borderRadius: BorderRadius.circular(15),
+      onTap: onTap,
+      child: ListTile(
+        leading: Icon(appearanceicon, size: 25, color: appearancemenucolor),
+        title: Text(
+          languageProvider.translate(appearancetitle),
+          // appearancetitle,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
           ),
-          subtitle: Text(apearanceSub),
         ),
+        subtitle: Text(apearanceSub),
       ),
     ),
   );

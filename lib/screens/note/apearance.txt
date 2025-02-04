@@ -1,0 +1,347 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../provider/langguages_provider.dart';
+import '../../provider/theme_provider.dart';
+
+class AppearanceScreen extends StatefulWidget {
+  const AppearanceScreen({super.key});
+
+  @override
+  State<AppearanceScreen> createState() => _AppearanceScreenState();
+}
+
+class _AppearanceScreenState extends State<AppearanceScreen> {
+  @override
+  Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final languageProvider = Provider.of<LanguageProvider>(context);
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          "Appearance",
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+      ),
+      body: SafeArea(
+        child: Center(
+          child: Column(
+            children: [
+              Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ListTile(
+                        onTap: () => showNotificationDialog(context),
+                        title: Text(
+                          languageProvider.translate('"Daily Notification"'),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.notifications),
+                          onPressed: () => showNotificationDialog(context),
+                        ),
+                      ),
+                    ),
+                  )),
+              _appearancemenu(
+                context,
+                languageProvider,
+                Icons.translate,
+                'language',
+                languageProvider
+                    .translate(languageProvider.selectedLanguage.toUpperCase()),
+                () => _showLanguageSelectionDialog(context, languageProvider),
+                Colors.lightBlue,
+              ),
+              Padding(
+                padding: const EdgeInsets.all(5),
+                child: Card(
+                  elevation: 5,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    side: const BorderSide(
+                      width: 0.1,
+                    ),
+                  ),
+                  child: InkWell(
+                    child: SwitchListTile(
+                      title: Text(languageProvider.translate('theme')),
+                      subtitle: Text(
+                        themeProvider.isDarkTheme
+                            ? languageProvider.translate('Dark')
+                            : languageProvider.translate('Light'),
+                      ),
+                      value: themeProvider.isDarkTheme,
+                      onChanged: (value) => themeProvider.toggleTheme(),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+void showNotificationDialog(BuildContext context) async {
+  bool isSwitched = await getSavedSwitchState();
+  TimeOfDay selectedTime =
+      await getSavedTime() ?? const TimeOfDay(hour: 09, minute: 00);
+
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: const Text("Alert Notification"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // const Text("Enable daily notification?"),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Switch(
+                      value: isSwitched,
+                      onChanged: (value) {
+                        setState(() {
+                          isSwitched = value;
+                        });
+                        saveSwitchState(value);
+
+                        if (isSwitched) {
+                          NotificationService().scheduleNotification(
+                            title: "iSAVE",
+                            body:
+                                "Hello, Do you have any transactions today?🤑",
+                            hour: selectedTime.hour,
+                            minute: selectedTime.minute,
+                          );
+
+                          // Show success notification using SnackBar
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                  " ${selectedTime.format(context)} Daily alert notification is ON"),
+                              backgroundColor: Colors.green,
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                        } else {
+                          NotificationService().cancelAllNotifications();
+                        }
+                      },
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.blue),
+                        color: Colors.green[50],
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                            left: 20, right: 20, top: 10, bottom: 10),
+                        child: Row(
+                          children: [
+                            Text(
+                              selectedTime.format(context),
+                              style: const TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(
+                              width: 10,
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                  color: Colors.blue.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(50)),
+                              child: IconButton(
+                                icon: const Icon(
+                                  Icons.access_time,
+                                  size: 28,
+                                  color: Colors.blue,
+                                ),
+                                onPressed: () async {
+                                  TimeOfDay? pickedTime = await showTimePicker(
+                                    context: context,
+                                    initialTime: selectedTime,
+                                  );
+
+                                  if (pickedTime != null) {
+                                    setState(() {
+                                      selectedTime = pickedTime;
+                                    });
+
+                                    saveTime(pickedTime); // Save time
+
+                                    if (isSwitched) {
+                                      NotificationService()
+                                          .scheduleNotification(
+                                        title: "iSAVE",
+                                        body:
+                                            "Hello, Do you have any transactions today?🤑",
+                                        hour: selectedTime.hour,
+                                        minute: selectedTime.minute,
+                                      );
+                                    }
+                                  }
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  isSwitched
+                      ? "Daily notification is ON at ${selectedTime.format(context)}"
+                      : "Daily notification is OFF",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: isSwitched ? Colors.green : Colors.red,
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text("Close"),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+}
+
+// Save switch SharedPreferences
+Future<void> saveSwitchState(bool isEnabled) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.setBool('isSwitched', isEnabled);
+}
+
+// Load switch SharedPreferences
+Future<bool> getSavedSwitchState() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  return prefs.getBool('isSwitched') ?? false;
+}
+
+// Save selected time
+Future<void> saveTime(TimeOfDay time) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.setInt('hour', time.hour);
+  await prefs.setInt('minute', time.minute);
+}
+
+// Load saved time
+Future<TimeOfDay?> getSavedTime() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  int? hour = prefs.getInt('hour');
+  int? minute = prefs.getInt('minute');
+
+  if (hour != null && minute != null) {
+    return TimeOfDay(hour: hour, minute: minute);
+  }
+  return null;
+}
+
+class NotificationService {
+  void scheduleNotification({
+    required String title,
+    required String body,
+    required int hour,
+    required int minute,
+  }) {
+    // Implement notification scheduling logic here
+    print("Notification Scheduled: $title - $body at $hour:$minute");
+  }
+
+  void cancelAllNotifications() {
+    // Implement notification cancellation logic here
+    print("All notifications canceled.");
+  }
+}
+
+void _showLanguageSelectionDialog(
+    BuildContext context, LanguageProvider languageProvider) {
+  final languages = ['English', 'Thai', 'Khmer'];
+
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text(languageProvider.translate('select_language')),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: languages.map((language) {
+            return RadioListTile<String>(
+              title: Text(languageProvider.translate(language.toUpperCase())),
+              value: language,
+              groupValue: languageProvider.selectedLanguage,
+              onChanged: (value) {
+                if (value != null) {
+                  languageProvider.setLanguage(value);
+                  Navigator.of(context).pop();
+                }
+              },
+            );
+          }).toList(),
+        ),
+      );
+    },
+  );
+}
+
+Widget _appearancemenu(
+  BuildContext context,
+  LanguageProvider languageProvider,
+  IconData appearanceicon,
+  String appearancetitle,
+  String apearanceSub,
+  VoidCallback onTap,
+  Color appearancemenucolor,
+) {
+  return Padding(
+    padding: const EdgeInsets.all(5),
+    child: Card(
+      elevation: 5,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+        side: const BorderSide(
+          color: Colors.blue,
+          width: 0.1,
+        ),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(15),
+        onTap: onTap,
+        child: ListTile(
+          leading: Icon(appearanceicon, size: 25, color: appearancemenucolor),
+          title: Text(
+            languageProvider.translate(appearancetitle),
+            // appearancetitle,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          subtitle: Text(apearanceSub),
+        ),
+      ),
+    ),
+  );
+}

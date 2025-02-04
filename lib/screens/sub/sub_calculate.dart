@@ -35,7 +35,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     final languageProvider = Provider.of<LanguageProvider>(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Calculator'),
+        title: const Text('Day Saving Calculator'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -48,7 +48,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 controller: _amountController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
-                  labelText: 'Amount',
+                  labelText: 'Daily Amount',
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {

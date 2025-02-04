@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../provider/notification_service.dart';
+import '../provider/notification_service.dart';
 
 class TestNotificatioScreen extends StatefulWidget {
   const TestNotificatioScreen({super.key});
@@ -20,6 +20,7 @@ class _TestNotificatioScreenState extends State<TestNotificatioScreen> {
           child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
+         
           ElevatedButton(
               style: ButtonStyle(
                 backgroundColor: WidgetStateProperty.all(Colors.green.shade300),
@@ -49,5 +50,4 @@ class _TestNotificatioScreenState extends State<TestNotificatioScreen> {
       )),
     );
   }
-  
 }
