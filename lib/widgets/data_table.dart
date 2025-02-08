@@ -1,192 +1,271 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:csv/csv.dart';
+import 'package:path_provider/path_provider.dart';
+import '../../models/currency_db.dart';
+import '../../models/transaction_db.dart';
 
 class DataTransactionTable extends StatefulWidget {
-  final List<Map<String, dynamic>> transactions;
-
-  const DataTransactionTable({super.key, required this.transactions});
+  const DataTransactionTable({super.key});
 
   @override
   _DataTransactionTableState createState() => _DataTransactionTableState();
 }
 
 class _DataTransactionTableState extends State<DataTransactionTable> {
-  int currentPage = 0;
-  static const int rowsPerPage = 11;
-  int? _sortColumnIndex;
-  bool _sortAscending = true;
+  List<Map<String, dynamic>> transactions = [];
+  String currencySymbol = '\$';
+  String selectedFilter = 'All';
+  late DateTime selectedStartDate;
+  late DateTime selectedEndDate;
 
-  // Sort the transactions based on the selected column
-  void _sortData(int columnIndex, bool ascending) {
-    switch (columnIndex) {
-      case 0: // No
-        widget.transactions.sort((a, b) => ascending
-            ? a['date'].compareTo(b['date'])
-            : b['date'].compareTo(a['date']));
-        break;
-      case 1: // Date
-        widget.transactions.sort((a, b) => ascending
-            ? a['date'].compareTo(b['date'])
-            : b['date'].compareTo(a['date']));
-        break;
-      case 2: // Category
-        widget.transactions.sort((a, b) => ascending
-            ? a['category'].compareTo(b['category'])
-            : b['category'].compareTo(a['category']));
-        break;
-      case 3: // Amount
-        widget.transactions.sort((a, b) => ascending
-            ? a['amount'].compareTo(b['amount'])
-            : b['amount'].compareTo(a['amount']));
-        break;
-      case 4: // Type
-        widget.transactions.sort((a, b) => ascending
-            ? a['typeCategory'].compareTo(b['typeCategory'])
-            : b['typeCategory'].compareTo(a['typeCategory']));
-        break;
-      case 5: // Description
-        widget.transactions.sort((a, b) => ascending
-            ? (a['description'] ?? '').compareTo(b['description'] ?? '')
-            : (b['description'] ?? '').compareTo(a['description'] ?? ''));
-        break;
-    }
+  @override
+  void initState() {
+    super.initState();
+    _loadCurrency();
+    _loadTransactions();
+
+    selectedStartDate = DateTime(DateTime.now().year, DateTime.now().month, 1);
+    selectedEndDate =
+        DateTime(DateTime.now().year, DateTime.now().month + 1, 0);
   }
 
-  // Handle the column sorting
-  void _onSort(int columnIndex, bool ascending) {
+  Future<void> _loadCurrency() async {
+    final db = CurrencyDB();
+    final defaultCurrency = await db.getDefaultCurrency();
     setState(() {
-      _sortColumnIndex = columnIndex;
-      _sortAscending = ascending;
-      _sortData(columnIndex, ascending);
+      currencySymbol = defaultCurrency?['symbol'] ?? '\$';
+    });
+  }
+
+  Future<void> _loadTransactions() async {
+    final db = TransactionDB();
+    final data = await db.getTransactions();
+    setState(() {
+      transactions = List<Map<String, dynamic>>.from(data);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final totalRows = widget.transactions.length;
-    final totalPages = (totalRows / rowsPerPage).ceil();
+    final filteredTransactions = transactions.where((tx) {
+      DateTime txDate = DateTime.parse(tx['date']);
+      bool isWithinDateRange =
+          txDate.isAfter(selectedStartDate.subtract(const Duration(days: 1))) &&
+              txDate.isBefore(selectedEndDate.add(const Duration(days: 1)));
 
-    // Paginated transactions for the current page
-    final paginatedTransactions = widget.transactions
-        .skip(currentPage * rowsPerPage)
-        .take(rowsPerPage)
-        .toList();
+      bool matchesFilter =
+          selectedFilter == 'All' || tx['typeCategory'] == selectedFilter;
+      return isWithinDateRange && matchesFilter;
+    }).toList();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Transaction Table'),
-        backgroundColor: Colors.blueAccent,
+        title: const Text("Transaction Table"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.date_range),
+            onPressed: _pickDateRange,
+          ),
+        ],
       ),
       body: Column(
         children: [
+          const SizedBox(height: 30),
+          _buildDropdownFilter(),
+          const SizedBox(height: 10),
           Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: DataTable(
-                sortColumnIndex: _sortColumnIndex,
-                sortAscending: _sortAscending,
-                columns: [
-                  DataColumn(
-                    label: const Text('No'),
-                    onSort: (columnIndex, ascending) =>
-                        _onSort(columnIndex, ascending),
+            child: filteredTransactions.isEmpty
+                ? const Center(
+                    child: Text("No transactions available in this range."))
+                : SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: DataTable(
+                      columns: const [
+                        DataColumn(label: Text("No")),
+                        DataColumn(label: Text("Category")),
+                        DataColumn(label: Text("Amount")),
+                        DataColumn(label: Text("Type")),
+                        DataColumn(label: Text("Date")),
+                        DataColumn(label: Text("Description")),
+                      ],
+                      rows: filteredTransactions.asMap().entries.map((entry) {
+                        int index = entry.key + 1;
+                        Map<String, dynamic> tx = entry.value;
+
+                        return DataRow(cells: [
+                          DataCell(Text(index.toString())),
+                          DataCell(Text(tx['category'])),
+                          DataCell(Text("$currencySymbol ${tx['amount']}")),
+                          DataCell(Text(_getCategoryType(tx['typeCategory']))),
+                          DataCell(Text(_formatDate(tx['date']))),
+                          DataCell(Text(tx['description'] ?? "-")),
+                        ]);
+                      }).toList(),
+                    ),
                   ),
-                  DataColumn(
-                    label: const Text('Date'),
-                    onSort: (columnIndex, ascending) =>
-                        _onSort(columnIndex, ascending),
-                  ),
-                  DataColumn(
-                    label: const Text('Category'),
-                    onSort: (columnIndex, ascending) =>
-                        _onSort(columnIndex, ascending),
-                  ),
-                  DataColumn(
-                    label: const Text('Amount'),
-                    onSort: (columnIndex, ascending) =>
-                        _onSort(columnIndex, ascending),
-                  ),
-                  DataColumn(
-                    label: const Text('Type'),
-                    onSort: (columnIndex, ascending) =>
-                        _onSort(columnIndex, ascending),
-                  ),
-                  DataColumn(
-                    label: const Text('Description'),
-                    onSort: (columnIndex, ascending) =>
-                        _onSort(columnIndex, ascending),
-                  ),
-                ],
-                rows: List.generate(paginatedTransactions.length, (index) {
-                  final transaction = paginatedTransactions[index];
-                  return DataRow(
-                  
-                    cells: [
-                      DataCell(
-                          Text('${index + 1 + (currentPage * rowsPerPage)}')),
-                      DataCell(Text(transaction['date'])),
-                      DataCell(Text(transaction['category'])),
-                      DataCell(Text('\$${transaction['amount']}')),
-                      DataCell(Text(transaction['typeCategory'])),
-                      DataCell(Text(transaction['description'] ?? '')),
-                    ],
-                  );
-                }),
-              ),
-            ),
           ),
-          // Pagination Controls
-          if (totalPages > 1)
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Page ${currentPage + 1} of $totalPages',
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back),
-                        onPressed: currentPage > 0
-                            ? () {
-                                setState(() {
-                                  currentPage--;
-                                });
-                              }
-                            : null,
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.arrow_forward),
-                        onPressed: currentPage < totalPages - 1
-                            ? () {
-                                setState(() {
-                                  currentPage++;
-                                });
-                              }
-                            : null,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
         ],
       ),
-      // Floating Action Button for exporting data
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 40, left: 20),
         child: Align(
           alignment: Alignment.bottomCenter,
           child: FloatingActionButton.extended(
-            onPressed: () {},
+            onPressed: _exportToCSV,
             label: const Text("Export Data"),
-            icon: const Icon(Icons.play_arrow),
+            icon: const Icon(Icons.file_download),
             backgroundColor: const Color.fromARGB(255, 17, 215, 119),
           ),
         ),
       ),
     );
   }
+
+  Widget _buildDropdownFilter() {
+    return Container(
+      width: 180,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.3),
+            spreadRadius: 2,
+            blurRadius: 5,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<String>(
+            value: selectedFilter,
+            items: const [
+              DropdownMenuItem(value: 'All', child: Text('All')),
+              DropdownMenuItem(value: 'Income', child: Text('Income')),
+              DropdownMenuItem(value: 'Expense', child: Text('Expense')),
+              DropdownMenuItem(value: 'Saving', child: Text('Saving')),
+            ],
+            onChanged: (value) {
+              setState(() {
+                selectedFilter = value!;
+              });
+            },
+            isExpanded: true,
+            dropdownColor: Colors.white,
+            icon: const Icon(Icons.arrow_drop_down, color: Colors.blue),
+            style: const TextStyle(
+              color: Colors.grey,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _pickDateRange() async {
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      initialDateRange:
+          DateTimeRange(start: selectedStartDate, end: selectedEndDate),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+
+    if (picked != null) {
+      setState(() {
+        selectedStartDate = picked.start;
+        selectedEndDate = picked.end;
+      });
+    }
+  }
+
+String _getCategoryType(dynamic typeCategory) {
+  if (typeCategory is int) {
+    switch (typeCategory) {
+      case 0:
+        return "Expense";
+      case 1:
+        return "Income";
+      case 2:
+        return "Saving";
+      default:
+        return "otseete";
+    }
+  } else if (typeCategory is String) {
+    return typeCategory;
+  }
+  return "otseete";
+}
+
+
+  String _formatDate(String date) {
+    DateTime parsedDate = DateTime.parse(date);
+    return DateFormat("yyyy-MM-dd").format(parsedDate);
+  }
+Future<void> _exportToCSV() async {
+  List<List<String>> csvData = [
+    ["No", "Category", "Amount", "Type", "Date", "Description"]
+  ];
+
+  // Filter transactions based on the selected date range and filter
+  final filteredTransactions = transactions.where((tx) {
+    DateTime txDate = DateTime.parse(tx['date']);
+    bool isWithinDateRange = txDate.isAfter(selectedStartDate.subtract(const Duration(days: 1))) &&
+                             txDate.isBefore(selectedEndDate.add(const Duration(days: 1)));
+
+    bool matchesFilter = selectedFilter == 'All' || tx['typeCategory'] == selectedFilter;
+    return isWithinDateRange && matchesFilter;
+  }).toList();
+
+  for (int i = 0; i < filteredTransactions.length; i++) {
+    Map<String, dynamic> tx = filteredTransactions[i];
+    csvData.add([
+      (i + 1).toString(),
+      tx['category'],
+      "$currencySymbol ${tx['amount']}",
+      _getCategoryType(tx['typeCategory']),
+      _formatDate(tx['date']),
+      tx['description'] ?? "-"
+    ]);
+  }
+
+  String csv = const ListToCsvConverter().convert(csvData);
+
+  // Format the file name using the current date, hour, and minute
+  String formattedDateTime = DateFormat('yyyyMMdd_HHmm').format(DateTime.now());
+  String fileName = "transaction_${formattedDateTime}.csv";
+
+  // Get the directory path for saving the file
+  Directory? downloadsDirectory;
+
+  if (Platform.isAndroid) {
+    downloadsDirectory = await getExternalStorageDirectory(); // Use external storage for Android
+  } else if (Platform.isIOS) {
+    downloadsDirectory = await getApplicationDocumentsDirectory(); // Use app documents for iOS
+  }
+
+  if (downloadsDirectory != null) {
+    final downloadPath = "${downloadsDirectory.path}/$fileName";
+    final file = File(downloadPath);
+
+    await file.writeAsString(csv);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("CSV Exported to: $downloadPath")),
+    );
+  } else {
+    // Handle case if directory is not found
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: const Text("Failed to get download directory")),
+    );
+  }
+}
+
 }

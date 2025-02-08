@@ -50,6 +50,15 @@ class TransactionDB {
     final db = await database;
     return await db.insert('transactions', transaction);
   }
+Future<List<Map<String, dynamic>>> getTransactionsByDateRange(String startDate, String endDate) async {
+  final db = await database;
+  return await db.query(
+    'transactions',
+    where: 'date BETWEEN ? AND ? AND deleted = 0',
+    whereArgs: [startDate, endDate],
+    orderBy: 'date DESC',
+  );
+}
 
   Future<List<Map<String, dynamic>>> getTransactions() async {
     final db = await database;

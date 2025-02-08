@@ -32,8 +32,8 @@ class NotificationDB {
       CREATE TABLE Notifications (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         message TEXT NOT NULL,
-        time TEXT NOT NULL,
-        timestamp INTEGER NOT NULL
+        time TEXT NULL,
+        timestamp INTEGER NULL
       )
     ''');
   }

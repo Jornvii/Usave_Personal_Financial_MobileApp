@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/transaction_db.dart';
 import '../models/currency_db.dart';
-import 'data_table.dart';
 
 class ListSummaryScreen extends StatefulWidget {
   const ListSummaryScreen({super.key});
@@ -190,13 +189,13 @@ class _ListSummaryScreenState extends State<ListSummaryScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  DataTransactionTable(transactions: transactions),
-            ),
-          );
+          // Navigator.push(
+          //   context,
+          //   MaterialPageRoute(
+          //     builder: (context) =>
+          //         DataTransactionTable(transactions: transactions, ),
+          //   ),
+          // );
         },
         backgroundColor: const Color.fromARGB(255, 17, 215, 119),
         child: const Icon(Icons.visibility),

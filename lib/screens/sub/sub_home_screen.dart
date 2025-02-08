@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_bot/screens/main/report_screen.dart';
 import 'package:flutter_chat_bot/screens/sub/addsaving_goal_screen.dart';
-import 'package:flutter_chat_bot/widgets/myhome_screen.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -117,7 +116,7 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
                       Text(
                         languageProvider.translate('Tap here to set your name'),
                         style: const TextStyle(
-                          fontSize: 12,
+                          fontSize: 14,
                           color: Colors.blue,
                           decoration: TextDecoration.underline,
                         ),
@@ -170,7 +169,7 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,
                 ),
-                itemCount:7,
+                itemCount: 6,
                 itemBuilder: (context, index) {
                   final options = [
                     {
@@ -182,8 +181,9 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
                     {
                       'icon': Icons.table_view,
                       'title': 'Data Table',
-                      'screen':
-                          DataTransactionTable(transactions: transactions),
+
+                      'screen':  DataTransactionTable(),
+                      // DataTransactionTable(transactions: transactions),
                       'color': Colors.green,
                     },
                     {
@@ -211,12 +211,12 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
                       'screen': const TransactionsScreen(),
                       'color': Colors.lightBlue,
                     },
-                    {
-                      'icon': Icons.watch,
-                      'title': 'TIMER',
-                      'screen':  const TestNotificatioScreen(),
-                      'color': Colors.black,
-                    },
+                    // {
+                    //   'icon': Icons.watch,
+                    //   'title': 'TIMER',
+                    //   'screen':  const TestNotificatioScreen(),
+                    //   'color': Colors.black,
+                    // },
                     // {
                     //   'icon': Icons.currency_bitcoin,
                     //   'title': 'currency',

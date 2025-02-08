@@ -213,58 +213,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
     return timeFormat.format(DateTime.now());
   }
 
-  void _deleteNotification(int id) async {
-    final notificationDB = NotificationDB();
-    final result = await notificationDB.deleteNotification(id);
-    if (result > 0) {
-      setState(() {
-        notifications
-            .removeWhere((notification) => notification['id'] == id.toString());
-      });
-    }
-  }
 
-  void _showDeleteConfirmation(int id) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Delete Notification"),
-        content:
-            const Text("Are you sure you want to delete this notification?"),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: const Text("Cancel"),
-          ),
-          TextButton(
-            onPressed: () {
-              _deleteNotification(id);
-              Navigator.of(context).pop();
-            },
-            child: const Text("Delete"),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showErrorDialog(String error) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Error"),
-        content: Text(error),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text("Okay"),
-          ),
-        ],
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -313,6 +262,59 @@ class _NotificationScreenState extends State<NotificationScreen> {
       ),
     );
   }
+
+    void _deleteNotification(int id) async {
+    final notificationDB = NotificationDB();
+    final result = await notificationDB.deleteNotification(id);
+    if (result > 0) {
+      setState(() {
+        notifications
+            .removeWhere((notification) => notification['id'] == id.toString());
+      });
+    }
+  }
+  void _showDeleteConfirmation(int id) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Delete Notification"),
+        content:
+            const Text("Are you sure you want to delete this notification?"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () {
+              _deleteNotification(id);
+              Navigator.of(context).pop();
+            },
+            child: const Text("Delete"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showErrorDialog(String error) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Error"),
+        content: Text(error),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("Okay"),
+          ),
+        ],
+      ),
+    );
+  }
+
 }
 
 class NotificationCard extends StatefulWidget {

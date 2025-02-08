@@ -3,6 +3,7 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter_timezone/flutter_timezone.dart';
 
+
 class NotificationService {
   final notificationPlugin = FlutterLocalNotificationsPlugin();
 
@@ -122,6 +123,34 @@ class NotificationService {
     );
     print("Notification schaduled");
   }
+
+//  notifications from transactions 
+
+  // Future<void> financialNotification() async {
+  //   final db = NotificationDB();
+  //   final notifications = await db.getNotifications();
+
+  //   for (var notification in notifications) {
+  //     final int? timestamp = notification['timestamp'];
+  //     final String message = notification['message'];
+
+  //     if (timestamp != null) {
+  //       final scheduledTime =
+  //           tz.TZDateTime.fromMillisecondsSinceEpoch(tz.local, timestamp);
+  //       final int hour = scheduledTime.hour;
+  //       final int minute = scheduledTime.minute;
+
+  //       await schaduleNotification(
+  //         id: notification['id'],
+  //         title: "Financial Alert",
+  //         body: message,
+  //         hour: hour,
+  //         minute: minute,
+  //       );
+  //     }
+  //   }
+  //   print("Financial notifications fetched");
+  // }
 
   //cancel notification all
   Future<void> cancelAllNotification() async {
