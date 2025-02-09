@@ -6,8 +6,6 @@ import 'package:path_provider/path_provider.dart';
 import '../../models/currency_db.dart';
 import '../../models/transaction_db.dart';
 
-
-
 import 'package:permission_handler/permission_handler.dart';
 
 class DataTransactionTable extends StatefulWidget {
@@ -221,11 +219,12 @@ class _DataTransactionTableState extends State<DataTransactionTable> {
     // Filter transactions
     final filteredTransactions = transactions.where((tx) {
       DateTime txDate = DateTime.parse(tx['date']);
-
       bool matchesFilter =
           selectedFilter == 'All' || tx['typeCategory'] == selectedFilter;
-      return txDate.isAfter(selectedStartDate.subtract(const Duration(days: 1))) &&
-              txDate.isBefore(selectedEndDate.add(const Duration(days: 1))) && matchesFilter;
+      return txDate
+              .isAfter(selectedStartDate.subtract(const Duration(days: 1))) &&
+          txDate.isBefore(selectedEndDate.add(const Duration(days: 1))) &&
+          matchesFilter;
     }).toList();
 
     for (int i = 0; i < filteredTransactions.length; i++) {
@@ -241,29 +240,43 @@ class _DataTransactionTableState extends State<DataTransactionTable> {
     }
 
     String csv = const ListToCsvConverter().convert(csvData);
-
     String formattedDateTime =
         DateFormat('yyyyMMdd_HHmm').format(DateTime.now());
     String fileName = "transaction_$formattedDateTime.csv";
 
-    Directory? downloadsDirectory;
+    // Request storage permission
+    var status = await Permission.storage.request();
+    if (!status.isGranted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Storage permission denied!")),
+      );
+      return;
+    }
 
+    Directory? downloadsDirectory;
     if (Platform.isAndroid) {
-      downloadsDirectory = await getExternalStorageDirectory();
+      downloadsDirectory = Directory('/storage/emulated/0/Download');
+    } else {
+      downloadsDirectory = await getDownloadsDirectory();
     }
 
     if (downloadsDirectory != null) {
-      final downloadPath = "${downloadsDirectory.path}/$fileName";
-      final file = File(downloadPath);
+      final filePath = "${downloadsDirectory.path}/$fileName";
+      final file = File(filePath);
 
-      await file.writeAsString(csv);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("CSV Exported to: $downloadPath")),
-      );
+      try {
+        await file.writeAsString(csv);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("CSV Exported: $filePath")),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Export failed: ${e.toString()}")),
+        );
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to get download directory")),
+        const SnackBar(content: Text("Failed to access download directory")),
       );
     }
   }
