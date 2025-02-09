@@ -58,7 +58,7 @@ class LanguageProvider with ChangeNotifier {
       "Transactions": "Transactions",
 
       // ReportScreen
-      'FinancialReport': 'Financial Report',
+      'FinancialReport': 'Summary Report',
       'report': 'Report',
       'Income': 'Income',
       'Expense': 'Expense',
@@ -146,7 +146,7 @@ class LanguageProvider with ChangeNotifier {
       "Transactions": "รายการ",
 
       // ReportScreen
-      'FinancialReport': 'รายงานการเงิน',
+      'FinancialReport': 'รายสรุปการเงิน',
       'report': 'รายงาน',
       'Income': 'รายรับ',
       'Expense': 'รายจ่าย',

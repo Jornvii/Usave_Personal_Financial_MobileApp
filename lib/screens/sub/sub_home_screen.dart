@@ -36,6 +36,7 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
     _loadUserProfile();
     _startTransactionReload();
     _loadTransactions();
+     _loadCurrency(); 
   }
 
   @override
@@ -182,8 +183,7 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
                       'icon': Icons.table_view,
                       'title': 'Data Table',
 
-                      'screen':  DataTransactionTable(),
-                      // DataTransactionTable(transactions: transactions),
+                      'screen':  const DataTransactionTable(),
                       'color': Colors.green,
                     },
                     {
@@ -348,7 +348,8 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
                                           fontSize: 15),
                                     ),
                                     trailing: Text(
-                                      '$currencySymbol ${transaction['amount']}',
+                                     '$currencySymbol ${transaction['amount']}',
+                                      // '$currencySymbol ${transaction['amount']}',
                                       style: TextStyle(
                                         color: transaction['typeCategory'] ==
                                                 'Income'
@@ -377,9 +378,11 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
     final db = CurrencyDB();
     final defaultCurrency = await db.getDefaultCurrency();
     setState(() {
-      currencySymbol = defaultCurrency?['symbol'] ?? '\$';
+      currencySymbol =
+          defaultCurrency?['symbol'] ?? '\$'; 
     });
   }
+
 
   Future<void> _loadUserProfile() async {
     final userProfile = await _userDB.fetchUserProfile();
