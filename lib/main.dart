@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'provider/langguages_provider.dart';
-import 'provider/notification_service.dart';
+import 'provider/local_notification_service.dart';
 import 'provider/theme_provider.dart';
 import 'screens/main/home_screen.dart';
 import 'screens/main/chat_bot.dart';
@@ -10,8 +12,13 @@ import 'screens/main/setting_screenui.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // init notification service
-  NotificationService().initNotification();
+  // Request Notification & Storage permissions
+  await _checkAndRequestPermissions();
+
+  // Initialize notification service
+  LocalNotificationService().initNotification();
+
+  // Load theme and language settings
   final themeProvider = ThemeProvider();
   await themeProvider.loadTheme();
 
@@ -29,6 +36,30 @@ void main() async {
   );
 }
 
+Future<void> _checkAndRequestPermissions() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  bool hasAskedPermissions = prefs.getBool('askedPermissions') ?? false;
+
+  if (!hasAskedPermissions) {
+    // Request notification permission
+    if (await Permission.notification.isDenied) {
+      await Permission.notification.request();
+    }
+
+    // Request storage permission for Android
+    if (await Permission.storage.isDenied) {
+      await Permission.storage.request();
+    }
+
+    // Android 11+ needs MANAGE_EXTERNAL_STORAGE permission
+    if (await Permission.manageExternalStorage.isDenied) {
+      await Permission.manageExternalStorage.request();
+    }
+
+    await prefs.setBool('askedPermissions', true);
+  }
+}
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -44,7 +75,6 @@ class MyApp extends StatelessWidget {
       darkTheme: themeProvider.darkTheme,
       themeMode: themeProvider.isDarkTheme ? ThemeMode.dark : ThemeMode.light,
       home: const MainScreen(),
-      // home:  const SettingUi(transactions: [],),
       localizationsDelegates: const [],
       supportedLocales: const [
         Locale('en'),
@@ -68,7 +98,6 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _screens = [
     const MyHomePage(),
-    // const ReportScreen(),
     const ChatBotScreen(),
     const SettingScreenUi(
       transactions: [],
@@ -103,10 +132,6 @@ class _MainScreenState extends State<MainScreen> {
             icon: const Icon(Icons.home),
             label: languageProvider.translate('home'),
           ),
-          // BottomNavigationBarItem(
-          //   icon: const Icon(Icons.bar_chart),
-          //   label: languageProvider.translate('report'),
-          // ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.smart_toy),
             label: languageProvider.translate('chatbot'),

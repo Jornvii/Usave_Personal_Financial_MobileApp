@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../provider/notification_service.dart';
+import '../provider/local_notification_service.dart';
 
 class TestNotificatioScreen extends StatefulWidget {
   const TestNotificatioScreen({super.key});
@@ -27,7 +27,7 @@ class _TestNotificatioScreenState extends State<TestNotificatioScreen> {
               ),
               onPressed: () {
                 // show notification
-                NotificationService().showNotification(
+                LocalNotificationService().showNotification(
                   title: "iSAVE",
                   body: "Hello this is test notification",
                 );
@@ -38,7 +38,7 @@ class _TestNotificatioScreenState extends State<TestNotificatioScreen> {
                 backgroundColor: WidgetStateProperty.all(Colors.red.shade300),
               ),
               onPressed: () {
-                NotificationService().schaduleNotification(
+                LocalNotificationService().schaduleNotification(
                   title: "iSAVE",
                   body: "Hello today pek ot?",
                   hour: 09,

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../provider/langguages_provider.dart';
-import '../../provider/notification_service.dart';
+import '../../provider/local_notification_service.dart';
 import '../../provider/theme_provider.dart';
 
 class AppearanceScreen extends StatefulWidget {
@@ -30,7 +30,7 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
       selectedMinute = prefs.getInt('selectedMinute') ?? 0;
     });
     if (isNotificationOn) {
-      NotificationService().schaduleNotification(
+      LocalNotificationService().schaduleNotification(
         title: "iSAVE",
         body: "Hello, Do you have any transactions today?🤑",
         hour: selectedHour,
@@ -51,14 +51,14 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
       isNotificationOn = newValue;
     });
     if (isNotificationOn) {
-      NotificationService().schaduleNotification(
+      LocalNotificationService().schaduleNotification(
         title: "iSAVE",
         body: "Hello, Do you have any transactions today?🤑",
         hour: selectedHour,
         minute: selectedMinute,
       );
     } else {
-      NotificationService().cancelAllNotification();
+      LocalNotificationService().cancelAllNotification();
     }
     _savePreferences();
   }
@@ -74,7 +74,7 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
         selectedMinute = pickedTime.minute;
       });
       if (isNotificationOn) {
-        NotificationService().schaduleNotification(
+        LocalNotificationService().schaduleNotification(
           title: "iSAVE",
           body: "Hello, Do you have any transactions today?🤑",
           hour: selectedHour,

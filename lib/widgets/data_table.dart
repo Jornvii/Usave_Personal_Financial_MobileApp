@@ -1,12 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'dart:convert';
 import 'package:csv/csv.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../models/currency_db.dart';
 import '../../models/transaction_db.dart';
-
-import 'package:permission_handler/permission_handler.dart';
 
 class DataTransactionTable extends StatefulWidget {
   const DataTransactionTable({super.key});
@@ -211,73 +210,66 @@ class _DataTransactionTableState extends State<DataTransactionTable> {
     return DateFormat("yyyy-MM-dd").format(parsedDate);
   }
 
-  Future<void> _exportToCSV() async {
-    List<List<String>> csvData = [
-      ["No", "Category", "Amount", "Type", "Date", "Description"]
-    ];
+Future<void> _exportToCSV() async {
+  List<List<String>> csvData = [
+    ["No", "Category", "Amount", "Type", "Date", "Description"]
+  ];
 
-    // Filter transactions
-    final filteredTransactions = transactions.where((tx) {
-      DateTime txDate = DateTime.parse(tx['date']);
-      bool matchesFilter =
-          selectedFilter == 'All' || tx['typeCategory'] == selectedFilter;
-      return txDate
-              .isAfter(selectedStartDate.subtract(const Duration(days: 1))) &&
-          txDate.isBefore(selectedEndDate.add(const Duration(days: 1))) &&
-          matchesFilter;
-    }).toList();
+  final filteredTransactions = transactions.where((tx) {
+    DateTime txDate = DateTime.parse(tx['date']);
+    bool matchesFilter =
+        selectedFilter == 'All' || tx['typeCategory'] == selectedFilter;
+    return txDate
+            .isAfter(selectedStartDate.subtract(const Duration(days: 1))) &&
+        txDate.isBefore(selectedEndDate.add(const Duration(days: 1))) &&
+        matchesFilter;
+  }).toList();
 
-    for (int i = 0; i < filteredTransactions.length; i++) {
-      Map<String, dynamic> tx = filteredTransactions[i];
-      csvData.add([
-        (i + 1).toString(),
-        tx['category'],
-        "$currencySymbol ${tx['amount']}",
-        _getCategoryType(tx['typeCategory']),
-        _formatDate(tx['date']),
-        tx['description'] ?? "-"
-      ]);
-    }
-
-    String csv = const ListToCsvConverter().convert(csvData);
-    String formattedDateTime =
-        DateFormat('yyyyMMdd_HHmm').format(DateTime.now());
-    String fileName = "transaction_$formattedDateTime.csv";
-
-    // Request storage permission
-    var status = await Permission.storage.request();
-    if (!status.isGranted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Storage permission denied!")),
-      );
-      return;
-    }
-
-    Directory? downloadsDirectory;
-    if (Platform.isAndroid) {
-      downloadsDirectory = Directory('/storage/emulated/0/Download');
-    } else {
-      downloadsDirectory = await getDownloadsDirectory();
-    }
-
-    if (downloadsDirectory != null) {
-      final filePath = "${downloadsDirectory.path}/$fileName";
-      final file = File(filePath);
-
-      try {
-        await file.writeAsString(csv);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("CSV Exported: $filePath")),
-        );
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Export failed: ${e.toString()}")),
-        );
-      }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to access download directory")),
-      );
-    }
+  for (int i = 0; i < filteredTransactions.length; i++) {
+    Map<String, dynamic> tx = filteredTransactions[i];
+    csvData.add([
+      (i + 1).toString(),
+      tx['category'],
+      "${tx['amount']}",
+      _getCategoryType(tx['typeCategory']),
+      _formatDate(tx['date']),
+      tx['description'] ?? "-"
+    ]);
   }
+
+  // Convert CSV data
+  String csv = const ListToCsvConverter(fieldDelimiter: ",").convert(csvData);
+
+  List<int> csvBytes = utf8.encode("\uFEFF" + csv);
+
+  String formattedDateTime = DateFormat('yyyyMMdd_HHmm').format(DateTime.now());
+  String fileName = "transaction_$formattedDateTime.csv";
+
+  Directory? downloadsDirectory;
+  if (Platform.isAndroid) {
+    downloadsDirectory = Directory('/storage/emulated/0/Download');
+  } else {
+    downloadsDirectory = await getDownloadsDirectory();
+  }
+
+  if (downloadsDirectory != null) {
+    final filePath = "${downloadsDirectory.path}/$fileName";
+    final file = File(filePath);
+
+    try {
+      await file.writeAsBytes(csvBytes); 
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("CSV Exported: $filePath")),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Export failed: ${e.toString()}")),
+      );
+    }
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Failed to access download directory")),
+    );
+  }
+}
 }
