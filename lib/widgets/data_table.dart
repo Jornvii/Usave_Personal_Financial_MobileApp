@@ -240,7 +240,7 @@ Future<void> _exportToCSV() async {
   // Convert CSV data
   String csv = const ListToCsvConverter(fieldDelimiter: ",").convert(csvData);
 
-  List<int> csvBytes = utf8.encode("\uFEFF" + csv);
+  List<int> csvBytes = utf8.encode("\uFEFF$csv");
 
   String formattedDateTime = DateFormat('yyyyMMdd_HHmm').format(DateTime.now());
   String fileName = "transaction_$formattedDateTime.csv";

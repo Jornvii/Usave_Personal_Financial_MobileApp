@@ -1,0 +1,427 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:intl/intl.dart';
+import 'package:path/path.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:google_gemini/google_gemini.dart';
+import '../models/notification_db.dart';
+import '../../models/notification_db.dart';
+import '../../models/transaction_db.dart';
+import '../models/saving_goaldb.dart';
+
+const apiKey = "AIzaSyDu8b8nBCg5ZzH0WNEGsLLn_Rb4oZYabVI";
+
+class TransactionsNotificationService {
+  final notificationPlugin = FlutterLocalNotificationsPlugin();
+  final GoogleGemini gemini = GoogleGemini(apiKey: apiKey);
+  final TransactionDB transactionDB = TransactionDB();
+  final bool _initialized = false;
+  bool get isInitialized => _initialized;
+
+  // Initialize Notification Service
+  Future<void> initNotification() async {
+    if (_initialized) return;
+
+    // Initialize timezone
+    tz.initializeTimeZones();
+    final String currentTimezone = await FlutterTimezone.getLocalTimezone();
+    tz.setLocalLocation(tz.getLocation(currentTimezone));
+
+    // Android initialization
+    const initSettingsAndroid = AndroidInitializationSettings("@mipmap/ic_launcher");
+    const initSettings = InitializationSettings(android: initSettingsAndroid);
+
+    // Final initialization
+    await notificationPlugin.initialize(initSettings);
+  }
+
+  // Format current time
+  String _formatCurrentTime() {
+    final DateFormat timeFormat = DateFormat.jm();
+    return timeFormat.format(DateTime.now());
+  }
+
+  // Generate Transaction Notification
+  Future<String> genNotificationTransaction() async {
+    try {
+      final transactions = await transactionDB.getTransactions();
+
+      double totalIncome = 0.0;
+      double totalExpenses = 0.0;
+      double totalSaving = 0.0;
+      Map<String, double> categoryExpenses = {};
+
+      for (var transaction in transactions) {
+        final type = transaction['typeCategory'];
+        final amount = transaction['amount'] as double;
+        final category = transaction['category'] ?? "Uncategorized";
+
+        if (type == 'Income') {
+          totalIncome += amount;
+        } else if (type == 'Expense') {
+          totalExpenses += amount;
+          categoryExpenses[category] = (categoryExpenses[category] ?? 0) + amount;
+        } else if (type == 'Saving') {
+          totalSaving += amount;
+        }
+      }
+
+      double balance = totalIncome - totalExpenses;
+
+      String prompt1 = """
+      Analyze my financial data and generate a short notification:
+      - Total Income: \$${totalIncome.toStringAsFixed(2)}
+      - Total Expenses: \$${totalExpenses.toStringAsFixed(2)}
+      - Total Saving: \$${totalSaving.toStringAsFixed(2)}
+      - Balance: \$${balance.toStringAsFixed(2)}
+      Key Expense Categories: ${categoryExpenses.entries.map((e) => '${e.key}: \$${e.value.toStringAsFixed(2)}').join(', ')}
+
+      Provide a concise alert based on the data or with a sentence alert me better financial like a quote or sth, (write all in just short paragraph)
+      """;
+
+      final response = await gemini.generateFromText(prompt1);
+      String notificationText = response.text.trim();
+      String time = _formatCurrentTime();
+      int timestamp = DateTime.now().millisecondsSinceEpoch;
+
+      final notificationDB = NotificationDB();
+      await notificationDB.insertNotification({
+        'message': notificationText,
+        'time': time,
+        'timestamp': timestamp,
+      });
+
+      return notificationText;
+    } catch (e) {
+      print("Error generating transaction notification: $e");
+      return "Transaction update failed.";
+    }
+  }
+
+  // Generate Saving Goal Notification
+  Future<String> gNotificationSavingGoal() async {
+    try {
+      final savingGoalDB = SavingGoalDB();
+      final savingGoals = await savingGoalDB.fetchSavingGoals();
+      final transactions = await transactionDB.getTransactions();
+      Map<String, double> savingsByCategory = {};
+
+      for (var transaction in transactions) {
+        final type = transaction['typeCategory'];
+        final amount = transaction['amount'] as double;
+        final category = transaction['category'] ?? "Uncategorized";
+
+        if (type == 'Saving') {
+          savingsByCategory[category] = (savingsByCategory[category] ?? 0) + amount;
+        }
+      }
+
+      bool hasValidSavings = false;
+      List<String> notificationsList = [];
+
+      for (var goal in savingGoals) {
+        final savingCategory = goal['savingCategory'] as String;
+        final goalAmount = goal['goalAmount'] as double;
+        final savedAmount = savingsByCategory[savingCategory] ?? 0.0;
+
+        if (savedAmount > 0) {
+          hasValidSavings = true;
+          double percentComplete = ((savedAmount / goalAmount) * 100).clamp(0, 100);
+
+          if (savedAmount >= goalAmount) {
+            notificationsList.add("🎉 Congrats! Goal reached for $savingCategory! Saved: \$${savedAmount.toStringAsFixed(2)} (Goal: \$${goalAmount.toStringAsFixed(2)}) - ${percentComplete.toStringAsFixed(1)}% complete.");
+          } else {
+            final remaining = goalAmount - savedAmount;
+            notificationsList.add("Keep going! Saved ${percentComplete.toStringAsFixed(1)}% for $savingCategory. \$${remaining.toStringAsFixed(2)} left.");
+          }
+        }
+      }
+
+      if (hasValidSavings) {
+        String notificationText = notificationsList.join("\n");
+        String time = _formatCurrentTime();
+        int timestamp = DateTime.now().millisecondsSinceEpoch;
+
+        final notificationDB = NotificationDB();
+        await notificationDB.insertNotification({
+          'message': notificationText,
+          'time': time,
+          'timestamp': timestamp,
+        });
+
+        return notificationText;
+      }
+
+      return "No saving updates.";
+    } catch (e) {
+      print("Error generating saving goal notification: $e");
+      return "Saving goal update failed.";
+    }
+  }
+
+  // Schedule Notification
+  Future<void> transactionschaduleNotification({
+    required int id,
+    required String title,
+    required String body,
+    required int hour,
+    required int minute,
+  }) async {
+    final now = tz.TZDateTime.now(tz.local);
+    var scheduledDate = tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
+
+    await notificationPlugin.zonedSchedule(
+      id,
+      title,
+      body,
+      scheduledDate,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'channel id',
+          'channel name',
+          importance: Importance.max,
+          priority: Priority.high,
+          playSound: true,
+          enableVibration: true,
+          enableLights: true,
+          styleInformation: BigTextStyleInformation(''),
+        ),
+      ),
+      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      matchDateTimeComponents: DateTimeComponents.time,
+    );
+
+    print("Notification Scheduled: $title at $hour:$minute");
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+----------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:intl/intl.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:google_gemini/google_gemini.dart';
+import '../../models/transaction_db.dart';
+import '../models/saving_goaldb.dart';
+
+const apiKey = "AIzaSyDu8b8nBCg5ZzH0WNEGsLLn_Rb4oZYabVI";
+
+class TransactionsNotificationService {
+  final FlutterLocalNotificationsPlugin notificationPlugin =
+      FlutterLocalNotificationsPlugin();
+  final GoogleGemini gemini = GoogleGemini(apiKey: apiKey);
+  final TransactionDB transactionDB = TransactionDB();
+  final SavingGoalDB savingGoalDB = SavingGoalDB();
+  bool _initialized = false;
+
+  bool get isInitialized => _initialized;
+
+  //  Initialize Notifications
+  Future<void> initNotification() async {
+    if (_initialized) return;
+
+    tz.initializeTimeZones();
+    final String currentTimezone = await FlutterTimezone.getLocalTimezone();
+    tz.setLocalLocation(tz.getLocation(currentTimezone));
+
+    const initSettingsAndroid =
+        AndroidInitializationSettings("@mipmap/ic_launcher");
+    const initSettings = InitializationSettings(android: initSettingsAndroid);
+
+    await notificationPlugin.initialize(initSettings);
+    _initialized = true; // Mark as initialized
+  }
+
+  //  Format Current Time
+  String _formatCurrentTime() {
+    return DateFormat.jm().format(DateTime.now());
+  }
+
+  //  Generate & Schedule Transaction Summary Notification
+  Future<void> _genNotificationTransaction() async {
+    try {
+      final transactions = await transactionDB.getTransactions();
+      double totalIncome = 0.0, totalExpenses = 0.0, totalSaving = 0.0;
+      Map<String, double> categoryExpenses = {};
+
+      for (var transaction in transactions) {
+        final type = transaction['typeCategory'];
+        final amount = transaction['amount'] as double;
+        final category = transaction['category'] ?? "Uncategorized";
+
+        if (type == 'Income') {
+          totalIncome += amount;
+        } else if (type == 'Expense') {
+          totalExpenses += amount;
+          categoryExpenses[category] =
+              (categoryExpenses[category] ?? 0) + amount;
+        } else if (type == 'Saving') {
+          totalSaving += amount;
+        }
+      }
+
+      double balance = totalIncome - totalExpenses;
+
+      String prompt1 = """
+      Analyze my financial data and generate a short notification:
+      - Total Income: \$${totalIncome.toStringAsFixed(2)}
+      - Total Expenses: \$${totalExpenses.toStringAsFixed(2)}
+      - Total Saving: \$${totalSaving.toStringAsFixed(2)}
+      - Balance: \$${balance.toStringAsFixed(2)}
+      Key Expense Categories: ${categoryExpenses.entries.map((e) => '${e.key}: \$${e.value.toStringAsFixed(2)}').join(', ')}
+
+      Provide a concise financial alert in a short paragraph.
+      """;
+
+      final response = await gemini.generateFromText(prompt1);
+      String notificationText = response.text.trim();
+
+      await transactionschaduleNotification(
+        id: 1,
+        title: "📢 Financial Summary Alert",
+        body: notificationText,
+        hour: 8,
+        minute: 0,
+      );
+    } catch (e) {
+      print("Error generating transaction notification: $e");
+    }
+  }
+
+  //  Generate & Schedule Savings Goal Notification
+  Future<void> _gNotificationSavingGoal() async {
+    try {
+      final savingGoals = await savingGoalDB.fetchSavingGoals();
+      final transactions = await transactionDB.getTransactions();
+      Map<String, double> savingsByCategory = {};
+
+      for (var transaction in transactions) {
+        final type = transaction['typeCategory'];
+        final amount = transaction['amount'] as double;
+        final category = transaction['category'] ?? "Uncategorized";
+
+        if (type == 'Saving') {
+          savingsByCategory[category] =
+              (savingsByCategory[category] ?? 0) + amount;
+        }
+      }
+
+      bool hasValidSavings = false;
+      List<String> notificationsList = [];
+
+      for (var goal in savingGoals) {
+        final savingCategory = goal['savingCategory'] as String;
+        final goalAmount = goal['goalAmount'] as double;
+        final savedAmount = savingsByCategory[savingCategory] ?? 0.0;
+
+        if (savedAmount > 0) {
+          hasValidSavings = true;
+          double percentComplete =
+              ((savedAmount / goalAmount) * 100).clamp(0, 100);
+          double remaining = goalAmount - savedAmount;
+
+          if (savedAmount >= goalAmount) {
+            notificationsList.add(
+                "🎉 Congratulations! You've reached your saving goal for $savingCategory! "
+                "You've saved \$${savedAmount.toStringAsFixed(2)} (Goal: \$${goalAmount.toStringAsFixed(2)}) "
+                "and are ${percentComplete.toStringAsFixed(1)}% complete.");
+          } else {
+            notificationsList.add(
+                "Keep going! You've saved ${percentComplete.toStringAsFixed(1)}% of your goal for $savingCategory. "
+                "You're \$${remaining.toStringAsFixed(2)} away from completing it.");
+          }
+        }
+      }
+
+      if (hasValidSavings) {
+        String prompt2 = """
+        Based on the following saving goal and transaction data, provide a short motivational notification:
+        - Saving Goals: ${savingGoals.map((g) => '${g['savingCategory']}: Goal \$${g['goalAmount']}').join(', ')}
+        - Savings by Category: ${savingsByCategory.entries.map((e) => '${e.key}: \$${e.value.toStringAsFixed(2)}').join(', ')}
+
+        Include motivation to complete the goals in a short paragraph.
+        """;
+
+        final response = await gemini.generateFromText(prompt2);
+        String notificationText = response.text.trim();
+
+        await transactionschaduleNotification(
+          id: 2,
+          title: "💰 Savings Progress Update",
+          body: notificationText,
+          hour: 9,
+          minute: 0,
+        );
+      }
+    } catch (e) {
+      print("Error generating savings goal notification: $e");
+    }
+  }
+
+  //  Schedule Notifications
+  Future<void> transactionschaduleNotification({
+    required int id,
+    required String title,
+    required String body,
+    required int hour,
+    required int minute,
+  }) async {
+    final now = tz.TZDateTime.now(tz.local);
+    final scheduledDate =
+        tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
+
+    try {
+      await notificationPlugin.zonedSchedule(
+        id,
+        title,
+        body,
+        scheduledDate,
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'channel id',
+            'channel name',
+            importance: Importance.max,
+            priority: Priority.high,
+            playSound: true,
+            enableVibration: true,
+            enableLights: true,
+            styleInformation: BigTextStyleInformation(''),
+          ),
+        ),
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        matchDateTimeComponents: DateTimeComponents.time,
+      );
+      print("Notification scheduled: $title");
+    } catch (e) {
+      print("Error scheduling notification: $e");
+    }
+  }
+}
+

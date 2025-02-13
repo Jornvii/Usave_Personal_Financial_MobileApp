@@ -1,5 +1,6 @@
 {
     "java.configuration.updateBuildConfiguration": "automatic",
     "dart.previewFlutterUiGuides": true,
-    "dart.previewFlutterUiGuidesCustomTracking": true
+    "dart.previewFlutterUiGuidesCustomTracking": true,
+    "cmake.sourceDirectory": "D:/git hub/chat_gemini_api_flutter/linux"
 }

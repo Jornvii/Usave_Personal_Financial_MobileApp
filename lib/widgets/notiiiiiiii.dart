@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../provider/local_notification_service.dart';
+import '../provider/notification_tractions.dart';
 
 class TestNotificatioScreen extends StatefulWidget {
   const TestNotificatioScreen({super.key});
@@ -20,7 +21,6 @@ class _TestNotificatioScreenState extends State<TestNotificatioScreen> {
           child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-         
           ElevatedButton(
               style: ButtonStyle(
                 backgroundColor: WidgetStateProperty.all(Colors.green.shade300),
@@ -29,7 +29,7 @@ class _TestNotificatioScreenState extends State<TestNotificatioScreen> {
                 // show notification
                 LocalNotificationService().showNotification(
                   title: "iSAVE",
-                  body: "Hello this is test notification",
+                  body: "Hello Do you have any transaction today?",
                 );
               },
               child: const Text("show notification")),
@@ -46,6 +46,42 @@ class _TestNotificatioScreenState extends State<TestNotificatioScreen> {
                 );
               },
               child: const Text("show Notification by schedule")),
+
+// Button to Trigger Notifications
+          ElevatedButton(
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.all(Colors.red.shade300),
+            ),
+            onPressed: () async {
+              final service = TransactionsNotificationService();
+
+              // Fetch new Transaction Notification
+              String transactionBody =
+                  await service.genNotificationTransaction();
+
+              // Fetch new Saving Goal Notification
+              String savingGoalBody = await service.gNotificationSavingGoal();
+
+              // Schedule Transaction Notification
+              service.transactionschaduleNotification(
+                id: 1,
+                title: "iSAVE - Transaction Summary",
+                body: transactionBody,
+                hour: 7,
+                minute: 05,
+              );
+
+              // Schedule Saving Goal Notification
+              service.transactionschaduleNotification(
+                id: 2,
+                title: "iSAVE - Saving Goal Update",
+                body: savingGoalBody,
+                hour: 7,
+                minute: 15,
+              );
+            },
+            child: const Text("Show Notifications"),
+          ),
         ],
       )),
     );

@@ -1,12 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:google_gemini/google_gemini.dart';
-import 'package:intl/intl.dart';
 import '../../models/notification_db.dart';
-import '../../models/saving_goaldb.dart';
-import '../../models/transaction_db.dart';
-
-const apiKey = "AIzaSyDu8b8nBCg5ZzH0WNEGsLLn_Rb4oZYabVI";
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -18,26 +12,11 @@ class NotificationScreen extends StatefulWidget {
 class _NotificationScreenState extends State<NotificationScreen> {
   bool loading = false;
   List<Map<String, String>> notifications = [];
-  final GoogleGemini gemini = GoogleGemini(apiKey: apiKey);
-  final TransactionDB transactionDB = TransactionDB();
-  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
     _loadNotifications();
-    _generateNotification1();
-    _generateNotification2();
-    _startAutoNotification(); 
-  }
-
-  void _scheduleNotification(DateTime scheduledTime) {
-    final duration = scheduledTime.difference(DateTime.now());
-    Future.delayed(duration, () {
-      _generateNotification1();
-      _generateNotification2();
-      _scheduleNotification(scheduledTime.add(const Duration(days: 1)));
-    });
   }
 
   void clearNotifications() async {
@@ -45,152 +24,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
     await db.deleteAllNotifications();
     _loadNotifications();
     print("All notifications deleted successfully.");
-  }
-
-  void _startAutoNotification() {
-    _timer = Timer.periodic(const Duration(hours: 12), (timer) {
-      _generateNotification1();
-      _generateNotification2();
-    });
-  }
-
-  Future<void> _generateNotification1() async {
-    setState(() {
-      loading = true;
-    });
-    try {
-      final transactions = await transactionDB.getTransactions();
-
-      double totalIncome = 0.0;
-      double totalExpenses = 0.0;
-      double totalSaving = 0.0;
-
-      Map<String, double> categoryExpenses = {};
-
-      for (var transaction in transactions) {
-        final type = transaction['typeCategory'];
-        final amount = transaction['amount'] as double;
-        final category = transaction['category'] ?? "Uncategorized";
-
-        if (type == 'Income') {
-          totalIncome += amount;
-        } else if (type == 'Expense') {
-          totalExpenses += amount;
-          categoryExpenses[category] =
-              (categoryExpenses[category] ?? 0) + amount;
-        } else if (type == 'Saving') {
-          totalSaving += amount;
-        }
-      }
-
-      double balance = totalIncome - totalExpenses;
-
-      String prompt1 = """
-    Analyze my financial data and generate a short notification:
-    - Total Income: \$${totalIncome.toStringAsFixed(2)}
-    - Total Expenses: \$${totalExpenses.toStringAsFixed(2)}
-    - Total Saving: \$${totalSaving.toStringAsFixed(2)}
-    - Balance: \$${balance.toStringAsFixed(2)}
-    Key Expense Categories: ${categoryExpenses.entries.map((e) => '${e.key}: \$${e.value.toStringAsFixed(2)}').join(', ')}
-
-    Provide a concise alert based on the data or with a sentence alert me better financial like a quote or sth, ( write all in just short paragraph)
-    """;
-
-      final response = await gemini.generateFromText(prompt1);
-      String notificationText = response.text.trim();
-      String time = _formatCurrentTime();
-      int timestamp = DateTime.now().millisecondsSinceEpoch;
-
-      final notificationDB = NotificationDB();
-      await notificationDB.insertNotification({
-        'message': notificationText,
-        'time': time,
-        'timestamp': timestamp,
-      });
-
-      await _loadNotifications();
-    } catch (e) {
-      _showErrorDialog("Error generating notification: $e");
-    }
-  }
-
-  Future<void> _generateNotification2() async {
-    try {
-      final savingGoalDB = SavingGoalDB();
-      final savingGoals = await savingGoalDB.fetchSavingGoals();
-
-      final transactions = await transactionDB.getTransactions();
-      Map<String, double> savingsByCategory = {};
-
-      for (var transaction in transactions) {
-        final type = transaction['typeCategory'];
-        final amount = transaction['amount'] as double;
-        final category = transaction['category'] ?? "Uncategorized";
-
-        if (type == 'Saving') {
-          savingsByCategory[category] =
-              (savingsByCategory[category] ?? 0) + amount;
-        }
-      }
-      List<String> notificationsList = [];
-      bool hasValidSavings = false;
-
-      for (var goal in savingGoals) {
-        final savingCategory = goal['savingCategory'] as String;
-        final goalAmount = goal['goalAmount'] as double;
-        final savedAmount = savingsByCategory[savingCategory] ?? 0.0;
-
-        if (savedAmount > 0) {
-          hasValidSavings = true;
-
-          if (savedAmount >= goalAmount) {
-            double percentComplete =
-                ((savedAmount / goalAmount) * 100).clamp(0, 100);
-
-            notificationsList.add(
-                "🎉 Congratulations! You've reached your saving goal for $savingCategory! You've saved \$${savedAmount.toStringAsFixed(2)} (Goal: \$${goalAmount.toStringAsFixed(2)}) and are ${percentComplete.toStringAsFixed(1)}% complete.");
-          } else {
-            final remaining = goalAmount - savedAmount;
-            double percentComplete =
-                ((savedAmount / goalAmount) * 100).clamp(0, 100);
-
-            notificationsList.add(
-                "Keep going! You've saved ${percentComplete.toStringAsFixed(1)}% of your goal for $savingCategory. You're \$${remaining.toStringAsFixed(2)} away from completing it.");
-          }
-        }
-      }
-
-      if (hasValidSavings) {
-        String prompt2 = """
-      Based on the following saving goal and transaction data, provide a short summary notification or motivation:
-      - Saving Goals: ${savingGoals.map((g) => '${g['savingCategory']}: Goal \$${g['goalAmount']}').join(', ')}
-      - Savings by Category: ${savingsByCategory.entries.map((e) => '${e.key}: \$${e.value.toStringAsFixed(2)}').join(', ')}
-      
-      Include a percentage to complete reach for each goal. Provide a short concise and motivational message about achieving these goals and some short idea to reach goal. (write all in just short paragraph)
-    """;
-
-        final response = await gemini.generateFromText(prompt2);
-        String notificationText = response.text.trim();
-
-        String time = _formatCurrentTime();
-        int timestamp = DateTime.now().millisecondsSinceEpoch;
-
-        final notificationDB = NotificationDB();
-        await notificationDB.insertNotification({
-          'message': notificationText,
-          'time': time,
-          'timestamp': timestamp,
-        });
-
-        await _loadNotifications();
-      }
-    } catch (e) {
-      _showErrorDialog("Error generating notification: $e");
-    } finally {
-      setState(() {
-        loading = false;
-      });
-    }
   }
 
   Future<void> _loadNotifications() async {
@@ -207,13 +40,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
       }).toList();
     });
   }
-
-  String _formatCurrentTime() {
-    final DateFormat timeFormat = DateFormat.jm();
-    return timeFormat.format(DateTime.now());
-  }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -263,7 +89,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
     );
   }
 
-    void _deleteNotification(int id) async {
+  void _deleteNotification(int id) async {
     final notificationDB = NotificationDB();
     final result = await notificationDB.deleteNotification(id);
     if (result > 0) {
@@ -273,6 +99,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
       });
     }
   }
+
   void _showDeleteConfirmation(int id) {
     showDialog(
       context: context,
@@ -298,23 +125,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
       ),
     );
   }
-
-  void _showErrorDialog(String error) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Error"),
-        content: Text(error),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text("Okay"),
-          ),
-        ],
-      ),
-    );
-  }
-
 }
 
 class NotificationCard extends StatefulWidget {
@@ -361,8 +171,7 @@ class _NotificationCardState extends State<NotificationCard> {
               ),
               const SizedBox(height: 8),
               Row(
-                mainAxisAlignment: MainAxisAlignment
-                    .spaceBetween, 
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     widget.time,

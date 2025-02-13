@@ -24,7 +24,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    _updateNotificationCount(); // Fetch the initial notification count
+    _updateNotificationCount(); 
   }
 
   @override
@@ -144,6 +144,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // Schedule the function to run every 2 seconds
     _timer = Timer.periodic(const Duration(seconds: 2), (timer) {
       _updateNotificationCount(); 
+       _updateNotificationCount(); 
     });
   }
 

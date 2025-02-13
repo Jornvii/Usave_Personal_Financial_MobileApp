@@ -25,9 +25,9 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
   Future<void> _loadPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      isNotificationOn = prefs.getBool('isNotificationOn') ?? false;
-      selectedHour = prefs.getInt('selectedHour') ?? 9;
-      selectedMinute = prefs.getInt('selectedMinute') ?? 0;
+      isNotificationOn = prefs.getBool('isNotificationOn') ?? true;
+      selectedHour = prefs.getInt('selectedHour') ?? 12;
+      selectedMinute = prefs.getInt('selectedMinute') ?? 00;
     });
     if (isNotificationOn) {
       LocalNotificationService().schaduleNotification(
@@ -119,6 +119,7 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
                         setState(() {
                           isNotificationOn = newValue;
                         });
+                         _savePreferences();
                       }
                     },
                     items: const [
@@ -181,30 +182,7 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
                     ),
                   ),
                 ),
-                // Row(
-                //   children: [
-                //     ElevatedButton(
-                //       onPressed: _pickTime,
-                //       style: ElevatedButton.styleFrom(
-                //         shape: RoundedRectangleBorder(
-                //           borderRadius: BorderRadius.circular(10),
-                //         ),
-                //         padding: const EdgeInsets.symmetric(
-                //             vertical: 12, horizontal: 20),
-                //       ),
-                //       child: Row(
-                //         children: [
-                //           Text(
-                //             "Set Notification Time: ${selectedHour.toString().padLeft(2, '0')}:${selectedMinute.toString().padLeft(2, '0')}",
-                //           ),
-                //           IconButton(
-                //               onPressed: _pickTime,
-                //               icon: const Icon(Icons.edit))
-                //         ],
-                //       ),
-                //     ),
-                //   ],
-                // ),
+            
                 const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -263,22 +241,7 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
             padding: const EdgeInsets.all(8.0),
             child: Column(
               children: [
-                //         DropdownButton<bool>(
-                //   value: isNotificationOn,
-                //   onChanged: (bool? newValue) {
-                //     if (newValue != null) {
-                //       _toggleNotification(newValue);
-                //     }
-                //   },
-                //   items: const [
-                //     DropdownMenuItem(value: true, child: Text("On")),
-                //     DropdownMenuItem(value: false, child: Text("Off")),
-                //   ],
-                // ),
-                // ElevatedButton(
-                //   onPressed: _pickTime,
-                //   child: Text("Set Notification Time: ${selectedHour.toString().padLeft(2, '0')}:${selectedMinute.toString().padLeft(2, '0')}"),
-                // ),
+          
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
