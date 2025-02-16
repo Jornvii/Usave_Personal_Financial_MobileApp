@@ -51,7 +51,6 @@ Future<void> _checkAndRequestPermissions() async {
       await Permission.storage.request();
     }
 
-    // Android 11+ needs MANAGE_EXTERNAL_STORAGE permission
     if (await Permission.manageExternalStorage.isDenied) {
       await Permission.manageExternalStorage.request();
     }

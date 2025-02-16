@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter_timezone/flutter_timezone.dart';
@@ -65,25 +64,6 @@ class TransactionsNotificationService {
     try {
       final transactions = await transactionDB.getTransactions();
 
-      // Exit if transactions are null or empty
-      if (transactions.isEmpty) {
-        return "No transaction yet. Do you have any transaction today?🤑";
-      }
-
-      // Retrieve last known transaction state
-      final prefs = await SharedPreferences.getInstance();
-      final String? lastTransactionData =
-          prefs.getString('lastTransactionData');
-
-      // Serialize current transaction data for comparison
-      final currentTransactionData = transactions.toString();
-      if (currentTransactionData == lastTransactionData) {
-        return "No transaction updates. Do you have any transaction today?";
-      }
-
-      // Update shared preferences with current transaction data
-      await prefs.setString('lastTransactionData', currentTransactionData);
-
       double totalIncome = 0.0;
       double totalExpenses = 0.0;
       double totalSaving = 0.0;
@@ -108,15 +88,15 @@ class TransactionsNotificationService {
       double balance = totalIncome - totalExpenses;
 
       String prompt1 = """
-    Analyze my financial data and generate a short notification:
-    - Total Income: \$${totalIncome.toStringAsFixed(2)}
-    - Total Expenses: \$${totalExpenses.toStringAsFixed(2)}
-    - Total Saving: \$${totalSaving.toStringAsFixed(2)}
-    - Balance: \$${balance.toStringAsFixed(2)}
-    Key Expense Categories: ${categoryExpenses.entries.map((e) => '${e.key}: \$${e.value.toStringAsFixed(2)}').join(', ')}
+      Analyze my financial data and generate a short notification:
+      - Total Income: \$${totalIncome.toStringAsFixed(2)}
+      - Total Expenses: \$${totalExpenses.toStringAsFixed(2)}
+      - Total Saving: \$${totalSaving.toStringAsFixed(2)}
+      - Balance: \$${balance.toStringAsFixed(2)}
+      Key Expense Categories: ${categoryExpenses.entries.map((e) => '${e.key}: \$${e.value.toStringAsFixed(2)}').join(', ')}
 
-    Provide a concise alert based on the data or with a sentence alert me better financial like a quote or sth, (write all in just short paragraph)
-    """;
+      Provide a concise alert based on the data or with a sentence alert me better financial like a quote or sth, (write all in just short paragraph)
+      """;
 
       final response = await gemini.generateFromText(prompt1);
       String notificationText = response.text.trim();
@@ -137,42 +117,12 @@ class TransactionsNotificationService {
     }
   }
 
-// Generate Saving Goal Notification
+  // Generate Saving Goal Notification
   Future<String> gNotificationSavingGoal() async {
     try {
       final savingGoalDB = SavingGoalDB();
       final savingGoals = await savingGoalDB.fetchSavingGoals();
       final transactions = await transactionDB.getTransactions();
-
-      // Exit if savingGoals and transactions  empty
-      if (savingGoals.isEmpty && transactions.isEmpty) {
-        return "No Saving transaction yet. Do you have any transaction today?🐖";
-      } else if (savingGoals.isEmpty) {
-        return "No Saving Goals yet. Do you have any transaction today?🐖";
-      } else if (transactions.isEmpty) {
-        return "No Saving transaction yet. Do you have any transaction today?🐖";
-      }
-
-      // Retrieve last known saving goals and transaction state
-      final prefs = await SharedPreferences.getInstance();
-      final String? lastSavingGoalsData =
-          prefs.getString('lastSavingGoalsData');
-      final String? lastTransactionsData =
-          prefs.getString('lastTransactionsData');
-
-      // Serialize current saving goal and transaction data for comparison
-      final currentSavingGoalsData = savingGoals.toString();
-      final currentTransactionsData = transactions.toString();
-
-      if (currentSavingGoalsData == lastSavingGoalsData &&
-          currentTransactionsData == lastTransactionsData) {
-        return "No saving transaction updates. Do you have any transaction today?";
-      }
-
-      // Update shared preferences with current data
-      await prefs.setString('lastSavingGoalsData', currentSavingGoalsData);
-      await prefs.setString('lastTransactionsData', currentTransactionsData);
-
       Map<String, double> savingsByCategory = {};
 
       for (var transaction in transactions) {
@@ -232,6 +182,7 @@ class TransactionsNotificationService {
     }
   }
 
+
   // schacule Notification for local notification
   Future<void> transactionschaduleNotification({
     required int id,
@@ -269,110 +220,71 @@ class TransactionsNotificationService {
 
     print("Notification Scheduled: $title at $hour:$minute");
   }
+  
 
-// fucntion  for  wokring (schacule Notification  local notification and genNotificationTransaction and gNotificationSavingGoal )
-  Future<void> executeAndScheduleNotifications({
-    required int id,
-    required String title,
-    required String body,
-    required int hour,
-    required int minute,
-  }) async {
-    try {
-      // Generate transaction notification
-      String transactionNotification = await genNotificationTransaction();
-      print("Transaction Notification: $transactionNotification");
+// fucntion  for  wokring (schacule Notification  local notification and genNotificationTransaction and gNotificationSavingGoal ) 
 
-      // Generate saving goal notification
-      String savingGoalNotification = await gNotificationSavingGoal();
-      print("Saving Goal Notification: $savingGoalNotification");
+Future<void> executeAndScheduleNotifications() async {
+  try {
+    // Generate transaction notification
+    String transactionNotification = await genNotificationTransaction();
+    print("Transaction Notification: $transactionNotification");
 
- 
+    // Generate saving goal notification
+    String savingGoalNotification = await gNotificationSavingGoal();
+    print("Saving Goal Notification: $savingGoalNotification");
 
-      // Create the scheduled time for today
-      final now = tz.TZDateTime.now(tz.local);
-      var scheduledDate =
-          tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
+    // Wait for 1 minute
+    await Future.delayed(const Duration(minutes: 1));
 
-      // If the scheduled time has already passed today, schedule for tomorrow
-      if (scheduledDate.isBefore(now)) {
-        scheduledDate = scheduledDate.add(const Duration(days: 1));
-      }
+    // Schedule transaction notification
+    final now = tz.TZDateTime.now(tz.local);
+    await transactionschaduleNotification(
+      id: 1,
+      title: "Transaction Update",
+      body: transactionNotification,
+      hour: now.hour,
+      minute: (now.minute + 1) % 60,
+    );
 
-      // Schedule combined notification
-      await notificationPlugin.zonedSchedule(
-        id, 
-      title,
-      body,
-      scheduledDate,
-        const NotificationDetails(
-          android: AndroidNotificationDetails(
-            'channel id',
-            'channel name',
-            importance: Importance.max,
-            priority: Priority.high,
-            playSound: true,
-            enableVibration: true,
-            enableLights: true,
-            styleInformation: BigTextStyleInformation(''),
-          ),
-        ),
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-        matchDateTimeComponents: DateTimeComponents.time, // Repeat daily
-      );
-
-      print("Notification Scheduled: Financial Update at $hour:$minute daily.");
-    } catch (e) {
-      print("Error executing and scheduling notifications: $e");
-    }
-  }
-
-
-
-
-
-
-
-
-
-
-
-
-
-// testttttttttttttttttttttttttttt (schacule Notification  local notification and genNotificationTransaction and gNotificationSavingGoal )
-  Future<void> testTransactionNotifications() async {
-    try {
-      // Generate transaction notification
-      String transactionNotification = await genNotificationTransaction();
-      print("Transaction Notification: $transactionNotification");
-
-      // Generate saving goal notification
-      String savingGoalNotification = await gNotificationSavingGoal();
-      print("Saving Goal Notification: $savingGoalNotification");
-
-      // Check if messages are the same
-      String finalNotificationBody;
-      if (transactionNotification == savingGoalNotification) {
-        finalNotificationBody = transactionNotification;
-      } else {
-        finalNotificationBody = "No transaction updates. Do you have any transaction today?";
-      }
-
-      await Future.delayed(const Duration(minutes: 1));
-
-      // Schedule combined notification
-      final now = tz.TZDateTime.now(tz.local);
-      await transactionschaduleNotification(
-        id: 1, 
-        title: "Financial Update",
-        body: finalNotificationBody,
-        hour: now.hour,
-        minute: (now.minute + 1) % 60,
-      );
-    } catch (e) {
-      print("Error executing and scheduling notifications: $e");
-    }
+    // Schedule saving goal notification
+    await transactionschaduleNotification(
+      id: 2, 
+      title: "Saving Goal Update",
+      body: savingGoalNotification,
+      hour: now.hour,
+      minute: (now.minute + 2), 
+    );
+  } catch (e) {
+    print("Error executing and scheduling notifications: $e");
   }
 }
+
+
+}
+
+
+
+----------------------------------------------
+
+
+    ElevatedButton(
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all(Colors.red.shade300),
+            ),
+            onPressed: () async {
+              try {
+                // Create an instance of your notification service
+                final notificationService = TransactionsNotificationService();
+
+                // Initialize the notification service
+                await notificationService.initNotification();
+
+                // Execute and schedule the notifications
+                await notificationService.executeAndScheduleNotifications();
+              } catch (e) {
+                print("Error running notifications: $e");
+              }
+            },
+            child: Text('Run Notifications'),
+          )

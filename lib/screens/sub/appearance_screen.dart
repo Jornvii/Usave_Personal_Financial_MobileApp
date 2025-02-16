@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../provider/langguages_provider.dart';
 import '../../provider/local_notification_service.dart';
+import '../../provider/notification_tractions.dart';
 import '../../provider/theme_provider.dart';
 
 class AppearanceScreen extends StatefulWidget {
@@ -14,214 +15,14 @@ class AppearanceScreen extends StatefulWidget {
 
 class _AppearanceScreenState extends State<AppearanceScreen> {
   bool isNotificationOn = false;
+  bool _isTransactionSwitched = false;
   int selectedHour = 9;
   int selectedMinute = 0;
   @override
   void initState() {
     super.initState();
-    _loadPreferences();
-  }
-
-  Future<void> _loadPreferences() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      isNotificationOn = prefs.getBool('isNotificationOn') ?? true;
-      selectedHour = prefs.getInt('selectedHour') ?? 12;
-      selectedMinute = prefs.getInt('selectedMinute') ?? 00;
-    });
-    if (isNotificationOn) {
-      LocalNotificationService().schaduleNotification(
-        title: "iSAVE",
-        body: "Hello, Do you have any transactions today?🤑",
-        hour: selectedHour,
-        minute: selectedMinute,
-      );
-    }
-  }
-
-  Future<void> _savePreferences() async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setBool('isNotificationOn', isNotificationOn);
-    prefs.setInt('selectedHour', selectedHour);
-    prefs.setInt('selectedMinute', selectedMinute);
-  }
-
-  void _toggleNotification(bool newValue) {
-    setState(() {
-      isNotificationOn = newValue;
-    });
-    if (isNotificationOn) {
-      LocalNotificationService().schaduleNotification(
-        title: "iSAVE",
-        body: "Hello, Do you have any transactions today?🤑",
-        hour: selectedHour,
-        minute: selectedMinute,
-      );
-    } else {
-      LocalNotificationService().cancelAllNotification();
-    }
-    _savePreferences();
-  }
-
-  Future<void> _pickTime() async {
-    TimeOfDay? pickedTime = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay(hour: selectedHour, minute: selectedMinute),
-    );
-    if (pickedTime != null) {
-      setState(() {
-        selectedHour = pickedTime.hour;
-        selectedMinute = pickedTime.minute;
-      });
-      if (isNotificationOn) {
-        LocalNotificationService().schaduleNotification(
-          title: "iSAVE",
-          body: "Hello, Do you have any transactions today?🤑",
-          hour: selectedHour,
-          minute: selectedMinute,
-        );
-      }
-      _savePreferences();
-    }
-  }
-
-  void _showNotificationDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.0),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  "Daily Alert Notification",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: 150,
-                  child: DropdownButtonFormField<bool>(
-                    value: isNotificationOn,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 15, vertical: 5),
-                    ),
-                    onChanged: (bool? newValue) {
-                      if (newValue != null) {
-                        setState(() {
-                          isNotificationOn = newValue;
-                        });
-                         _savePreferences();
-                      }
-                    },
-                    items: const [
-                      DropdownMenuItem(value: true, child: Text("On")),
-                      DropdownMenuItem(value: false, child: Text("Off")),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.blue,width: 0.5),
-                    color: Colors.green[50],
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                        left: 20, right: 20, top: 10, bottom: 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.grey),
-                            children: [
-                              const TextSpan(text: "Set Time : "),
-                              TextSpan(
-                                text:
-                                    "${selectedHour.toString().padLeft(2, '0')}:${selectedMinute.toString().padLeft(2, '0')}",
-                                style: const TextStyle(
-                                    color: Colors
-                                        .black,fontWeight: FontWeight.bold, fontSize: 24),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                              color: Colors.blue.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(50)),
-                          child: Padding(
-                            padding: const EdgeInsets.all(4),
-                            child: IconButton(
-                              icon: const Icon(
-                                Icons.access_time,
-                                size: 28,
-                                color: Colors.blue,
-                              ),
-                              onPressed: _pickTime,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-            
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text("Close",
-                          style: TextStyle(color: Colors.red)),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        _savePreferences();
-                        Navigator.pop(context);
-                        if (isNotificationOn) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                  "Notification Time set: ${selectedHour.toString().padLeft(2, '0')}:${selectedMinute.toString().padLeft(2, '0')}"),
-                            ),
-                          );
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 10, horizontal: 20),
-                      ),
-                      child: const Text("Save"),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+    // _loadPreferences();
+    _loadPreferencestransaction();
   }
 
   @override
@@ -241,33 +42,13 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
             padding: const EdgeInsets.all(8.0),
             child: Column(
               children: [
-          
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: ListTile(
-                      onTap: _showNotificationDialog,
-                      title: Text(
-                        languageProvider.translate('"Daily Notification'),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.notifications),
-                        onPressed: () => _showNotificationDialog(),
-                      ),
-                    ),
-                  ),
-                ),
                 _appearancemenu(
                   context,
                   languageProvider,
                   Icons.translate,
                   'language',
-                  languageProvider
-                      .translate(languageProvider.selectedLanguage.toUpperCase()),
+                  languageProvider.translate(
+                      languageProvider.selectedLanguage.toUpperCase()),
                   () => _showLanguageSelectionDialog(context, languageProvider),
                   Colors.lightBlue,
                 ),
@@ -292,6 +73,89 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
                     ),
                   ),
                 ),
+                Card(
+                  elevation: 5,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    side: const BorderSide(
+                      width: 0.1,
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 8, bottom: 8),
+                    child: InkWell(
+                      child: SwitchListTile(
+                        title: const Text("Show Notifications"),
+                        value: _isTransactionSwitched,
+                        onChanged: (bool value) async {
+                          setState(() {
+                            _isTransactionSwitched = value;
+                          });
+                          await _savePreferencestransaction();
+
+                          if (value) {
+                            final notificationService =
+                                TransactionsNotificationService();
+                            // Initialize the notification service
+                            await notificationService.initNotification();
+
+                            final service = TransactionsNotificationService();
+
+                            // Fetch new Transaction Notification
+                            String transactionBody =
+                                await service.genNotificationTransaction();
+
+                            // Fetch new Saving Goal Notification
+                            String savingGoalBody =
+                                await service.gNotificationSavingGoal();
+
+                            // Execute and schedule notifications
+                            await notificationService
+                                .executeAndScheduleNotifications(
+                              id: 1,
+                              title: "Transaction Reminder",
+                              body: transactionBody,
+                              hour: 23,
+                              minute: 12,
+                            );
+                            // Execute and schedule notifications
+                            await notificationService
+                                .executeAndScheduleNotifications(
+                              id: 2,
+                              title: "Saving Goal Reminder",
+                              body: savingGoalBody,
+                              hour: 23,
+                              minute: 15,
+                            );
+                          } else {
+                            LocalNotificationService().cancelAllNotification();
+                          }
+
+                          _savePreferencestransaction();
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+                // Card(
+                //   child: Padding(
+                //     padding: const EdgeInsets.all(8.0),
+                //     child: ListTile(
+                //       onTap: _showNotificationDialog,
+                //       title: Text(
+                //         languageProvider.translate('"Daily Alert Notification'),
+                //         style: const TextStyle(
+                //           fontSize: 16,
+                //           fontWeight: FontWeight.bold,
+                //         ),
+                //       ),
+                //       trailing: IconButton(
+                //         icon: const Icon(Icons.notifications),
+                //         onPressed: () => _showNotificationDialog(),
+                //       ),
+                //     ),
+                //   ),
+                // ),
               ],
             ),
           ),
@@ -299,6 +163,223 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
       ),
     );
   }
+
+// for transaction notification
+  Future<void> _loadPreferencestransaction() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _isTransactionSwitched = prefs.getBool('isTransactionSwitched') ?? true;
+    });
+  }
+
+  Future<void> _savePreferencestransaction() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isTransactionSwitched', _isTransactionSwitched);
+  }
+
+  /// for daily notification
+
+  // Future<void> _loadPreferences() async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   setState(() {
+  //     isNotificationOn = prefs.getBool('isNotificationOn') ?? true;
+  //     selectedHour = prefs.getInt('selectedHour') ?? 12;
+  //     selectedMinute = prefs.getInt('selectedMinute') ?? 00;
+  //   });
+  //   if (isNotificationOn) {
+  //     LocalNotificationService().schaduleNotification(
+  //       title: "iSAVE",
+  //       body: "Hello, Do you have any transactions today?🤑",
+  //       hour: selectedHour,
+  //       minute: selectedMinute,
+  //     );
+  //   }
+  // }
+
+  // Future<void> _savePreferences() async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   prefs.setBool('isNotificationOn', isNotificationOn);
+  //   prefs.setInt('selectedHour', selectedHour);
+  //   prefs.setInt('selectedMinute', selectedMinute);
+  // }
+
+  // void _toggleNotification(bool newValue) {
+  //   setState(() {
+  //     isNotificationOn = newValue;
+  //   });
+  //   if (isNotificationOn) {
+  //     LocalNotificationService().schaduleNotification(
+  //       title: "iSAVE",
+  //       body: "Hello, Do you have any transactions today?🤑",
+  //       hour: selectedHour,
+  //       minute: selectedMinute,
+  //     );
+  //   } else {
+  //     LocalNotificationService().cancelAllNotification();
+  //   }
+  //   _savePreferences();
+  // }
+
+  // Future<void> _pickTime() async {
+  //   TimeOfDay? pickedTime = await showTimePicker(
+  //     context: context,
+  //     initialTime: TimeOfDay(hour: selectedHour, minute: selectedMinute),
+  //   );
+  //   if (pickedTime != null) {
+  //     setState(() {
+  //       selectedHour = pickedTime.hour;
+  //       selectedMinute = pickedTime.minute;
+  //     });
+  //     if (isNotificationOn) {
+  //       LocalNotificationService().schaduleNotification(
+  //         title: "iSAVE",
+  //         body: "Hello, Do you have any transactions today?🤑",
+  //         hour: selectedHour,
+  //         minute: selectedMinute,
+  //       );
+  //     }
+  //     _savePreferences();
+  //   }
+  // }
+
+//   void _showNotificationDialog() {
+//     showDialog(
+//       context: context,
+//       builder: (BuildContext context) {
+//         return Dialog(
+//           shape: RoundedRectangleBorder(
+//             borderRadius: BorderRadius.circular(20.0),
+//           ),
+//           child: Padding(
+//             padding: const EdgeInsets.all(20),
+//             child: Column(
+//               mainAxisSize: MainAxisSize.min,
+//               children: [
+//                 const Text(
+//                   "Daily Alert Notification",
+//                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+//                 ),
+//                 const SizedBox(height: 20),
+//                 SizedBox(
+//                   width: 150,
+//                   child: DropdownButtonFormField<bool>(
+//                     value: isNotificationOn,
+//                     decoration: InputDecoration(
+//                       border: OutlineInputBorder(
+//                         borderRadius: BorderRadius.circular(10),
+//                       ),
+//                       contentPadding: const EdgeInsets.symmetric(
+//                           horizontal: 15, vertical: 5),
+//                     ),
+//                     onChanged: (bool? newValue) {
+//                       if (newValue != null) {
+//                         setState(() {
+//                           isNotificationOn = newValue;
+//                         });
+//                         _savePreferences();
+//                       }
+//                     },
+//                     items: const [
+//                       DropdownMenuItem(value: true, child: Text("On")),
+//                       DropdownMenuItem(value: false, child: Text("Off")),
+//                     ],
+//                   ),
+//                 ),
+//                 const SizedBox(height: 20),
+//                 Container(
+//                   decoration: BoxDecoration(
+//                     border: Border.all(color: Colors.blue, width: 0.5),
+//                     color: Colors.green[50],
+//                     borderRadius: BorderRadius.circular(5),
+//                   ),
+//                   child: Padding(
+//                     padding: const EdgeInsets.only(
+//                         left: 20, right: 20, top: 10, bottom: 10),
+//                     child: Row(
+//                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                       children: [
+//                         RichText(
+//                           text: TextSpan(
+//                             style: const TextStyle(
+//                                 fontSize: 16,
+//                                 fontWeight: FontWeight.bold,
+//                                 color: Colors.grey),
+//                             children: [
+//                               const TextSpan(text: "Set Time : "),
+//                               TextSpan(
+//                                 text:
+//                                     "${selectedHour.toString().padLeft(2, '0')}:${selectedMinute.toString().padLeft(2, '0')}",
+//                                 style: const TextStyle(
+//                                     color: Colors.black,
+//                                     fontWeight: FontWeight.bold,
+//                                     fontSize: 24),
+//                               ),
+//                             ],
+//                           ),
+//                         ),
+//                         const SizedBox(
+//                           width: 10,
+//                         ),
+//                         Container(
+//                           decoration: BoxDecoration(
+//                               color: Colors.blue.withOpacity(0.2),
+//                               borderRadius: BorderRadius.circular(50)),
+//                           child: Padding(
+//                             padding: const EdgeInsets.all(4),
+//                             child: IconButton(
+//                               icon: const Icon(
+//                                 Icons.access_time,
+//                                 size: 28,
+//                                 color: Colors.blue,
+//                               ),
+//                               onPressed: _pickTime,
+//                             ),
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                   ),
+//                 ),
+//                 const SizedBox(height: 20),
+//                 Row(
+//                   mainAxisAlignment: MainAxisAlignment.spaceAround,
+//                   children: [
+//                     TextButton(
+//                       onPressed: () => Navigator.pop(context),
+//                       child: const Text("Close",
+//                           style: TextStyle(color: Colors.red)),
+//                     ),
+//                     ElevatedButton(
+//                       onPressed: () {
+//                         _savePreferences();
+//                         Navigator.pop(context);
+//                         if (isNotificationOn) {
+//                           ScaffoldMessenger.of(context).showSnackBar(
+//                             SnackBar(
+//                               content: Text(
+//                                   "Notification Time set: ${selectedHour.toString().padLeft(2, '0')}:${selectedMinute.toString().padLeft(2, '0')}"),
+//                             ),
+//                           );
+//                         }
+//                       },
+//                       style: ElevatedButton.styleFrom(
+//                         shape: RoundedRectangleBorder(
+//                           borderRadius: BorderRadius.circular(10),
+//                         ),
+//                         padding: const EdgeInsets.symmetric(
+//                             vertical: 10, horizontal: 20),
+//                       ),
+//                       child: const Text("Save"),
+//                     ),
+//                   ],
+//                 ),
+//               ],
+//             ),
+//           ),
+//         );
+//       },
+//     );
+//   }
 }
 
 void _showLanguageSelectionDialog(

@@ -439,8 +439,31 @@ class _SettingScreenUiState extends State<SettingScreenUi> {
           actions: [
             TextButton(
               onPressed: () {
-                _deleteAllData(context, languageProvider);
-                Navigator.of(context).pop();
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text(languageProvider.translate('warning')),
+                      content: Text(
+                          languageProvider.translate('delete_forever_warning')),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            _deleteAllData(context, languageProvider);
+                            Navigator.of(context).pop();
+                            Navigator.of(context).pop();
+                          },
+                          child: Text(
+                              languageProvider.translate('confirm_delete')),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: Text(languageProvider.translate('cancel')),
+                        ),
+                      ],
+                    );
+                  },
+                );
               },
               child: Text(languageProvider.translate('delete_all')),
             ),
@@ -472,12 +495,17 @@ class _SettingScreenUiState extends State<SettingScreenUi> {
 
   void _deleteAllData(
       BuildContext context, LanguageProvider languageProvider) async {
-    // Clear all data from the database
-    // await TransactionDB().clearTransactions();
+    try {
+      await TransactionDB().resetDatabase();
 
-// Show a confirmation message after clearing data
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(languageProvider.translate('all_data_cleared'))),
-    );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(languageProvider.translate('all_data_cleared'))),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(languageProvider.translate('error_deleting_data'))),
+      );
+    }
   }
 }

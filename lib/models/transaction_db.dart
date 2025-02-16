@@ -161,4 +161,12 @@ Future<List<Map<String, dynamic>>> getTransactionsByDateRange(String startDate, 
         ? result.first['totalSavings'] as double
         : 0.0;
   }
+
+
+  // reset all transactions without move to bin 
+  Future<void> resetDatabase() async {
+  final db = await database;
+  await db.delete('transactions'); 
+}
+
 }
