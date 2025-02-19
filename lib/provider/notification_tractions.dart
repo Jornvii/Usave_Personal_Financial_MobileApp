@@ -327,6 +327,7 @@ class TransactionsNotificationService {
     } catch (e) {
       print("Error executing and scheduling notifications: $e");
     }
+    
   }
 
 

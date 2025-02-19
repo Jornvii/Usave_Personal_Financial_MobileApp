@@ -84,55 +84,59 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
                   child: Padding(
                     padding: const EdgeInsets.only(top: 8, bottom: 8),
                     child: InkWell(
-                      child: SwitchListTile(
+                      child: ListTile(
                         title: const Text("Show Notifications"),
-                        value: _isTransactionSwitched,
-                        onChanged: (bool value) async {
-                          setState(() {
-                            _isTransactionSwitched = value;
-                          });
-                          await _savePreferencestransaction();
-
-                          if (value) {
-                            final notificationService =
-                                TransactionsNotificationService();
-                            // Initialize the notification service
-                            await notificationService.initNotification();
-
-                            final service = TransactionsNotificationService();
-
-                            // Fetch new Transaction Notification
-                            String transactionBody =
-                                await service.genNotificationTransaction();
-
-                            // Fetch new Saving Goal Notification
-                            String savingGoalBody =
-                                await service.gNotificationSavingGoal();
-
-                            // Execute and schedule notifications
-                            await notificationService
-                                .executeAndScheduleNotifications(
-                              id: 1,
-                              title: "Transaction Reminder",
-                              body: transactionBody,
-                              hour: 23,
-                              minute: 12,
+                        trailing: DropdownButton<String>(
+                          value: _isTransactionSwitched ? "On" : "Off",
+                          items: ["On", "Off"].map((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
                             );
-                            // Execute and schedule notifications
-                            await notificationService
-                                .executeAndScheduleNotifications(
-                              id: 2,
-                              title: "Saving Goal Reminder",
-                              body: savingGoalBody,
-                              hour: 23,
-                              minute: 15,
-                            );
-                          } else {
-                            LocalNotificationService().cancelAllNotification();
-                          }
+                          }).toList(),
+                          onChanged: (String? newValue) async {
+                            bool newValueBool = newValue == "On";
+                            setState(() {
+                              _isTransactionSwitched = newValueBool;
+                            });
+                            await _savePreferencestransaction();
 
-                          _savePreferencestransaction();
-                        },
+                            if (newValueBool) {
+                              final notificationService =
+                                  TransactionsNotificationService();
+                              await notificationService.initNotification();
+
+                              final service = TransactionsNotificationService();
+                              String transactionBody =
+                                  await service.genNotificationTransaction();
+                              String savingGoalBody =
+                                  await service.gNotificationSavingGoal();
+
+                              await notificationService
+                                  .executeAndScheduleNotifications(
+                                id: 1,
+                                title: "Transaction Reminder",
+                                body: transactionBody,
+                                hour: 17,
+                                minute: 00,
+                              );
+
+                              await notificationService
+                                  .executeAndScheduleNotifications(
+                                id: 2,
+                                title: "Saving Goal Reminder",
+                                body: savingGoalBody,
+                                hour: 20,
+                                minute: 00,
+                              );
+                            } else {
+                              LocalNotificationService()
+                                  .cancelAllNotification();
+                            }
+
+                            await _savePreferencestransaction();
+                          },
+                        ),
                       ),
                     ),
                   ),

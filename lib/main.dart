@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'provider/langguages_provider.dart';
 import 'provider/local_notification_service.dart';
+import 'provider/notification_tractions.dart';
 import 'provider/theme_provider.dart';
 import 'screens/main/home_screen.dart';
 import 'screens/main/chat_bot.dart';
@@ -15,7 +16,9 @@ void main() async {
   // Request Notification & Storage permissions
   await _checkAndRequestPermissions();
 
+ await checkTransactionNotification(); 
   // Initialize notification service
+  TransactionsNotificationService().initNotification();
   LocalNotificationService().initNotification();
 
   // Load theme and language settings
@@ -35,7 +38,35 @@ void main() async {
     ),
   );
 }
+Future<void> checkTransactionNotification() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  bool isTransactionSwitched = prefs.getBool('isTransactionSwitched') ?? true;
 
+  if (isTransactionSwitched) {
+    final notificationService = TransactionsNotificationService();
+    await notificationService.initNotification();
+
+    final service = TransactionsNotificationService();
+    String transactionBody = await service.genNotificationTransaction();
+    String savingGoalBody = await service.gNotificationSavingGoal();
+
+    await notificationService.executeAndScheduleNotifications(
+      id: 1,
+      title: "Transaction Reminder",
+      body: transactionBody,
+      hour: 17,
+      minute: 00,
+    );
+
+    await notificationService.executeAndScheduleNotifications(
+      id: 2,
+      title: "Saving Goal Reminder",
+      body: savingGoalBody,
+      hour: 20,
+      minute: 00,
+    );
+  }
+}
 Future<void> _checkAndRequestPermissions() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   bool hasAskedPermissions = prefs.getBool('askedPermissions') ?? false;

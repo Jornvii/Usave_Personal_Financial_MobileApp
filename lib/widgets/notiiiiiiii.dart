@@ -129,7 +129,6 @@ class _TestNotificatioScreenState extends State<TestNotificatioScreen> {
                   minute: 38,
                 );
 
-                // Success feedback
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                       content: Text("Notifications scheduled successfully!")),
