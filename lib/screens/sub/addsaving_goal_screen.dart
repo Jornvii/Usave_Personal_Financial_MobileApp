@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../models/category_db.dart';
+import '../../models/currency_db.dart';
 import '../../models/saving_goaldb.dart';
 import '../../models/transaction_db.dart';
+import '../../provider/langguages_provider.dart';
 import 'saving_detail.dart';
 
 class SavingGoalScreen extends StatefulWidget {
@@ -12,8 +15,9 @@ class SavingGoalScreen extends StatefulWidget {
 }
 
 class _SavingGoalScreenState extends State<SavingGoalScreen> {
+  String currencySymbol = '\$';
   final List<String> defaultSavingCategories = [
-    'Emergency Fund',
+    'EmergencyFund',
     'Investments',
   ];
 
@@ -24,13 +28,15 @@ class _SavingGoalScreenState extends State<SavingGoalScreen> {
   void initState() {
     super.initState();
     _loadCategoriesAndGoals();
+    _loadCurrency();
   }
 
   @override
   Widget build(BuildContext context) {
+    final languageProvider = Provider.of<LanguageProvider>(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Set Saving Goals'),
+        title: Text(languageProvider.translate('SetASavingGoal')),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -51,7 +57,8 @@ class _SavingGoalScreenState extends State<SavingGoalScreen> {
                         defaultSavingCategories.contains(category);
 
                     final subtitleText = (goalAmount != null && goalAmount > 0)
-                        ? 'Goal: \$${goalAmount.toStringAsFixed(2)}'
+                        ? languageProvider.translate(
+                            'Goal: $currencySymbol  ${goalAmount.toStringAsFixed(2)}')
                         : 'No goal set yet';
                     return isDefaultCategory
                         ? Card(
@@ -166,7 +173,10 @@ class _SavingGoalScreenState extends State<SavingGoalScreen> {
                                 await showDialog(
                                   context: context,
                                   builder: (context) => AlertDialog(
-                                    title: const Text('Cannot Delete'),
+                                    title: Text(
+                                      languageProvider
+                                          .translate('CannotDelete'),
+                                    ),
                                     content: Text(
                                       'The saving goal for "$category" is associated with transactions and cannot be deleted.',
                                     ),
@@ -187,15 +197,19 @@ class _SavingGoalScreenState extends State<SavingGoalScreen> {
                                 context: context,
                                 builder: (context) {
                                   return AlertDialog(
-                                    title: const Text('Confirm Deletion'),
+                                    title: Text(languageProvider
+                                        .translate('ConfirmDeletion')),
                                     content: Text(
-                                      'Are you sure you want to delete the saving goal for "$category"?',
+                                      languageProvider.translate(
+                                          'Areyousureyouwanttodeletethesavinggoalcategory?'),
+                                      // 'Areyousureyouwanttodeletethesavinggoalfor "$category"?',
                                     ),
                                     actions: [
                                       TextButton(
                                         onPressed: () =>
                                             Navigator.of(context).pop(false),
-                                        child: const Text('Cancel'),
+                                        child: Text(languageProvider
+                                            .translate('Cancel')),
                                       ),
                                       ElevatedButton(
                                         onPressed: () async {
@@ -216,7 +230,8 @@ class _SavingGoalScreenState extends State<SavingGoalScreen> {
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: Colors.redAccent,
                                         ),
-                                        child: const Text('Delete'),
+                                        child: Text(languageProvider
+                                            .translate('Delete')),
                                       ),
                                     ],
                                   );
@@ -324,6 +339,14 @@ class _SavingGoalScreenState extends State<SavingGoalScreen> {
         child: const Icon(Icons.add),
       ),
     );
+  }
+
+  Future<void> _loadCurrency() async {
+    final db = CurrencyDB();
+    final defaultCurrency = await db.getDefaultCurrency();
+    setState(() {
+      currencySymbol = defaultCurrency?['symbol'] ?? '\$';
+    });
   }
 
   Future<void> _loadCategoriesAndGoals() async {

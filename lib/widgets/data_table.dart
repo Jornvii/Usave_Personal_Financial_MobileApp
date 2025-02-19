@@ -4,8 +4,10 @@ import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:csv/csv.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 import '../../models/currency_db.dart';
 import '../../models/transaction_db.dart';
+import '../provider/langguages_provider.dart';
 
 class DataTransactionTable extends StatefulWidget {
   const DataTransactionTable({super.key});
@@ -50,6 +52,9 @@ class _DataTransactionTableState extends State<DataTransactionTable> {
 
   @override
   Widget build(BuildContext context) {
+   
+    final languageProvider = Provider.of<LanguageProvider>(context);
+     final theme = Theme.of(context);
     final filteredTransactions = transactions.where((tx) {
       DateTime txDate = DateTime.parse(tx['date']);
       bool isWithinDateRange =
@@ -78,8 +83,13 @@ class _DataTransactionTableState extends State<DataTransactionTable> {
           const SizedBox(height: 10),
           Expanded(
             child: filteredTransactions.isEmpty
-                ? const Center(
-                    child: Text("No transactions available in this range."))
+                ?  Center(
+                    child:   Text(
+              languageProvider.translate('Notransactionsavailable'),
+              style: theme.textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),)
                 : SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: DataTable(
@@ -125,6 +135,7 @@ class _DataTransactionTableState extends State<DataTransactionTable> {
   }
 
   Widget _buildDropdownFilter() {
+     final languageProvider = Provider.of<LanguageProvider>(context);
     return Container(
       width: 180,
       decoration: BoxDecoration(
@@ -142,13 +153,22 @@ class _DataTransactionTableState extends State<DataTransactionTable> {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: DropdownButtonHideUnderline(
+          
           child: DropdownButton<String>(
             value: selectedFilter,
-            items: const [
-              DropdownMenuItem(value: 'All', child: Text('All')),
-              DropdownMenuItem(value: 'Income', child: Text('Income')),
-              DropdownMenuItem(value: 'Expense', child: Text('Expense')),
-              DropdownMenuItem(value: 'Saving', child: Text('Saving')),
+            items: [
+               DropdownMenuItem(
+                        value: 'All',
+                        child: Text(languageProvider.translate('All'))),
+                    DropdownMenuItem(
+                        value: 'Income',
+                        child: Text(languageProvider.translate('Income'))),
+                    DropdownMenuItem(
+                        value: 'Expense',
+                        child: Text(languageProvider.translate('Expense'))),
+                    DropdownMenuItem(
+                        value: 'Saving',
+                        child: Text(languageProvider.translate('Saving'))),
             ],
             onChanged: (value) {
               setState(() {

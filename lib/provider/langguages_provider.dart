@@ -31,14 +31,47 @@ class LanguageProvider with ChangeNotifier {
 
   // Translations for different languages
   static const Map<String, Map<String, String>> _translations = {
+
+    // ****************************************************************************************************************************************************************
+    // ****************************************************************************************************************************************************************
+    // ****************************************************************************************************************************************************************
     'English': {
       //Main Screen
       'home': 'Home',
       'chatbot': 'Chat bot',
        //Home Screen
       'MonthlyTransactions': 'Monthly Transactions',
+      'PleaseSetASavingGoalForTransactionsNotifications': 'Please set a saving goal for transactions notifications',
+      'GotoSetSavingGoalsNow': 'Set a Saving Goal',
+      "Cancel": 'Cancel',
+      //MyHomePage
+      "SetASavingGoal": "Set a Saving Goal",
       // sub home screen
-      "recent_transactions" : "Recent Transactions",
+      'GoodMorning': 'Good Morning',
+      'GoodAfternoon': 'Good Afternoon',
+      'GoodEvening': 'Good Evening',
+'Tapheretosetyourname': 'Tap here to set your name',
+'Menu': 'Menu',
+'DataCategory': "Data Category",
+'DataTable': 'Data Table',
+'Reports': 'Reports',
+'SavingGoal': 'Saving Goal',
+'Calculate': 'Calculate',
+'recent_transactions': 'Recent Transactions',
+'Notransactionsavailable': 'No transactions available',
+
+
+// ListSummaryScreen
+'All':'All',
+
+
+// SavingGoalScreen
+'EmergencyFund': 'Emergency Fund',
+'CannotDelete': 'Cannot delete',
+'Areyousureyouwanttodeletethesavinggoalcategory?' : 'Are you sure you want to delete the saving goal category?',
+'ConfirmDeletion': 'Confirm Deletion',
+
+
       //Add Transaction Screen
       'add_transaction': 'Add Transaction',
       'Amount': 'Amount',
@@ -120,14 +153,49 @@ class LanguageProvider with ChangeNotifier {
       'about_us': "About Us",
       'version_app': 'version 1.0.1'
     },
+    // ****************************************************************************************************************************************************************
+    // ****************************************************************************************************************************************************************
+    // ****************************************************************************************************************************************************************
+    // ****************************************************************************************************************************************************************
+    
     'Thai': {
       //Main Screen
       'home': 'หน้าหลัก',
       'chatbot': 'Chat bot',
  //Home Screen
-      'MonthlyTransactions': 'ธุรกรรมรายเดือน',
+      'MonthlyTransactions': 'รายการรายเดือน',
+       //MyHomePage
+      "SetASavingGoal": "ตั้งเป้าหมายการออม",
+      'PleaseSetASavingGoalForTransactionsNotifications': 'โปรดตั้งเป้าหมายการออมสำหรับการแจ้งเตือนรายการ',
+      'GotoSetSavingGoalsNow': 'ตั้งเป้าหมายการออม',
+      "Cancel": 'ยกเลิก',
       // sub home screen
-      "recent_transactions" : "ธุรกรรมล่าสุด",
+     'GoodMorning': 'อรุณสวัสดิ์',
+      'GoodAfternoon': 'สวัสดีตอนบ่าย',
+      'GoodEvening': 'สวัสดีตอนเย็น',
+'Tapheretosetyourname': 'กดที่นี่เพื่อตั้งชื่อของคุณ',
+'Menu': 'เมนู',
+'DataCategory': "หมวดหมู่ข้อมูล",
+'DataTable': 'ตารางข้อมูล',
+'Reports': 'รายงาน',
+'SavingGoal': 'เป้าหมายการออม',
+'Calculate': 'คำนวณ',
+'recent_transactions': 'รายการ',
+'Notransactionsavailable': 'ไม่มีรายการ',
+
+// ListSummaryScreen
+'All': 'ทั้งหมด',
+ 
+
+
+// SavingGoalScreen
+'EmergencyFund': 'กองทุนฉุกเฉิน',
+'CannotDelete': 'ไม่สามารถลบ',
+'Areyousureyouwanttodeletethesavinggoalcategory?' : "ลบหมวดหมู่เป้าหมายการออมนี้?",
+'ConfirmDeletion': 'ยืนยันการลบ',
+'Delete': 'ลบ',
+
+
       //Add Transaction Screen
       'add_transaction': 'เพิ่มรายการ',
       'Amount': 'จำนวนเงิน',
@@ -179,7 +247,7 @@ class LanguageProvider with ChangeNotifier {
       'username': 'ชื่อผู้ใช้',
       'save': 'บันทึก',
       'profile_updated': 'โปรไฟล์ได้รับการอัปเดตเรียบร้อยแล้ว!',
-      'default_username': 'ชื่อผู้ใช้เริ่มต้น',
+      'default_username': 'ชื่อผู้ใช้',
       'name': 'ชื่อ',
       'edit_user_name': 'แก้ไขชื่อผู้ใช้',
       'currency': 'สกุลเงิน',
@@ -209,14 +277,51 @@ class LanguageProvider with ChangeNotifier {
       'about_us': "เกี่ยวกับเรา",
       'version_app': 'เวอร์ชัน 1.0.1'
     },
+
+    // ************************************************************************************************************************************************************************************************************
+    // ************************************************************************************************************************************************************************************************************
+    // ************************************************************************************************************************************************************************************************************
+    // ************************************************************************************************************************************************************************************************************
+    // ************************************************************************************************************************************************************************************************************
     'Khmer': {
       //Main Screen
       'home': 'ទំព័រដើម',
       'chatbot': 'Chat bot',
       //Home Screen
       'MonthlyTransactions': 'ប្រតិបត្តិការប្រចាំខែ',
+       //MyHomePage
+      "SetASavingGoal": "កំណត់គោលដៅសន្សំ",
+      'PleaseSetASavingGoalForTransactionsNotifications': 'សូមកំណត់គោលដៅសន្សំសម្រាប់ការជូនដំណឹងប្រតិបត្តិការ',
+     'GotoSetSavingGoalsNow': 'កំណត់គោលដៅសន្សំ',
+     "Cancel": 'បោះបង់',
+     
       // sub home screen
-      "recent_transactions" : "ប្រតិបត្តិការថ្មី",
+     'GoodMorning': 'អរុណសួស្តី',
+      'GoodAfternoon': 'ទិវាសួស្តី',
+      'GoodEvening': 'សាយណ្ហសួស្តី',
+      'Tapheretosetyourname': 'ចុចទីនេះដើម្បីកំណត់ឈ្មោះអ្នក',
+'Menu': 'ម៉ឺនុយ',
+'DataCategory': "ប្រភេទទិន្នន័យ",
+'DataTable': 'តារាងទិន្នន័យ',
+'Reports': 'របាយការណ៍',
+'SavingGoal': 'គោលដៅសន្សំ',
+'Calculate': 'គណនា',
+'recent_transactions': 'ប្រតិបត្តិការថ្មី',
+'Notransactionsavailable': 'មិនមានប្រតិបត្តិការ',
+
+
+// ListSummaryScreen
+'All': 'ទាំងអស់',
+
+
+
+
+// SavingGoalScreen
+'EmergencyFund': 'កម្ចីបន្ទាន់',
+'CannotDelete': 'មិនអាចលុប',
+'Areyousureyouwanttodeletethesavinggoalcategory?' : 'តើអ្នកប្រើចង់លុបប្រភេទគោលដៅសន្សំនេះមែនទេ?',
+
+
 
       //Add Transaction Screen
       'add_transaction': 'បញ្ចូលប្រតិបត្តិការ',
@@ -296,7 +401,7 @@ class LanguageProvider with ChangeNotifier {
       'edit_saving_goal': 'កែសម្រួលគោលដៅសន្សំ',
       'delete_chat': 'លុបទិន្នន័យសារ',
       'about_us': "អំពី អ្នកបង្កើតកម្មវិធី",
-      'version_app': 'កំណែ 1.0.1'
+      'version_app': 'កំណែ 1.0.0'
     },
   };
 }

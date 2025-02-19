@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../models/transaction_db.dart';
 import '../models/currency_db.dart';
+import '../provider/langguages_provider.dart';
 
 class ListSummaryScreen extends StatefulWidget {
   const ListSummaryScreen({super.key});
@@ -31,9 +33,10 @@ class _ListSummaryScreenState extends State<ListSummaryScreen> {
     final defaultCurrency = await db.getDefaultCurrency();
     setState(() {
       currencySymbol =
-          defaultCurrency?['symbol'] ?? '\$'; // Use default if null
+          defaultCurrency?['symbol'] ?? '\$'; 
     });
   }
+
   Future<void> _loadTransactions() async {
     final db = TransactionDB();
     final data = await db.getTransactions();
@@ -61,6 +64,7 @@ class _ListSummaryScreenState extends State<ListSummaryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final languageProvider = Provider.of<LanguageProvider>(context);
     Map<String, Map<String, List<Map<String, dynamic>>>> groupedTransactions = {
       'Income': {},
       'Expense': {},
@@ -141,11 +145,19 @@ class _ListSummaryScreenState extends State<ListSummaryScreen> {
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
                   value: selectedFilter,
-                  items: const [
-                    DropdownMenuItem(value: 'All', child: Text('All')),
-                    DropdownMenuItem(value: 'Income', child: Text('Income')),
-                    DropdownMenuItem(value: 'Expense', child: Text('Expense')),
-                    DropdownMenuItem(value: 'Saving', child: Text('Saving')),
+                  items: [
+                    DropdownMenuItem(
+                        value: 'All',
+                        child: Text(languageProvider.translate('All'))),
+                    DropdownMenuItem(
+                        value: 'Income',
+                        child: Text(languageProvider.translate('Income'))),
+                    DropdownMenuItem(
+                        value: 'Expense',
+                        child: Text(languageProvider.translate('Expense'))),
+                    DropdownMenuItem(
+                        value: 'Saving',
+                        child: Text(languageProvider.translate('Saving'))),
                   ],
                   onChanged: (value) {
                     setState(() {
@@ -153,19 +165,17 @@ class _ListSummaryScreenState extends State<ListSummaryScreen> {
                     });
                   },
                   isExpanded: true,
-                  dropdownColor:
-                      Colors.white, 
+                  dropdownColor: Colors.white,
                   icon: const Icon(
                     Icons.arrow_drop_down,
-                    color: Colors.blue, 
+                    color: Colors.blue,
                   ),
                   style: const TextStyle(
                     color: Colors.grey,
                     fontSize: 16,
-                    fontWeight: FontWeight.w500, 
+                    fontWeight: FontWeight.w500,
                   ),
-                  borderRadius: BorderRadius.circular(
-                      12),
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
             ),
@@ -187,19 +197,19 @@ class _ListSummaryScreenState extends State<ListSummaryScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Navigator.push(
-          //   context,
-          //   MaterialPageRoute(
-          //     builder: (context) =>
-          //         DataTransactionTable(transactions: transactions, ),
-          //   ),
-          // );
-        },
-        backgroundColor: const Color.fromARGB(255, 17, 215, 119),
-        child: const Icon(Icons.visibility),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {
+      //     Navigator.push(
+      //       context,
+      //       MaterialPageRoute(
+      //         builder: (context) =>
+      //             DataTransactionTable(transactions: transactions, ),
+      //       ),
+      //     );
+      //   },
+      //   backgroundColor: const Color.fromARGB(255, 17, 215, 119),
+      //   child: const Icon(Icons.visibility),
+      // ),
     );
   }
 

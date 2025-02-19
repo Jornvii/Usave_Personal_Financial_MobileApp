@@ -160,10 +160,10 @@ class _MyHomePageState extends State<MyHomePage> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
+         final languageProvider = Provider.of<LanguageProvider>(context);
         return AlertDialog(
-          title: const Text('Set a Saving Goal'),
-          content: const Text(
-              'Please set at least one saving goal before accessing notifications.'),
+          title:  Text(languageProvider.translate('SetASavingGoal')),
+          content: Text(languageProvider.translate('PleaseSetASavingGoalForTransactionsNotifications')),
           actions: [
             TextButton(
               onPressed: () {
@@ -174,13 +174,13 @@ class _MyHomePageState extends State<MyHomePage> {
                       builder: (context) => const SavingGoalScreen()),
                 );
               },
-              child: const Text('Go to Saving Goals'),
+              child: Text(languageProvider.translate('GotoSetSavingGoalsNow')),
             ),
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: const Text('Cancel'),
+              child: Text(languageProvider.translate('Cancel')),
             ),
           ],
         );

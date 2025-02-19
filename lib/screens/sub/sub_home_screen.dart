@@ -53,20 +53,21 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
 
   // greeting text
   String _getGreetingMessage() {
+     final languageProvider = Provider.of<LanguageProvider>(context);
     final hour = DateTime.now().hour;
     if (hour < 12) {
-      return 'Good Morning';
+      return languageProvider.translate('GoodMorning');
     } else if (hour < 18) {
-      return 'Good Afternoon';
+      return languageProvider.translate('GoodAfternoon');
     } else {
-      return 'Good Evening';
+      return languageProvider.translate('GoodEvening');
     }
   }
 
   void _startTransactionReload() {
-    // Schedule the function to run every 2 seconds
     _timer = Timer.periodic(const Duration(seconds: 2), (timer) {
       _loadTransactions();
+      
     });
   }
 
@@ -115,7 +116,7 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
                         ),
                       ),
                       Text(
-                        languageProvider.translate('Tap here to set your name'),
+                        languageProvider.translate('Tapheretosetyourname'),
                         style: const TextStyle(
                           fontSize: 14,
                           color: Colors.blue,
@@ -128,7 +129,7 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
               : Row(
                   children: [
                     Text(
-                      '${_getGreetingMessage()},',
+                      '${_getGreetingMessage()}​,',
                       style: const TextStyle(fontSize: 22),
                     ),
                     Text(
@@ -175,39 +176,39 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
                   final options = [
                     {
                       'icon': Icons.category,
-                      'title': 'Data Category',
+                      'title':  languageProvider.translate('DataCategory'),
                       'screen': const ListSummaryScreen(),
                       'color': Colors.red,
                     },
                     {
                       'icon': Icons.table_view,
-                      'title': 'Data Table',
+                      'title': languageProvider.translate('DataTable'),
 
                       'screen':  const DataTransactionTable(),
                       'color': Colors.green,
                     },
                     {
                       'icon': Icons.pie_chart,
-                      'title': 'Reports',
+                      'title': languageProvider.translate('Reports'),
                       'screen': const ReportScreen(),
                       'color': Colors.lime,
                     },
 
                     {
                       'icon': Icons.dashboard,
-                      'title': 'Saving Goal',
+                      'title': languageProvider.translate('SavingGoal'),
                       'screen': const SavingGoalScreen(),
                       'color': Colors.orange,
                     },
                     {
                       'icon': Icons.calculate,
-                      'title': 'Calculate',
+                      'title': languageProvider.translate('Calculate'),
                       'screen': const CalculatorScreen(),
                       'color': Colors.blueGrey,
                     },
                     {
                       'icon': Icons.add_circle,
-                      'title': 'Transactions',
+                      'title': languageProvider.translate('Transactions'),
                       'screen': const TransactionsScreen(),
                       'color': Colors.lightBlue,
                     },
@@ -250,10 +251,10 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
             const SizedBox(height: 10),
             Expanded(
               child: sortedGroupedTransactions.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Text(
-                        'No transactions available.',
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                        languageProvider.translate('Notransactionsavailable'),
+                        style: const TextStyle(fontSize: 16, color: Colors.grey),
                       ),
                     )
                   : ListView.builder(
