@@ -31,7 +31,6 @@ class LanguageProvider with ChangeNotifier {
 
   // Translations for different languages
   static const Map<String, Map<String, String>> _translations = {
-
     // ****************************************************************************************************************************************************************
     // ****************************************************************************************************************************************************************
     // ****************************************************************************************************************************************************************
@@ -39,9 +38,10 @@ class LanguageProvider with ChangeNotifier {
       //Main Screen
       'home': 'Home',
       'chatbot': 'Chat bot',
-       //Home Screen
+      //Home Screen
       'MonthlyTransactions': 'Monthly Transactions',
-      'PleaseSetASavingGoalForTransactionsNotifications': 'Please set a saving goal for transactions notifications',
+      'PleaseSetASavingGoalForTransactionsNotifications':
+          'Please set a saving goal for transactions notifications',
       'GotoSetSavingGoalsNow': 'Set a Saving Goal',
       "Cancel": 'Cancel',
       //MyHomePage
@@ -50,27 +50,25 @@ class LanguageProvider with ChangeNotifier {
       'GoodMorning': 'Good Morning',
       'GoodAfternoon': 'Good Afternoon',
       'GoodEvening': 'Good Evening',
-'Tapheretosetyourname': 'Tap here to set your name',
-'Menu': 'Menu',
-'DataCategory': "Data Category",
-'DataTable': 'Data Table',
-'Reports': 'Reports',
-'SavingGoal': 'Saving Goal',
-'Calculate': 'Calculate',
-'recent_transactions': 'Recent Transactions',
-'Notransactionsavailable': 'No transactions available',
-
+      'Tapheretosetyourname': 'Tap here to set your name',
+      'Menu': 'Menu',
+      'DataCategory': "Data Category",
+      'DataTable': 'Data Table',
+      'Reports': 'Reports',
+      'SavingGoal': 'Saving Goal',
+      'Calculate': 'Calculate',
+      'recent_transactions': 'Recent Transactions',
+      'Notransactionsavailable': 'No transactions available',
 
 // ListSummaryScreen
-'All':'All',
-
+      'All': 'All',
 
 // SavingGoalScreen
-'EmergencyFund': 'Emergency Fund',
-'CannotDelete': 'Cannot delete',
-'Areyousureyouwanttodeletethesavinggoalcategory?' : 'Are you sure you want to delete the saving goal category?',
-'ConfirmDeletion': 'Confirm Deletion',
-
+      'EmergencyFund': 'Emergency Fund',
+      'CannotDelete': 'Cannot delete',
+      'Areyousureyouwanttodeletethesavinggoalcategory?':
+          'Are you sure you want to delete the saving goal category?',
+      'ConfirmDeletion': 'Confirm Deletion',
 
       //Add Transaction Screen
       'add_transaction': 'Add Transaction',
@@ -157,44 +155,43 @@ class LanguageProvider with ChangeNotifier {
     // ****************************************************************************************************************************************************************
     // ****************************************************************************************************************************************************************
     // ****************************************************************************************************************************************************************
-    
+
     'Thai': {
       //Main Screen
       'home': 'หน้าหลัก',
       'chatbot': 'Chat bot',
- //Home Screen
+      //Home Screen
       'MonthlyTransactions': 'รายการรายเดือน',
-       //MyHomePage
+      //MyHomePage
       "SetASavingGoal": "ตั้งเป้าหมายการออม",
-      'PleaseSetASavingGoalForTransactionsNotifications': 'โปรดตั้งเป้าหมายการออมสำหรับการแจ้งเตือนรายการ',
+      'PleaseSetASavingGoalForTransactionsNotifications':
+          'โปรดตั้งเป้าหมายการออมสำหรับการแจ้งเตือนรายการ',
       'GotoSetSavingGoalsNow': 'ตั้งเป้าหมายการออม',
       "Cancel": 'ยกเลิก',
       // sub home screen
-     'GoodMorning': 'อรุณสวัสดิ์',
+      'GoodMorning': 'อรุณสวัสดิ์',
       'GoodAfternoon': 'สวัสดีตอนบ่าย',
       'GoodEvening': 'สวัสดีตอนเย็น',
-'Tapheretosetyourname': 'กดที่นี่เพื่อตั้งชื่อของคุณ',
-'Menu': 'เมนู',
-'DataCategory': "หมวดหมู่ข้อมูล",
-'DataTable': 'ตารางข้อมูล',
-'Reports': 'รายงาน',
-'SavingGoal': 'เป้าหมายการออม',
-'Calculate': 'คำนวณ',
-'recent_transactions': 'รายการ',
-'Notransactionsavailable': 'ไม่มีรายการ',
+      'Tapheretosetyourname': 'กดที่นี่เพื่อตั้งชื่อของคุณ',
+      'Menu': 'เมนู',
+      'DataCategory': "หมวดหมู่ข้อมูล",
+      'DataTable': 'ตารางข้อมูล',
+      'Reports': 'รายงาน',
+      'SavingGoal': 'เป้าหมายการออม',
+      'Calculate': 'คำนวณ',
+      'recent_transactions': 'รายการ',
+      'Notransactionsavailable': 'ไม่มีรายการ',
 
 // ListSummaryScreen
-'All': 'ทั้งหมด',
- 
-
+      'All': 'ทั้งหมด',
 
 // SavingGoalScreen
-'EmergencyFund': 'กองทุนฉุกเฉิน',
-'CannotDelete': 'ไม่สามารถลบ',
-'Areyousureyouwanttodeletethesavinggoalcategory?' : "ลบหมวดหมู่เป้าหมายการออมนี้?",
-'ConfirmDeletion': 'ยืนยันการลบ',
-'Delete': 'ลบ',
-
+      'EmergencyFund': 'กองทุนฉุกเฉิน',
+      'CannotDelete': 'ไม่สามารถลบ',
+      'Areyousureyouwanttodeletethesavinggoalcategory?':
+          "ลบหมวดหมู่เป้าหมายการออมนี้?",
+      'ConfirmDeletion': 'ยืนยันการลบ',
+      'Delete': 'ลบ',
 
       //Add Transaction Screen
       'add_transaction': 'เพิ่มรายการ',
@@ -289,39 +286,35 @@ class LanguageProvider with ChangeNotifier {
       'chatbot': 'Chat bot',
       //Home Screen
       'MonthlyTransactions': 'ប្រតិបត្តិការប្រចាំខែ',
-       //MyHomePage
+      //MyHomePage
       "SetASavingGoal": "កំណត់គោលដៅសន្សំ",
-      'PleaseSetASavingGoalForTransactionsNotifications': 'សូមកំណត់គោលដៅសន្សំសម្រាប់ការជូនដំណឹងប្រតិបត្តិការ',
-     'GotoSetSavingGoalsNow': 'កំណត់គោលដៅសន្សំ',
-     "Cancel": 'បោះបង់',
-     
+      'PleaseSetASavingGoalForTransactionsNotifications':
+          'សូមកំណត់គោលដៅសន្សំសម្រាប់ការជូនដំណឹងប្រតិបត្តិការ',
+      'GotoSetSavingGoalsNow': 'កំណត់គោលដៅសន្សំ',
+      "Cancel": 'បោះបង់',
+
       // sub home screen
-     'GoodMorning': 'អរុណសួស្តី',
+      'GoodMorning': 'អរុណសួស្តី',
       'GoodAfternoon': 'ទិវាសួស្តី',
       'GoodEvening': 'សាយណ្ហសួស្តី',
       'Tapheretosetyourname': 'ចុចទីនេះដើម្បីកំណត់ឈ្មោះអ្នក',
-'Menu': 'ម៉ឺនុយ',
-'DataCategory': "ប្រភេទទិន្នន័យ",
-'DataTable': 'តារាងទិន្នន័យ',
-'Reports': 'របាយការណ៍',
-'SavingGoal': 'គោលដៅសន្សំ',
-'Calculate': 'គណនា',
-'recent_transactions': 'ប្រតិបត្តិការថ្មី',
-'Notransactionsavailable': 'មិនមានប្រតិបត្តិការ',
-
+      'Menu': 'ម៉ឺនុយ',
+      'DataCategory': "ប្រភេទទិន្នន័យ",
+      'DataTable': 'តារាងទិន្នន័យ',
+      'Reports': 'របាយការណ៍',
+      'SavingGoal': 'គោលដៅសន្សំ',
+      'Calculate': 'គណនា',
+      'recent_transactions': 'ប្រតិបត្តិការថ្មី',
+      'Notransactionsavailable': 'មិនមានប្រតិបត្តិការ',
 
 // ListSummaryScreen
-'All': 'ទាំងអស់',
-
-
-
+      'All': 'ទាំងអស់',
 
 // SavingGoalScreen
-'EmergencyFund': 'កម្ចីបន្ទាន់',
-'CannotDelete': 'មិនអាចលុប',
-'Areyousureyouwanttodeletethesavinggoalcategory?' : 'តើអ្នកប្រើចង់លុបប្រភេទគោលដៅសន្សំនេះមែនទេ?',
-
-
+      'EmergencyFund': 'កម្ចីបន្ទាន់',
+      'CannotDelete': 'មិនអាចលុប',
+      'Areyousureyouwanttodeletethesavinggoalcategory?':
+          'តើអ្នកប្រើចង់លុបប្រភេទគោលដៅសន្សំនេះមែនទេ?',
 
       //Add Transaction Screen
       'add_transaction': 'បញ្ចូលប្រតិបត្តិការ',

@@ -143,6 +143,67 @@ class _TestNotificatioScreenState extends State<TestNotificatioScreen> {
             },
             child: const Text("Execute and Schedule Notifications"),
           ),
+          ElevatedButton(
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.all(
+                Colors.yellow.shade300,
+              ),
+            ),
+            onPressed: () async {
+              try {
+                // Create an instance of TransactionsNotificationService
+                final notificationService = TransactionsNotificationService();
+                // Initialize the notification service
+                await notificationService.initNotification();
+
+                final service = TransactionsNotificationService();
+
+                // Fetch new Transaction Notification
+                String transactionBody =
+                    await service.genNotificationTransaction();
+
+                // Fetch new Saving Goal Notification
+                String savingGoalBody = await service.gNotificationSavingGoal();
+
+                // String finalNotificationBody;
+                // if (transactionBody == savingGoalBody) {
+                //   finalNotificationBody =  "No transaction updates. Do you have any transaction today?";
+                // } else {
+                //   finalNotificationBody =
+                //       "No transaction updates. Do you have any transaction today?";
+                // }
+
+                // Execute and schedule notifications
+                await notificationService.executeAndScheduleNotifications(
+                  id: 1,
+                  title: "Transaction Reminder",
+                  body: transactionBody,
+                  hour: 6,
+                  minute: 37,
+                );
+                // Execute and schedule notifications
+                await notificationService.executeAndScheduleNotifications(
+                  id: 2,
+                  title: "Saving Goal Reminder",
+                  body: savingGoalBody,
+                  hour: 6,
+                  minute: 38,
+                );
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content: Text("Notifications scheduled successfully!")),
+                );
+              } catch (e) {
+                // Handle errors and show feedback
+                print("Error executing notifications: $e");
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Error: $e")),
+                );
+              }
+            },
+            child: const Text("Execute and Schedule Notifications"),
+          ),
         ],
       )),
     );

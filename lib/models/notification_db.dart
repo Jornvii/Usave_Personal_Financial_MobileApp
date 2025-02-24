@@ -64,4 +64,20 @@ class NotificationDB {
     final result = await db.rawQuery('SELECT COUNT(*) as count FROM Notifications');
     return Sqflite.firstIntValue(result) ?? 0;
   }
+    /// Fetch notifications where date is today
+  Future<List<Map<String, dynamic>>> getTodaysNotifications() async {
+    final db = await database;
+
+    // Get current timestamp at start of the day (midnight)
+    final now = DateTime.now();
+    final startOfDay = DateTime(now.year, now.month, now.day).millisecondsSinceEpoch;
+    final endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59).millisecondsSinceEpoch;
+
+    return await db.query(
+      'Notifications',
+      where: 'timestamp >= ? AND timestamp <= ?',
+      whereArgs: [startOfDay, endOfDay],
+      orderBy: 'timestamp DESC',
+    );
+  }
 }

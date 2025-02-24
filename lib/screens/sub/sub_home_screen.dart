@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_bot/screens/main/report_screen.dart';
 import 'package:flutter_chat_bot/screens/sub/addsaving_goal_screen.dart';
@@ -13,6 +12,7 @@ import '../../provider/langguages_provider.dart';
 import '../../widgets/edit_transaction.dart';
 import '../../widgets/data_category.dart';
 import '../../widgets/data_table.dart';
+import '../../widgets/notiiiiiiii.dart';
 import '../main/transactions_screen.dart';
 import 'sub_calculate.dart';
 
@@ -36,7 +36,7 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
     _loadUserProfile();
     _startTransactionReload();
     _loadTransactions();
-     _loadCurrency(); 
+    _loadCurrency();
   }
 
   @override
@@ -53,7 +53,7 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
 
   // greeting text
   String _getGreetingMessage() {
-     final languageProvider = Provider.of<LanguageProvider>(context);
+    final languageProvider = Provider.of<LanguageProvider>(context);
     final hour = DateTime.now().hour;
     if (hour < 12) {
       return languageProvider.translate('GoodMorning');
@@ -67,7 +67,6 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
   void _startTransactionReload() {
     _timer = Timer.periodic(const Duration(seconds: 2), (timer) {
       _loadTransactions();
-      
     });
   }
 
@@ -176,15 +175,14 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
                   final options = [
                     {
                       'icon': Icons.category,
-                      'title':  languageProvider.translate('DataCategory'),
+                      'title': languageProvider.translate('DataCategory'),
                       'screen': const ListSummaryScreen(),
                       'color': Colors.red,
                     },
                     {
                       'icon': Icons.table_view,
                       'title': languageProvider.translate('DataTable'),
-
-                      'screen':  const DataTransactionTable(),
+                      'screen': const DataTransactionTable(),
                       'color': Colors.green,
                     },
                     {
@@ -200,24 +198,24 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
                       'screen': const SavingGoalScreen(),
                       'color': Colors.orange,
                     },
-                    {
-                      'icon': Icons.calculate,
-                      'title': languageProvider.translate('Calculate'),
-                      'screen': const CalculatorScreen(),
-                      'color': Colors.blueGrey,
-                    },
+                    // {
+                    //   'icon': Icons.calculate,
+                    //   'title': languageProvider.translate('Calculate'),
+                    //   'screen': const CalculatorScreen(),
+                    //   'color': Colors.blueGrey,
+                    // },
                     {
                       'icon': Icons.add_circle,
                       'title': languageProvider.translate('Transactions'),
                       'screen': const TransactionsScreen(),
                       'color': Colors.lightBlue,
                     },
-                    // {
-                    //   'icon': Icons.watch,
-                    //   'title': 'TIMER',
-                    //   'screen':  const TestNotificatioScreen(),
-                    //   'color': Colors.black,
-                    // },
+                    {
+                      'icon': Icons.notifications,
+                      'title': 'TIMER',
+                      'screen':   TestNotificatioScreen(),
+                      'color': Colors.black,
+                    },
                     // {
                     //   'icon': Icons.currency_bitcoin,
                     //   'title': 'currency',
@@ -254,7 +252,8 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
                   ? Center(
                       child: Text(
                         languageProvider.translate('Notransactionsavailable'),
-                        style: const TextStyle(fontSize: 16, color: Colors.grey),
+                        style:
+                            const TextStyle(fontSize: 16, color: Colors.grey),
                       ),
                     )
                   : ListView.builder(
@@ -349,7 +348,7 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
                                           fontSize: 15),
                                     ),
                                     trailing: Text(
-                                     '$currencySymbol ${transaction['amount']}',
+                                      '$currencySymbol ${transaction['amount']}',
                                       // '$currencySymbol ${transaction['amount']}',
                                       style: TextStyle(
                                         color: transaction['typeCategory'] ==
@@ -379,11 +378,9 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
     final db = CurrencyDB();
     final defaultCurrency = await db.getDefaultCurrency();
     setState(() {
-      currencySymbol =
-          defaultCurrency?['symbol'] ?? '\$'; 
+      currencySymbol = defaultCurrency?['symbol'] ?? '\$';
     });
   }
-
 
   Future<void> _loadUserProfile() async {
     final userProfile = await _userDB.fetchUserProfile();

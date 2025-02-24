@@ -232,6 +232,27 @@ class TransactionsNotificationService {
     }
   }
 
+//set time to work  function genNotificationTransaction  and gNotificationSavingGoal
+  Future<void> settimetoGenerateNotification() async {
+    Timer.periodic(const Duration(minutes: 1), (timer) async {
+      final now = tz.TZDateTime.now(tz.local);
+
+      if (now.hour == 12 && now.minute == 0) {
+        try {
+          // Generate transaction notification
+          String transactionNotification = await genNotificationTransaction();
+          print("Generated Transaction Notification: $transactionNotification");
+
+          // Generate saving goal notification
+          String savingGoalNotification = await gNotificationSavingGoal();
+          print("Generated Saving Goal Notification: $savingGoalNotification");
+        } catch (e) {
+          print("Error generating notifications: $e");
+        }
+      }
+    });
+  }
+
   // schacule Notification for local notification
   Future<void> transactionschaduleNotification({
     required int id,
@@ -278,69 +299,65 @@ class TransactionsNotificationService {
     required int hour,
     required int minute,
   }) async {
-    try {
-      // Generate transaction notification
-      String transactionNotification = await genNotificationTransaction();
-      print("Transaction Notification: $transactionNotification");
+    final notificationdb = NotificationDB();
+    // Fetch today's notifications from the database
+    List<Map<String, dynamic>> notifications =
+        await notificationdb.getTodaysNotifications();
 
-      // Generate saving goal notification
-      String savingGoalNotification = await gNotificationSavingGoal();
-      print("Saving Goal Notification: $savingGoalNotification");
+    // Only proceed if notifications exist for today
+    if (notifications.isNotEmpty) {
+      try {
+        // Generate transaction notification details
+        String transactionNotification = await genNotificationTransaction();
+        print("Transaction Notification: $transactionNotification");
 
- 
+        // Generate saving goal notification details
+        String savingGoalNotification = await gNotificationSavingGoal();
+        print("Saving Goal Notification: $savingGoalNotification");
 
-      // Create the scheduled time for today
-      final now = tz.TZDateTime.now(tz.local);
-      var scheduledDate =
-          tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
+        // Determine the scheduled time for the notification today
+        final now = tz.TZDateTime.now(tz.local);
+        var scheduledDate =
+            tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
 
-      // If the scheduled time has already passed today, schedule for tomorrow
-      if (scheduledDate.isBefore(now)) {
-        scheduledDate = scheduledDate.add(const Duration(days: 1));
-      }
+        // If the scheduled time is already past, adjust to tomorrow
+        if (scheduledDate.isBefore(now)) {
+          scheduledDate = scheduledDate.add(const Duration(days: 1));
+        }
 
-      // Schedule combined notification
-      await notificationPlugin.zonedSchedule(
-        id, 
-      title,
-      body,
-      scheduledDate,
-        const NotificationDetails(
-          android: AndroidNotificationDetails(
-            'channel id',
-            'channel name',
-            importance: Importance.max,
-            priority: Priority.high,
-            playSound: true,
-            enableVibration: true,
-            enableLights: true,
-            styleInformation: BigTextStyleInformation(''),
+        // Schedule the combined notification using the notification plugin
+        await notificationPlugin.zonedSchedule(
+          id,
+          title,
+          body,
+          scheduledDate,
+          const NotificationDetails(
+            android: AndroidNotificationDetails(
+              'channel id',
+              'channel name',
+              importance: Importance.max,
+              priority: Priority.high,
+              playSound: true,
+              enableVibration: true,
+              enableLights: true,
+              styleInformation: BigTextStyleInformation(''),
+            ),
           ),
-        ),
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-        matchDateTimeComponents: DateTimeComponents.time, // Repeat daily
-      );
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          matchDateTimeComponents: DateTimeComponents.time, // Repeat daily
+        );
 
-      print("Notification Scheduled: Financial Update at $hour:$minute daily.");
-    } catch (e) {
-      print("Error executing and scheduling notifications: $e");
+        print(
+            "Notification Scheduled: Financial Update at $hour:$minute daily.");
+      } catch (e) {
+        print("Error executing and scheduling notifications: $e");
+      }
+    } else {
+      print("No notifications for today. Skipping scheduling.");
     }
-    
   }
-
-
-
-
-
-
-
-
-
-
-
-
 
 // testttttttttttttttttttttttttttt (schacule Notification  local notification and genNotificationTransaction and gNotificationSavingGoal )
   Future<void> testTransactionNotifications() async {
@@ -358,7 +375,8 @@ class TransactionsNotificationService {
       if (transactionNotification == savingGoalNotification) {
         finalNotificationBody = transactionNotification;
       } else {
-        finalNotificationBody = "No transaction updates. Do you have any transaction today?";
+        finalNotificationBody =
+            "No transaction updates. Do you have any transaction today?";
       }
 
       await Future.delayed(const Duration(minutes: 1));
@@ -366,7 +384,7 @@ class TransactionsNotificationService {
       // Schedule combined notification
       final now = tz.TZDateTime.now(tz.local);
       await transactionschaduleNotification(
-        id: 1, 
+        id: 1,
         title: "Financial Update",
         body: finalNotificationBody,
         hour: now.hour,
