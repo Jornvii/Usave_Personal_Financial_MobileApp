@@ -100,33 +100,16 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
                             await _savePreferencestransaction();
 
                             if (newValueBool) {
-                              final notificationService =
+                              final notificationService = 
                                   TransactionsNotificationService();
                               await notificationService.initNotification();
-
-                              final service = TransactionsNotificationService();
-                              String transactionBody =
-                                  await service.genNotificationTransaction();
-                              String savingGoalBody =
-                                  await service.gNotificationSavingGoal();
 
                               await notificationService
                                   .executeAndScheduleNotifications(
                                 id: 1,
                                 title: "Transaction Reminder",
-                                body: transactionBody,
-                                hour: 17,
-                                minute: 00,
                               );
 
-                              await notificationService
-                                  .executeAndScheduleNotifications(
-                                id: 2,
-                                title: "Saving Goal Reminder",
-                                body: savingGoalBody,
-                                hour: 20,
-                                minute: 00,
-                              );
                             } else {
                               LocalNotificationService()
                                   .cancelAllNotification();

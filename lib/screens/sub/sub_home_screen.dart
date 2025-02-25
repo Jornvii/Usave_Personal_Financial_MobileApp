@@ -213,7 +213,7 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
                     {
                       'icon': Icons.notifications,
                       'title': 'TIMER',
-                      'screen':   TestNotificatioScreen(),
+                      'screen':   const TestNotificatioScreen(),
                       'color': Colors.black,
                     },
                     // {

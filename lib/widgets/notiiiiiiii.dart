@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../models/notification_db.dart';
 import '../provider/local_notification_service.dart';
 import '../provider/notification_tractions.dart';
 
@@ -11,6 +12,8 @@ class TestNotificatioScreen extends StatefulWidget {
 }
 
 class _TestNotificatioScreenState extends State<TestNotificatioScreen> {
+  final NotificationDB notificationDB = NotificationDB();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -116,17 +119,17 @@ class _TestNotificatioScreenState extends State<TestNotificatioScreen> {
                 await notificationService.executeAndScheduleNotifications(
                   id: 1,
                   title: "Transaction Reminder",
-                  body: transactionBody,
-                  hour: 6,
-                  minute: 37,
+                  // body: transactionBody,
+                  // hour: 6,
+                  // minute: 37,
                 );
                 // Execute and schedule notifications
                 await notificationService.executeAndScheduleNotifications(
                   id: 2,
                   title: "Saving Goal Reminder",
-                  body: savingGoalBody,
-                  hour: 6,
-                  minute: 38,
+                  // body: savingGoalBody,
+                  // hour: 6,
+                  // minute: 38,
                 );
 
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -143,6 +146,7 @@ class _TestNotificatioScreenState extends State<TestNotificatioScreen> {
             },
             child: const Text("Execute and Schedule Notifications"),
           ),
+
           ElevatedButton(
             style: ButtonStyle(
               backgroundColor: WidgetStateProperty.all(
@@ -177,17 +181,17 @@ class _TestNotificatioScreenState extends State<TestNotificatioScreen> {
                 await notificationService.executeAndScheduleNotifications(
                   id: 1,
                   title: "Transaction Reminder",
-                  body: transactionBody,
-                  hour: 6,
-                  minute: 37,
+                  // body: transactionBody,
+                  // hour: 6,
+                  // minute: 37,
                 );
                 // Execute and schedule notifications
                 await notificationService.executeAndScheduleNotifications(
                   id: 2,
                   title: "Saving Goal Reminder",
-                  body: savingGoalBody,
-                  hour: 6,
-                  minute: 38,
+                  // body: savingGoalBody,
+                  // hour: 6,
+                  // minute: 38,
                 );
 
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -204,8 +208,26 @@ class _TestNotificatioScreenState extends State<TestNotificatioScreen> {
             },
             child: const Text("Execute and Schedule Notifications"),
           ),
+          ElevatedButton(
+            onPressed: _printTodaysNotifications,
+            child: const Text('Get Today\'s Notifications'),
+          ),
         ],
       )),
     );
+  }
+
+  // Function to fetch and print today's notifications
+  void _printTodaysNotifications() async {
+    try {
+      List<Map<String, dynamic>> todaysNotifications =
+          await notificationDB.getTodaysNotifications();
+          if (todaysNotifications.isEmpty) {
+            print("No notifications for today");
+          }
+      print("Today's Notifications: $todaysNotifications");
+    } catch (e) {
+      print("Error fetching notifications: $e");
+    }
   }
 }

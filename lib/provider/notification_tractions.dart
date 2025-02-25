@@ -295,46 +295,45 @@ class TransactionsNotificationService {
   Future<void> executeAndScheduleNotifications({
     required int id,
     required String title,
-    required String body,
-    required int hour,
-    required int minute,
   }) async {
+    final now = tz.TZDateTime.now(tz.local);
+    int scheduledHour = 10;
+    int scheduledMinute = 52;
+
+    // Set a fixed time for checking notifications 
+    var scheduledRunning = tz.TZDateTime(
+        tz.local, now.year, now.month, now.day, scheduledHour, scheduledMinute);
+
     final notificationdb = NotificationDB();
+
     // Fetch today's notifications from the database
-    List<Map<String, dynamic>> notifications =
+    List<Map<String, dynamic>> notificationstoday =
         await notificationdb.getTodaysNotifications();
 
-    // Only proceed if notifications exist for today
-    if (notifications.isNotEmpty) {
+    // Only proceed if notifications exist for today and it's past the scheduled time
+    if (notificationstoday.isEmpty) {
       try {
-        // Generate transaction notification details
+        // Generate notification messages
         String transactionNotification = await genNotificationTransaction();
+        // String savingGoalNotification = await gNotificationSavingGoal();
+
         print("Transaction Notification: $transactionNotification");
+        // print("Saving Goal Notification: $savingGoalNotification");
 
-        // Generate saving goal notification details
-        String savingGoalNotification = await gNotificationSavingGoal();
-        print("Saving Goal Notification: $savingGoalNotification");
+        // Schedule notification time using the original 'now' value
+        var scheduledDate = tz.TZDateTime(tz.local, now.year, now.month,
+            now.day, scheduledHour, scheduledMinute);
 
-        // Determine the scheduled time for the notification today
-        final now = tz.TZDateTime.now(tz.local);
-        var scheduledDate =
-            tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
-
-        // If the scheduled time is already past, adjust to tomorrow
-        if (scheduledDate.isBefore(now)) {
-          scheduledDate = scheduledDate.add(const Duration(days: 1));
-        }
-
-        // Schedule the combined notification using the notification plugin
+        // Schedule the notification
         await notificationPlugin.zonedSchedule(
           id,
           title,
-          body,
+          transactionNotification,
           scheduledDate,
           const NotificationDetails(
             android: AndroidNotificationDetails(
-              'channel id',
-              'channel name',
+              'channel_id',
+              'Financial Updates',
               importance: Importance.max,
               priority: Priority.high,
               playSound: true,
@@ -346,11 +345,12 @@ class TransactionsNotificationService {
           uiLocalNotificationDateInterpretation:
               UILocalNotificationDateInterpretation.absoluteTime,
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-          matchDateTimeComponents: DateTimeComponents.time, // Repeat daily
+          matchDateTimeComponents:
+              DateTimeComponents.time, // Repeat daily at the same time
         );
 
         print(
-            "Notification Scheduled: Financial Update at $hour:$minute daily.");
+            "Notification Scheduled: Financial Update at $scheduledHour:$scheduledMinute daily.");
       } catch (e) {
         print("Error executing and scheduling notifications: $e");
       }
