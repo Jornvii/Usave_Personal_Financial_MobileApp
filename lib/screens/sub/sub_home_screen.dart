@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_bot/screens/main/bot_test.dart';
 import 'package:flutter_chat_bot/screens/main/report_screen.dart';
 import 'package:flutter_chat_bot/screens/sub/addsaving_goal_screen.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -12,9 +13,8 @@ import '../../provider/langguages_provider.dart';
 import '../../widgets/edit_transaction.dart';
 import '../../widgets/data_category.dart';
 import '../../widgets/data_table.dart';
-import '../../widgets/notiiiiiiii.dart';
 import '../main/transactions_screen.dart';
-import 'sub_calculate.dart';
+import 'sub_summarycategory.dart';
 
 class SubHomeScreen extends StatefulWidget {
   final List transactions;
@@ -213,7 +213,7 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
                     {
                       'icon': Icons.notifications,
                       'title': 'TIMER',
-                      'screen':   const TestNotificatioScreen(),
+                      'screen':ReportCategoryScreen(),
                       'color': Colors.black,
                     },
                     // {

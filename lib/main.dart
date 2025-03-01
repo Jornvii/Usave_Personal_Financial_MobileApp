@@ -67,6 +67,7 @@ void main() async {
 //     );
 //   }
 // }
+
 Future<void> _checkAndRequestPermissions() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   bool hasAskedPermissions = prefs.getBool('askedPermissions') ?? false;

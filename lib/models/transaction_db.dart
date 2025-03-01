@@ -22,9 +22,8 @@ class TransactionDB {
 
     return await openDatabase(
       path,
-      version: 2, 
+      version: 2,
       onCreate: (db, version) async {
-        
         await db.execute('''
           CREATE TABLE transactions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -40,8 +39,9 @@ class TransactionDB {
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
           // migration by adding the 'deleted' column if upgrading from version 1 to 2
-          await db.execute('ALTER TABLE transactions ADD COLUMN deleted INTEGER DEFAULT 0');
-        } 
+          await db.execute(
+              'ALTER TABLE transactions ADD COLUMN deleted INTEGER DEFAULT 0');
+        }
       },
     );
   }
@@ -50,27 +50,32 @@ class TransactionDB {
     final db = await database;
     return await db.insert('transactions', transaction);
   }
-Future<List<Map<String, dynamic>>> getTransactionsByDateRange(String startDate, String endDate) async {
-  final db = await database;
-  return await db.query(
-    'transactions',
-    where: 'date BETWEEN ? AND ? AND deleted = 0',
-    whereArgs: [startDate, endDate],
-    orderBy: 'date DESC',
-  );
-}
+
+  Future<List<Map<String, dynamic>>> getTransactionsByDateRange(
+      String startDate, String endDate) async {
+    final db = await database;
+    return await db.query(
+      'transactions',
+      where: 'date BETWEEN ? AND ? AND deleted = 0',
+      whereArgs: [startDate, endDate],
+      orderBy: 'date DESC',
+    );
+  }
 
   Future<List<Map<String, dynamic>>> getTransactions() async {
     final db = await database;
-    return await db.query('transactions', where: 'deleted = 0', orderBy: 'date DESC');
+    return await db.query('transactions',
+        where: 'deleted = 0', orderBy: 'date DESC');
   }
 
   Future<List<Map<String, dynamic>>> getDeletedTransactions() async {
     final db = await database;
-    return await db.query('transactions', where: 'deleted = 1', orderBy: 'date DESC');
+    return await db.query('transactions',
+        where: 'deleted = 1', orderBy: 'date DESC');
   }
 
-  Future<void> updateTransaction(int id, Map<String, dynamic> updatedTransaction) async {
+  Future<void> updateTransaction(
+      int id, Map<String, dynamic> updatedTransaction) async {
     final db = await database;
     await db.update(
       'transactions',
@@ -125,6 +130,7 @@ Future<List<Map<String, dynamic>>> getTransactionsByDateRange(String startDate, 
       whereArgs: [id],
     );
   }
+
   Future<double> getSavingAmountByCategory(String category) async {
     final db = await database;
     var result = await db.rawQuery(
@@ -162,11 +168,22 @@ Future<List<Map<String, dynamic>>> getTransactionsByDateRange(String startDate, 
         : 0.0;
   }
 
-
-  // reset all transactions without move to bin 
+  // reset all transactions without move to bin
   Future<void> resetDatabase() async {
-  final db = await database;
-  await db.delete('transactions'); 
-}
+    final db = await database;
+    await db.delete('transactions');
+  }
+  // Function to get category totals for each typeCategory
+  Future<List<Map<String, dynamic>>> getCategoryTotals() async {
+    final db = await database; // Await the database connection.
 
+    final result = await db.rawQuery('''
+      SELECT category, typeCategory, SUM(amount) as totalAmount
+      FROM transactions
+      WHERE deleted = 0
+      GROUP BY category, typeCategory
+    ''');
+
+    return result;
+  }
 }

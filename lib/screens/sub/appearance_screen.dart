@@ -105,7 +105,7 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
                               await notificationService.initNotification();
 
                               await notificationService
-                                  .executeAndScheduleNotifications(
+                                  .executeTransactionNotifications(
                                 id: 1,
                                 title: "Transaction Reminder",
                               );

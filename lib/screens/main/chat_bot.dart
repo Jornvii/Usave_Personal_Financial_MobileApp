@@ -1,8 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:google_gemini/google_gemini.dart';
+import 'dart:io';
 
-// google_gemini: ^0.1.2  google gimini api key
-const apiKey = "AIzaSyDu8b8nBCg5ZzH0WNEGsLLn_Rb4oZYabVI";
+import 'package:flutter/material.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
 
 class ChatBotScreen extends StatefulWidget {
   const ChatBotScreen({super.key});
@@ -12,74 +11,38 @@ class ChatBotScreen extends StatefulWidget {
 }
 
 class _ChatBotScreenState extends State<ChatBotScreen> {
-  final gemini = GoogleGemini(apiKey: apiKey);
   bool loading = false;
   List<Map<String, String>> chatMessages = [];
   final ScrollController _scrollController = ScrollController();
-  String selectLanguage = 'English'; // Default language
+  String selectLanguage = 'English';
+  GenerativeModel? _model;
+  ChatSession? _chat;
 
-  void _startChat() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+  @override
+  void initState() {
+    super.initState();
+    _initializeChat();
+  }
+
+  void _initializeChat() async {
+    const apiKey = 'AIzaSyDP9iwhVwLh0_32bdcoQI_obhsyJF9r5oE';
+    if (apiKey.isEmpty) {
+      stderr.writeln('No API key provided');
+      return;
+    }
+
+    _model = GenerativeModel(
+      model: 'gemini-2.0-flash-thinking-exp-01-21',
+      apiKey: apiKey,
+      generationConfig: GenerationConfig(
+        temperature: 0.7,
+        topK: 64,
+        topP: 0.95,
+        maxOutputTokens: 65536,
+        responseMimeType: 'text/plain',
       ),
-      builder: (context) => _buildOptionsMenu(),
     );
-  }
-
-  Widget _buildOptionsMenu() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const SizedBox(height: 12),
-        Container(
-          width: 40,
-          height: 5,
-          decoration: BoxDecoration(
-            color: Colors.grey[300],
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-        const SizedBox(height: 12),
-        ListTile(
-          leading: const Icon(Icons.savings, color: Colors.green),
-          title: const Text("Savings Plan"),
-          onTap: () => _handleOptionSelection(
-            "Savings Plan",
-            ["Monthly Income", "Monthly Expenses", "Savings Goal"],
-          ),
-        ),
-        ListTile(
-          leading: const Icon(Icons.attach_money, color: Colors.blue),
-          title: const Text("Income Planner"),
-          onTap: () => _handleOptionSelection(
-            "Income Planner",
-            ["Target Income", "Current Income"],
-          ),
-        ),
-        ListTile(
-          leading: const Icon(Icons.track_changes, color: Colors.orange),
-          title: const Text("Expense Tracker"),
-          onTap: () => _handleOptionSelection(
-            "Expense Tracker",
-            ["Monthly Income", "Fixed Expenses", "Variable Expenses"],
-          ),
-        ),
-        const SizedBox(height: 22),
-      ],
-    );
-  }
-
-  void _handleOptionSelection(String title, List<String> fields) {
-    Navigator.pop(context);
-    _showInputForm(
-        title: title,
-        fields: fields,
-        onSubmit: (inputs) {
-          _generateResponse(title.toLowerCase(), inputs);
-        });
+    _chat = _model!.startChat(history: []);
   }
 
   void _showInputForm({
@@ -190,6 +153,70 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
     );
   }
 
+  void _startChat() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => _buildOptionsMenu(),
+    );
+  }
+
+  Widget _buildOptionsMenu() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const SizedBox(height: 12),
+        Container(
+          width: 40,
+          height: 5,
+          decoration: BoxDecoration(
+            color: Colors.grey[300],
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        const SizedBox(height: 12),
+        ListTile(
+          leading: const Icon(Icons.savings, color: Colors.green),
+          title: const Text("Savings Plan"),
+          onTap: () => _handleOptionSelection(
+            "Savings Plan",
+            ["Monthly Income", "Monthly Expenses", "Savings Goal"],
+          ),
+        ),
+        ListTile(
+          leading: const Icon(Icons.attach_money, color: Colors.blue),
+          title: const Text("Income Planner"),
+          onTap: () => _handleOptionSelection(
+            "Income Planner",
+            ["Target Income", "Current Income"],
+          ),
+        ),
+        ListTile(
+          leading: const Icon(Icons.track_changes, color: Colors.orange),
+          title: const Text("Expense Tracker"),
+          onTap: () => _handleOptionSelection(
+            "Expense Tracker",
+            ["Monthly Income", "Fixed Expenses", "Variable Expenses"],
+          ),
+        ),
+        const SizedBox(height: 22),
+      ],
+    );
+  }
+
+  void _handleOptionSelection(String title, List<String> fields) {
+    Navigator.pop(context);
+    _showInputForm(
+        title: title,
+        fields: fields,
+        onSubmit: (inputs) {
+          _generateResponse(title.toLowerCase(), inputs);
+        });
+  }
+
   void _generateResponse(String category, Map<String, String> inputs) async {
     setState(() {
       loading = true;
@@ -202,16 +229,17 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
     final enrichedQuery = """
 Category: $category
 Inputs: $inputs
-Let show the details, calculation...through $inputs to me reach my $category and give some tips list to help me reach my  $category and to improve it further through my $category.  and respond in $selectLanguage (respond in short and concise).
+Let show the details, calculation...through $inputs to me reach my $category and give some tips list to help me reach my $category and to improve it further through my $category.  and respond in $selectLanguage (respond in short and concise).
     """;
 
     try {
-      final response = await gemini.generateFromText(enrichedQuery);
+      final content = Content.text(enrichedQuery);
+      final response = await _chat!.sendMessage(content);
       setState(() {
         loading = false;
         chatMessages.add({
           "role": "bot",
-          "text": _sanitizeResponse(response.text),
+          "text": _sanitizeResponse(response.text ?? "No response"),
         });
       });
     } catch (e) {
@@ -305,9 +333,8 @@ Let show the details, calculation...through $inputs to me reach my $category and
                           GestureDetector(
                             onTap: () {
                               if (selectLanguage.isNotEmpty) {
-                                Navigator.pop(context); // Close the menu
+                                Navigator.pop(context);
                                 setState(() {
-                                  // Finalize the selection
                                   selectLanguage = selectLanguage;
                                 });
                               }
@@ -315,12 +342,12 @@ Let show the details, calculation...through $inputs to me reach my $category and
                             child: Container(
                               padding: const EdgeInsets.all(8),
                               decoration: const BoxDecoration(
-                                color: Colors.green, // Green background
-                                shape: BoxShape.circle, // Circular shape
+                                color: Colors.green,
+                                shape: BoxShape.circle,
                               ),
                               child: const Icon(
                                 Icons.check,
-                                color: Colors.white, // White tick icon
+                                color: Colors.white,
                               ),
                             ),
                           ),
@@ -359,12 +386,7 @@ Let show the details, calculation...through $inputs to me reach my $category and
                           color: isUser
                               ? const Color.fromARGB(255, 59, 131, 255)
                               : const Color.fromARGB(255, 170, 207, 251),
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(isUser ? 12 : 0),
-                            topRight: Radius.circular(isUser ? 0 : 12),
-                            bottomLeft: const Radius.circular(12),
-                            bottomRight: const Radius.circular(12),
-                          ),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
                           message["text"] ?? "",

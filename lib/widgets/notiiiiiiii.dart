@@ -116,7 +116,7 @@ class _TestNotificatioScreenState extends State<TestNotificatioScreen> {
                 // }
 
                 // Execute and schedule notifications
-                await notificationService.executeAndScheduleNotifications(
+                await notificationService.executeTransactionNotifications(
                   id: 1,
                   title: "Transaction Reminder",
                   // body: transactionBody,
@@ -124,7 +124,7 @@ class _TestNotificatioScreenState extends State<TestNotificatioScreen> {
                   // minute: 37,
                 );
                 // Execute and schedule notifications
-                await notificationService.executeAndScheduleNotifications(
+                await notificationService.executeTransactionNotifications(
                   id: 2,
                   title: "Saving Goal Reminder",
                   // body: savingGoalBody,
@@ -178,7 +178,7 @@ class _TestNotificatioScreenState extends State<TestNotificatioScreen> {
                 // }
 
                 // Execute and schedule notifications
-                await notificationService.executeAndScheduleNotifications(
+                await notificationService.executeTransactionNotifications(
                   id: 1,
                   title: "Transaction Reminder",
                   // body: transactionBody,
@@ -186,7 +186,7 @@ class _TestNotificatioScreenState extends State<TestNotificatioScreen> {
                   // minute: 37,
                 );
                 // Execute and schedule notifications
-                await notificationService.executeAndScheduleNotifications(
+                await notificationService.executeTransactionNotifications(
                   id: 2,
                   title: "Saving Goal Reminder",
                   // body: savingGoalBody,

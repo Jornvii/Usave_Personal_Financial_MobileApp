@@ -14,7 +14,7 @@ class AddTransactionScreen extends StatefulWidget {
 }
 
 class _AddTransactionScreenState extends State<AddTransactionScreen> {
-  String typeCategory = 'Income'; // 'Income', 'Expense', 'Saving'
+  String typeCategory = 'Income';
   bool hasTransactionBeenAdded = false;
   String selectedCategory = '';
   DateTime? transactionDate;
@@ -266,7 +266,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   padding: const EdgeInsets.only(bottom: 15),
                   child: FloatingActionButton.extended(
                     onPressed: _addTransaction,
-                    label: Text(languageProvider.translate("Submit")),
+                    label: Text(languageProvider.translate("AddTransaction")),
                     icon: const Icon(Icons.add),
                     backgroundColor: const Color.fromARGB(255, 17, 215, 119),
                   ),

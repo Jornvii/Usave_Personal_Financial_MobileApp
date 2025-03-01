@@ -7,6 +7,7 @@ import '../../models/transaction_db.dart';
 import '../../models/currency_db.dart';
 import '../../provider/langguages_provider.dart';
 import '../../widgets/data_category.dart';
+import '../sub/sub_summarycategory.dart';
 
 class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});
@@ -34,33 +35,12 @@ class _ReportScreenState extends State<ReportScreen> {
     _loadTransactions(context);
   }
 
-
   @override
   Widget build(BuildContext context) {
     final languageProvider = Provider.of<LanguageProvider>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(languageProvider.translate('FinancialReport')),
-        // title: const Text(
-        //   'Financial Report',
-        //   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
-        // ),
-        actions: [
-          // IconButton(
-          //   icon: const Icon(Icons.date_range),
-          //   onPressed: _selectDateRange,
-          // ),
-          IconButton(
-            icon: const Icon(Icons.view_list),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const ListSummaryScreen()),
-              );
-            },
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -108,6 +88,24 @@ class _ReportScreenState extends State<ReportScreen> {
               const SizedBox(height: 10),
               _buildChart(),
             ],
+          ),
+        ),
+      ),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 40, left: 20),
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: FloatingActionButton.extended(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const ReportCategoryScreen()),
+              );
+            },
+            label: const Text("See Category"),
+            icon: const Icon(Icons.visibility),
+            backgroundColor: const Color.fromARGB(255, 17, 215, 119),
           ),
         ),
       ),
@@ -189,6 +187,7 @@ class _ReportScreenState extends State<ReportScreen> {
       // ];
     });
   }
+
   // Modernized balance section
   Widget buildBalanceSection(LanguageProvider languageProvider) {
     return Column(
@@ -228,11 +227,6 @@ class _ReportScreenState extends State<ReportScreen> {
         padding: const EdgeInsets.all(5.0),
         decoration: BoxDecoration(
           color: color,
-          // gradient: LinearGradient(
-          //   colors: [color.withOpacity(0.9), color.withOpacity(0.9)],
-          //   begin: Alignment.topLeft,
-          //   end: Alignment.bottomRight,
-          // ),
           borderRadius: BorderRadius.circular(16.0),
           boxShadow: [
             BoxShadow(
@@ -340,7 +334,7 @@ class _ReportScreenState extends State<ReportScreen> {
               xValueMapper: (ChartData data, _) => data.name,
               yValueMapper: (ChartData data, _) => data.amount,
               radius: '100%',
-              innerRadius: '10%', // More distinct donut shape
+              innerRadius: '10%',
               dataLabelSettings: DataLabelSettings(
                 isVisible: true,
                 labelPosition: ChartDataLabelPosition.outside,
@@ -376,7 +370,7 @@ class _ReportScreenState extends State<ReportScreen> {
               explode: true,
               explodeOffset: '2%',
               strokeWidth: 2,
-              strokeColor: Colors.white,
+              strokeColor: const Color.fromARGB(255, 71, 69, 69),
             ),
           ],
           tooltipBehavior: TooltipBehavior(

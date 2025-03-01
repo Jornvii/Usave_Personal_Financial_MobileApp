@@ -82,56 +82,53 @@ class TransactionsNotificationService {
     return timeFormat.format(DateTime.now());
   }
 
-  // Generate Transaction Notification
-// Generate Transaction Notification
-  Future<String> genNotificationTransaction() async {
-    try {
-      final transactions = await transactionDB.getTransactions();
+ // Generate Transaction Notification
+Future<String> genNotificationTransaction() async {
+  try {
+    final transactions = await transactionDB.getTransactions();
 
-      // Exit if transactions are empty
-      if (transactions.isEmpty) {
-        return "No transaction yet. Do you have any transaction today?🤑";
+    // Exit if transactions are empty
+    if (transactions.isEmpty) {
+      return "No transaction yet. Do you have any transaction today?🤑";
+    }
+
+    // Retrieve last known transaction state
+    final prefs = await SharedPreferences.getInstance();
+    final String? lastTransactionData = prefs.getString('lastTransactionData');
+
+    // Serialize current transaction data for comparison
+    final currentTransactionData = transactions.toString();
+    if (currentTransactionData == lastTransactionData) {
+      return "No transaction updates. Do you have any transaction today?";
+    }
+
+    // Update shared preferences with current transaction data
+    await prefs.setString('lastTransactionData', currentTransactionData);
+
+    double totalIncome = 0.0;
+    double totalExpenses = 0.0;
+    double totalSaving = 0.0;
+    Map<String, double> categoryExpenses = {};
+
+    for (var transaction in transactions) {
+      final type = transaction['typeCategory'];
+      final amount = transaction['amount'] as double;
+      final category = transaction['category'] ?? "Uncategorized";
+
+      if (type == 'Income') {
+        totalIncome += amount;
+      } else if (type == 'Expense') {
+        totalExpenses += amount;
+        categoryExpenses[category] = (categoryExpenses[category] ?? 0) + amount;
+      } else if (type == 'Saving') {
+        totalSaving += amount;
       }
+    }
 
-      // Retrieve last known transaction state
-      final prefs = await SharedPreferences.getInstance();
-      final String? lastTransactionData =
-          prefs.getString('lastTransactionData');
+    double balance = totalIncome - totalExpenses;
 
-      // Serialize current transaction data for comparison
-      final currentTransactionData = transactions.toString();
-      if (currentTransactionData == lastTransactionData) {
-        return "No transaction updates. Do you have any transaction today?";
-      }
-
-      // Update shared preferences with current transaction data
-      await prefs.setString('lastTransactionData', currentTransactionData);
-
-      double totalIncome = 0.0;
-      double totalExpenses = 0.0;
-      double totalSaving = 0.0;
-      Map<String, double> categoryExpenses = {};
-
-      for (var transaction in transactions) {
-        final type = transaction['typeCategory'];
-        final amount = transaction['amount'] as double;
-        final category = transaction['category'] ?? "Uncategorized";
-
-        if (type == 'Income') {
-          totalIncome += amount;
-        } else if (type == 'Expense') {
-          totalExpenses += amount;
-          categoryExpenses[category] =
-              (categoryExpenses[category] ?? 0) + amount;
-        } else if (type == 'Saving') {
-          totalSaving += amount;
-        }
-      }
-
-      double balance = totalIncome - totalExpenses;
-
-      // Preserve the original prompt1 as per request
-      String prompt1 = """
+    // Preserve the original prompt1 as per request
+    String prompt1 = """
     Analyze my financial data and generate a short notification:
     - Total Income: \$${totalIncome.toStringAsFixed(2)}
     - Total Expenses: \$${totalExpenses.toStringAsFixed(2)}
@@ -142,33 +139,33 @@ class TransactionsNotificationService {
     Provide a concise alert based on the data or with a sentence alert me better financial like a quote or sth, (write all in just short paragraph)
     """;
 
-      // Ensure AI model is initialized
-      if (_model == null) {
-        print("AI model not initialized.");
-        return "AI model initialization failed.";
-      }
-
-      // Generate AI response
-      final response = await _model!.generateContent([Content.text(prompt1)]);
-
-      // Ensure response is valid
-      final notificationText =
-          response.text?.trim() ?? "Transaction update failed.";
-
-      // Save notification to database
-      final notificationDB = NotificationDB();
-      await notificationDB.insertNotification({
-        'message': notificationText,
-        'time': _formatCurrentTime(),
-        'timestamp': DateTime.now().millisecondsSinceEpoch,
-      });
-
-      return notificationText;
-    } catch (e) {
-      print("Error generating transaction notification: $e");
-      return "Transaction update failed.";
+    // Ensure AI model is initialized
+    if (_model == null) {
+      print("AI model not initialized.");
+      return "AI model initialization failed.";
     }
+
+    // Generate AI response
+    final response = await _model!.generateContent([Content.text(prompt1)]);
+
+    // Ensure response is valid
+    final notificationText = response.text?.trim() ?? "Transaction update failed.";
+
+    // Save notification to database
+    final notificationDB = NotificationDB();
+    await notificationDB.insertNotification({
+      'message': notificationText,
+      'time': _formatCurrentTime(),
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
+
+    return notificationText;
+  } catch (e) {
+    print("Error generating transaction notification: $e");
+    return "Transaction update failed.";
   }
+}
+
 
 // Generate Saving Goal Notification
   Future<String> gNotificationSavingGoal() async {
@@ -265,6 +262,27 @@ class TransactionsNotificationService {
     }
   }
 
+//set time to work  function genNotificationTransaction  and gNotificationSavingGoal
+  Future<void> settimetoGenerateNotification() async {
+    Timer.periodic(const Duration(minutes: 1), (timer) async {
+      final now = tz.TZDateTime.now(tz.local);
+
+      if (now.hour == 12 && now.minute == 0) {
+        try {
+          // Generate transaction notification
+          String transactionNotification = await genNotificationTransaction();
+          print("Generated Transaction Notification: $transactionNotification");
+
+          // Generate saving goal notification
+          String savingGoalNotification = await gNotificationSavingGoal();
+          print("Generated Saving Goal Notification: $savingGoalNotification");
+        } catch (e) {
+          print("Error generating notifications: $e");
+        }
+      }
+    });
+  }
+
   // schacule Notification for local notification
   Future<void> transactionschaduleNotification({
     required int id,
@@ -305,13 +323,13 @@ class TransactionsNotificationService {
 
 // fucntion  for  wokring (schacule Notification  local notification and genNotificationTransaction and gNotificationSavingGoal )
 
-  Future<void> executeTransactionNotifications({
+  Future<void> executeAndScheduleNotifications({
     required int id,
     required String title,
   }) async {
     final now = tz.TZDateTime.now(tz.local);
-    int scheduledHour = 12;
-    int scheduledMinute = 00;
+    int scheduledHour = 23;
+    int scheduledMinute = 22;
 
     // Set a fixed time for checking notifications
     var scheduledRunning = tz.TZDateTime(
