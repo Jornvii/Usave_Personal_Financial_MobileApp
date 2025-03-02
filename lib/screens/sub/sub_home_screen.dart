@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_bot/screens/main/bot_test.dart';
 import 'package:flutter_chat_bot/screens/main/report_screen.dart';
 import 'package:flutter_chat_bot/screens/sub/addsaving_goal_screen.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -14,6 +13,7 @@ import '../../widgets/edit_transaction.dart';
 import '../../widgets/data_category.dart';
 import '../../widgets/data_table.dart';
 import '../main/transactions_screen.dart';
+import 'sub_calculate.dart';
 import 'sub_summarycategory.dart';
 
 class SubHomeScreen extends StatefulWidget {
@@ -187,35 +187,35 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
                     },
                     {
                       'icon': Icons.pie_chart,
-                      'title': languageProvider.translate('Reports'),
+                      'title': languageProvider.translate('Dashboard'),
                       'screen': const ReportScreen(),
                       'color': Colors.lime,
                     },
 
                     {
-                      'icon': Icons.dashboard,
+                      'icon': Icons.savings,
                       'title': languageProvider.translate('SavingGoal'),
                       'screen': const SavingGoalScreen(),
                       'color': Colors.orange,
                     },
-                    // {
-                    //   'icon': Icons.calculate,
-                    //   'title': languageProvider.translate('Calculate'),
-                    //   'screen': const CalculatorScreen(),
-                    //   'color': Colors.blueGrey,
-                    // },
+                    {
+                      'icon': Icons.calculate,
+                      'title': languageProvider.translate('Calculate'),
+                      'screen': const CalculatorScreen(),
+                      'color': Colors.blueGrey,
+                    },
                     {
                       'icon': Icons.add_circle,
                       'title': languageProvider.translate('Transactions'),
                       'screen': const TransactionsScreen(),
                       'color': Colors.lightBlue,
                     },
-                    {
-                      'icon': Icons.notifications,
-                      'title': 'TIMER',
-                      'screen':ReportCategoryScreen(),
-                      'color': Colors.black,
-                    },
+                    // {
+                    //   'icon': Icons.notifications,
+                    //   'title': 'TIMER',
+                    //   'screen':const ReportCategoryScreen(),
+                    //   'color': Colors.black,
+                    // },
                     // {
                     //   'icon': Icons.currency_bitcoin,
                     //   'title': 'currency',

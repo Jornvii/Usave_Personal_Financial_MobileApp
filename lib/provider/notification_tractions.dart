@@ -310,12 +310,10 @@ class TransactionsNotificationService {
     required String title,
   }) async {
     final now = tz.TZDateTime.now(tz.local);
-    int scheduledHour = 12;
-    int scheduledMinute = 00;
+    int scheduledHour = 6;
+    int scheduledMinute = 0;
 
-    // Set a fixed time for checking notifications
-    var scheduledRunning = tz.TZDateTime(
-        tz.local, now.year, now.month, now.day, scheduledHour, scheduledMinute);
+
 
     final notificationdb = NotificationDB();
 

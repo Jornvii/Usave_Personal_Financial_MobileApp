@@ -75,16 +75,7 @@ class _ReportCategoryScreenState extends State<ReportCategoryScreen> with Single
     return Scaffold(
       appBar: AppBar(
         title: Center(child: Text(languageProvider.translate('ReportbyCategory'))),
-        leading: 
-          Padding(
-            padding: const EdgeInsets.only(left: 10),
-            child: FloatingActionButton.extended(
-              onPressed:() =>  Navigator.of(context).pop(),
-              label: Text(languageProvider.translate("back")),
-              // icon: const Icon(Icons.arrow_back_ios),
-              backgroundColor: const Color.fromARGB(255, 17, 215, 119),
-            ),
-          ),
+    
         bottom: TabBar(
           controller: _tabController,
           onTap: (index) {
@@ -135,12 +126,13 @@ class _ReportCategoryScreenState extends State<ReportCategoryScreen> with Single
             isVisible: true,
             position: LegendPosition.bottom,
             overflowMode: LegendItemOverflowMode.wrap,
+            
             textStyle: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
             ),
-            iconHeight: 14,
-            iconWidth: 14,
+            iconHeight: 15,
+            iconWidth: 15,
           ),
         series: <CircularSeries<ChartData, String>>[
           DoughnutSeries<ChartData, String>(
@@ -278,3 +270,5 @@ class ChartData {
   final Color color;
   ChartData(this.name, this.amount, this.color);
 }
+
+

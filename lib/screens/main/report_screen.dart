@@ -6,7 +6,6 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import '../../models/transaction_db.dart';
 import '../../models/currency_db.dart';
 import '../../provider/langguages_provider.dart';
-import '../../widgets/data_category.dart';
 import '../sub/sub_summarycategory.dart';
 
 class ReportScreen extends StatefulWidget {
