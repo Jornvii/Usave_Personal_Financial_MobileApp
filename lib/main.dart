@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_bot/screens/splash_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -76,7 +77,7 @@ class MyApp extends StatelessWidget {
       theme: themeProvider.lightTheme,
       darkTheme: themeProvider.darkTheme,
       themeMode: themeProvider.isDarkTheme ? ThemeMode.dark : ThemeMode.light,
-      home: const MainScreen(),
+      home: const SplashScreen(),
       localizationsDelegates: const [],
       supportedLocales: const [
         Locale('en'),

@@ -14,7 +14,6 @@ import '../../widgets/data_category.dart';
 import '../../widgets/data_table.dart';
 import '../main/transactions_screen.dart';
 import 'sub_calculate.dart';
-import 'sub_summarycategory.dart';
 
 class SubHomeScreen extends StatefulWidget {
   final List transactions;

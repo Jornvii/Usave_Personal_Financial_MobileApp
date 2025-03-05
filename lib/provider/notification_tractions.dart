@@ -86,7 +86,7 @@ class TransactionsNotificationService {
 // Generate Transaction Notification
   Future<String> genNotificationTransaction() async {
     try {
-      final transactions = await transactionDB.getTransactions();
+      final transactions = await transactionDB.getTransactionsToday();
 
       // Exit if transactions are empty
       if (transactions.isEmpty) {

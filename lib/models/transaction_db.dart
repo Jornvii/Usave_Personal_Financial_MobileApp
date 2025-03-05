@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:intl/intl.dart';
 
 class TransactionDB {
   static final TransactionDB _instance = TransactionDB._internal();
@@ -66,6 +67,16 @@ class TransactionDB {
     final db = await database;
     return await db.query('transactions',
         where: 'deleted = 0', orderBy: 'date DESC');
+  }
+    Future<List<Map<String, dynamic>>> getTransactionsToday() async {
+    final db = await database;
+    String today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    return await db.query(
+      'transactions',
+      where: 'date = ? AND deleted = 0',
+      whereArgs: [today],
+      orderBy: 'date DESC',
+    );
   }
 
   Future<List<Map<String, dynamic>>> getDeletedTransactions() async {

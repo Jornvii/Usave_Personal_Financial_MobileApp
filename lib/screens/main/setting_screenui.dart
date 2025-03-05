@@ -467,13 +467,13 @@ class _SettingScreenUiState extends State<SettingScreenUi> {
               },
               child: Text(languageProvider.translate('delete_all')),
             ),
-            TextButton(
-              onPressed: () {
-                _deleteChatData(context, languageProvider);
-                Navigator.of(context).pop();
-              },
-              child: Text(languageProvider.translate('delete_chat')),
-            ),
+            // TextButton(
+            //   onPressed: () {
+            //     _deleteChatData(context, languageProvider);
+            //     Navigator.of(context).pop();
+            //   },
+            //   child: Text(languageProvider.translate('delete_chat')),
+            // ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: Text(languageProvider.translate('cancel')),
