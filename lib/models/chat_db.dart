@@ -1,51 +1,52 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'dart:async';
 
 class ChatDB {
-  static final ChatDB _instance = ChatDB._internal();
+  static final ChatDB instance = ChatDB._init();
+  static Database? _database;
 
-  factory ChatDB() => _instance;
-
-  ChatDB._internal();
-
-  Database? _database;
+  ChatDB._init();
 
   Future<Database> get database async {
     if (_database != null) return _database!;
-    _database = await _initDatabase();
+    _database = await _initDB('chatMessages.db');
     return _database!;
   }
 
-  Future<Database> _initDatabase() async {
+  Future<Database> _initDB(String filePath) async {
     final dbPath = await getDatabasesPath();
-    return openDatabase(
-      join(dbPath, 'chat.db'),
-      onCreate: (db, version) {
-        return db.execute(
-          'CREATE TABLE chat (id INTEGER PRIMARY KEY, role TEXT, text TEXT, animated TEXT)',
-        );
-      },
-      version: 1,
-    );
+    final path = join(dbPath, filePath);
+    return await openDatabase(path, version: 1, onCreate: _onCreate);
   }
 
-  /// Insert a message into the chat table
-  Future<void> insertMessage(Map<String, String> message) async {
-    final db = await database;
-    await db.insert('chat', message, conflictAlgorithm: ConflictAlgorithm.replace);
+  Future _onCreate(Database db, int version) async {
+    const idType = 'INTEGER PRIMARY KEY AUTOINCREMENT';
+    const textType = 'TEXT';
+    const integerType = 'INTEGER';
+
+    await db.execute('''
+      CREATE TABLE chat_messages (
+        id $idType,
+        role $textType,
+        text $textType,
+        timestamp $integerType
+      );
+    ''');
   }
 
-  /// Fetch all messages from the chat table
-  Future<List<Map<String, dynamic>>> fetchMessages() async {
-    final db = await database;
-    return await db.query('chat', orderBy: 'id ASC');
+  Future<void> insertChatMessage(Map<String, dynamic> message) async {
+    final db = await instance.database;
+    await db.insert('chat_messages', message);
   }
 
-  /// Clear all messages in the chat table
-  Future<void> clearMessages() async {
-    final db = await database;
-    await db.delete('chat');
+  Future<List<Map<String, dynamic>>> fetchChatMessages() async {
+    final db = await instance.database;
+    return await db.query('chat_messages', orderBy: 'timestamp DESC');
   }
-
-
+   // Function to clear all chat messages
+  Future<void> clearAllChatMessages() async {
+    final db = await instance.database;
+    await db.delete('chat_messages'); // Deletes all rows in the table
+  }
 }

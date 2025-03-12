@@ -115,6 +115,9 @@ class LanguageProvider with ChangeNotifier {
       'fixed_expenses': 'Fixed Expenses',
       'variable_expenses': 'Variable Expenses',
       // settings screen
+      'are_you_sure': 'Are you sure want to delete chat bot history?',
+      'confirm_delete_chat': 'Confirm Delete​​ Chat History', 
+      'chat_data_cleared': 'Chat history cleared successfully!',
       'settings': 'Settings',
       'edit_user_name': 'Edit User Name',
       'default_username': ' User Name',
@@ -241,6 +244,9 @@ class LanguageProvider with ChangeNotifier {
       'fixed_expenses': 'ค่าใช้จ่ายคงที่',
       'variable_expenses': 'ค่าใช้จ่ายผันแปร',
       // settings screen
+      'are_you_sure': 'คุณแน่ใจว่าต้องการลบประวัติแชทบอท?',
+      'confirm_delete_chat': 'ยืนยันการลบประวัติแชทบอท',
+      'chat_data_cleared': 'ประวัติแชทบอทถูกลบ เรียบร้อยแล้ว',
       'settings': 'การตั้งค่า',
       'category': 'ประเภท',
       'username': 'ชื่อผู้ใช้',
@@ -366,6 +372,9 @@ class LanguageProvider with ChangeNotifier {
       'fixed_expenses': 'ចំណាយថេរ',
       'variable_expenses': 'ចំណាយអវត្ដមាន',
       // settings screen
+      'are_you_sure': 'តើអ្នកប្រើចង់លុបប្រវត្តិឆាតបតមែនទេ?',
+      'confirm_delete_chat': 'បញ្ជាក់លុបប្រវត្តិឆាត',
+      'chat_data_cleared': 'ប្រវត្តិឆាតបានលុបចេញ',
       'settings': 'ការកំណត់',
       'edit_user_name': 'កែប្រែឈ្មោះអ្នកប្រើ',
       'currency': 'រូបិយប័ណ្ណ',

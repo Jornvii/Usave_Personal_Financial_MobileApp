@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_bot/models/chat_db.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
 class ChatBotScreen extends StatefulWidget {
@@ -17,13 +18,24 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
   String selectLanguage = 'English';
   GenerativeModel? _model;
   ChatSession? _chat;
+@override
+void initState() {
+  super.initState();
+  _initializeChat();
+  _loadChatMessages();
+}
 
-  @override
-  void initState() {
-    super.initState();
-    _initializeChat();
-  }
-
+Future<void> _loadChatMessages() async {
+  final messages = await ChatDB.instance.fetchChatMessages();
+  setState(() {
+    chatMessages = messages.map((msg) {
+      return {
+        "role": msg['role'] as String,
+        "text": msg['text'] as String,
+      };
+    }).toList().cast<Map<String, String>>();
+  });
+}
   void _initializeChat() async {
     const apiKey = 'AIzaSyDP9iwhVwLh0_32bdcoQI_obhsyJF9r5oE';
     if (apiKey.isEmpty) {
@@ -216,44 +228,59 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
           _generateResponse(title.toLowerCase(), inputs);
         });
   }
+void _generateResponse(String category, Map<String, String> inputs) async {
+  setState(() {
+    loading = true;
+    chatMessages.add({
+      "role": "user",
+      "text": "Your $category with: " + inputs.entries.map((e) => "${e.key}: ${e.value}").join(" "),
+    });
+  });
 
-  void _generateResponse(String category, Map<String, String> inputs) async {
+  final enrichedQuery = """
+  Category: $category
+  Inputs: ${inputs.entries.map((e) => "${e.key}: ${e.value}").join(", ")}
+  Please provide calculations, suggestions, and improvement tips for my $category. Respond in $selectLanguage concisely.
+  """;
+
+  try {
+    final content = Content.text(enrichedQuery);
+    final response = await _chat!.sendMessage(content);
+    final responseText = _sanitizeResponse(response.text ?? "No response");
+
+    // Add the bot response to chatMessages
     setState(() {
-      loading = true;
+      loading = false;
       chatMessages.add({
-        "role": "user",
-        "text": "I have $category which $inputs",
+        "role": "bot",
+        "text": responseText,
       });
     });
 
-    final enrichedQuery = """
-Category: $category
-Inputs: $inputs
-Let show the details, calculation...through $inputs to me reach my $category and give some tips list to help me reach my $category and to improve it further through my $category.  and respond in $selectLanguage (respond in short and concise).
-    """;
-
-    try {
-      final content = Content.text(enrichedQuery);
-      final response = await _chat!.sendMessage(content);
-      setState(() {
-        loading = false;
-        chatMessages.add({
-          "role": "bot",
-          "text": _sanitizeResponse(response.text ?? "No response"),
-        });
+    // Save the conversation to the database
+    final currentTime = DateTime.now().millisecondsSinceEpoch;
+    await ChatDB.instance.insertChatMessage({
+      'role': 'user',
+      'text': enrichedQuery,
+      'timestamp': currentTime,
+    });
+    await ChatDB.instance.insertChatMessage({
+      'role': 'bot',
+      'text': responseText,
+      'timestamp': currentTime,
+    });
+  } catch (e) {
+    setState(() {
+      loading = false;
+      chatMessages.add({
+        "role": "bot",
+        "text": "Error: ${e.toString()}",
       });
-    } catch (e) {
-      setState(() {
-        loading = false;
-        chatMessages.add({
-          "role": "bot",
-          "text": "Error: ${e.toString()}",
-        });
-      });
-    }
-
-    _scrollToBottom();
+    });
   }
+
+  _scrollToBottom();
+}
 
   String _sanitizeResponse(String text) {
     text = text.replaceAll(RegExp(r'\*+'), '');

@@ -374,10 +374,10 @@ class _SettingScreenUiState extends State<SettingScreenUi> {
     Color menuColor,
   ) {
     return Card(
-      elevation: 4, // Slightly higher elevation for better depth
+      elevation: 4,
       shadowColor: Theme.of(context).primaryColor.withOpacity(0.5),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12), // Consistent border radius
+        borderRadius: BorderRadius.circular(12),
         side: BorderSide(
           color: Theme.of(context).primaryColor.withOpacity(0.5),
           width: 0.2,
@@ -471,6 +471,50 @@ class _SettingScreenUiState extends State<SettingScreenUi> {
               },
               child: Text(languageProvider.translate('delete_all')),
             ),
+            // chat data
+            TextButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text(
+                        languageProvider.translate('are_you_sure'),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, color: Colors.red),
+                      ),
+                      content: Text(
+                          languageProvider.translate('confirm_delete_chat')),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context)
+                                .pop(); // Close the confirmation dialog
+                          },
+                          child: Text(languageProvider.translate('cancel')),
+                        ),
+                        TextButton(
+                          onPressed: () async {
+                            // Proceed with deleting chat data
+                            final chatDatabase = ChatDB.instance;
+                            await chatDatabase.clearAllChatMessages();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content: Text(languageProvider
+                                      .translate('chat_data_cleared'))),
+                            );
+                            Navigator.of(context).pop(); // Close the dialog
+                          },
+                          child: Text(
+                              languageProvider.translate('confirm_delete')),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              child: Text(languageProvider.translate('delete_all')),
+            ),
             // TextButton(
             //   onPressed: () {
             //     _deleteChatData(context, languageProvider);
@@ -490,8 +534,8 @@ class _SettingScreenUiState extends State<SettingScreenUi> {
 
   void _deleteChatData(
       BuildContext context, LanguageProvider languageProvider) async {
-    final chatDatabase = ChatDB();
-    await chatDatabase.clearMessages();
+    final chatDatabase = ChatDB.instance;
+    await chatDatabase.clearAllChatMessages();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(languageProvider.translate('chat_data_cleared'))),
     );
