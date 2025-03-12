@@ -17,7 +17,7 @@ class SavingGoalScreen extends StatefulWidget {
 class _SavingGoalScreenState extends State<SavingGoalScreen> {
   String currencySymbol = '\$';
   final List<String> defaultSavingCategories = [
-    'EmergencyFund',
+    'Emergency Fund',
     'Investments',
   ];
 

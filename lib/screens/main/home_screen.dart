@@ -8,7 +8,7 @@ import '../../provider/langguages_provider.dart';
 import '../sub/addsaving_goal_screen.dart';
 import '../sub/notification_screen.dart';
 import '../../models/saving_goaldb.dart';
-import '../../models/notification_db.dart'; // Assume this is where NotificationDB is implemented
+import '../../models/notification_db.dart'; 
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -24,7 +24,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    _updateNotificationCount(); 
+    _updateNotificationCount();
   }
 
   @override
@@ -70,6 +70,12 @@ class _MyHomePageState extends State<MyHomePage> {
                         MaterialPageRoute(
                             builder: (context) => const NotificationScreen()),
                       );
+
+                      // Mark notifications as read when user returns
+                      final notificationDB = NotificationDB();
+                      await notificationDB.markAllNotificationsAsRead();
+
+                      // Update NotificationCount
                       _updateNotificationCount();
                     } else {
                       _showSetSavingGoalDialog();
@@ -131,20 +137,21 @@ class _MyHomePageState extends State<MyHomePage> {
       isRepeatingAnimation: true,
     );
   }
-  
+
   /// Fetch the current notification count from the database
   Future<void> _updateNotificationCount() async {
     final notificationDB = NotificationDB();
-    final count = await notificationDB.getNotificationCount();
+    final count = await notificationDB.getNotificationCountToday();
     setState(() {
       _notificationCount = count;
     });
   }
+
   void _startTransactionReload() {
     // Schedule the function to run every 2 seconds
     _timer = Timer.periodic(const Duration(seconds: 2), (timer) {
-      _updateNotificationCount(); 
-       _updateNotificationCount(); 
+      _updateNotificationCount();
+      _updateNotificationCount();
     });
   }
 
@@ -160,10 +167,11 @@ class _MyHomePageState extends State<MyHomePage> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-         final languageProvider = Provider.of<LanguageProvider>(context);
+        final languageProvider = Provider.of<LanguageProvider>(context);
         return AlertDialog(
-          title:  Text(languageProvider.translate('SetASavingGoal')),
-          content: Text(languageProvider.translate('PleaseSetASavingGoalForTransactionsNotifications')),
+          title: Text(languageProvider.translate('SetASavingGoal')),
+          content: Text(languageProvider
+              .translate('PleaseSetASavingGoalForTransactionsNotifications')),
           actions: [
             TextButton(
               onPressed: () {
@@ -187,5 +195,4 @@ class _MyHomePageState extends State<MyHomePage> {
       },
     );
   }
-
 }

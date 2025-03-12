@@ -9,6 +9,7 @@ import '../../models/currency_db.dart';
 import '../../models/profile_db.dart';
 import '../../models/transaction_db.dart';
 import '../../provider/langguages_provider.dart';
+import '../../widgets/add_ddtransaction.dart';
 import '../../widgets/edit_transaction.dart';
 import '../../widgets/data_category.dart';
 import '../../widgets/data_table.dart';
@@ -24,6 +25,7 @@ class SubHomeScreen extends StatefulWidget {
 }
 
 class _SubHomeScreenState extends State<SubHomeScreen> {
+   DateTime selectedStartDate = DateTime.now();
   String? _username;
   final UserDB _userDB = UserDB();
   List<Map<String, dynamic>> transactions = [];
@@ -206,6 +208,7 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
                     {
                       'icon': Icons.add_circle,
                       'title': languageProvider.translate('Transactions'),
+                      // 'screen': const BotBotScreen(),
                       'screen': const TransactionsScreen(),
                       'color': Colors.lightBlue,
                     },
@@ -370,9 +373,40 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
           ],
         ),
       ),
+       floatingActionButton: FloatingActionButton(
+        onPressed:_openAddTransactionScreen,
+        backgroundColor: const Color.fromARGB(255, 17, 215, 119),
+        child: const Icon(Icons.add),
+      ),
     );
   }
+ void _openAddTransactionScreen() async {
+    final newTransaction = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            AddTransactionScreen(selectedDate: selectedStartDate),
+      ),
+    );
 
+//  Navigator.push(
+//             context,
+//             MaterialPageRoute(
+//               builder: (context) =>
+//                   DataTransactionTable(transactions: transactions),
+//             ),
+//           );
+
+    if (newTransaction != null) {
+      final db = TransactionDB();
+      await db.addTransaction({
+        ...newTransaction,
+        'date': DateFormat('yyyy-MM-dd').format(newTransaction['date']),
+        'typeCategory': newTransaction['typeCategory'],
+      });
+      _loadTransactions();
+    }
+  }
   Future<void> _loadCurrency() async {
     final db = CurrencyDB();
     final defaultCurrency = await db.getDefaultCurrency();

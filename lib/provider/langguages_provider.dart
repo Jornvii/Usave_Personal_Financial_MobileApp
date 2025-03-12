@@ -146,7 +146,7 @@ class LanguageProvider with ChangeNotifier {
 
       'delete_data': 'Delete data',
       'delete_data_subtitle': 'Delete your chat or all data',
-      'delete_forever_warning' : 'This action cannot be recycle. Are you sure you want to delete all data?',
+      'reset_forever_warning' : 'Your Transaction data cannot be recycle. Are you sure you want to reset all data?',
       'confirm_delete': 'Confirm Delete',
       'edit_saving_goal': 'Edit Saving Goal',
       'delete_chat': 'Delete Chat Data',
@@ -271,7 +271,7 @@ class LanguageProvider with ChangeNotifier {
       'choose_delete_option': 'กรุณาเลือกลบ',
       'delete_data_subtitle': 'ลบการหรือข้อมูลทั้งหมด',
       'edit_saving_goal': 'แก้ไขเป้าหมายการออม',
-      'delete_forever_warning' : 'คุณแน่ใจหรือว่าต้องการลบข้อมูลทั้งหมด?',
+      'reset_forever_warning' : 'ข้อมูลทั้งหมดของคุณไม่สามารถคืนกลับได้ คุณแน่ใจว่าต้องการรีเซ็ตข้อมูลทั้งหมดหรือไหม?',
        'confirm_delete': 'ยืนยันการลบ',
 
       'delete_chat': 'ลบข้อมูล bot',
@@ -399,7 +399,7 @@ class LanguageProvider with ChangeNotifier {
       'delete_chat': 'លុបទិន្នន័យសារ',
       'about_us': "អំពី អ្នកបង្កើតកម្មវិធី",
       'version_app': 'កំណែ 1.0.0',
-      'delete_forever_warning' : 'បញ្ជាក់ថាអ្នកចង់លុបទិន្នន័យទាំងអស់ឬទេ? វាមិនអាចយកឡើងវិញបានទេ។',
+      'reset_forever_warning' : 'ទិន្នន័យរបស់អ្នកមិនអាចយកត្រឡប់មកវិគវិញបានទេ តើអ្នកចង់លុបឡើងទិន្នន័យទាំងអស់របស់អ្នកមែនទេ?',
       'confirm_delete': 'បញ្ជាក់លុប',
     },
   };

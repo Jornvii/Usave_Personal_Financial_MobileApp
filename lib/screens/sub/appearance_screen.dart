@@ -110,6 +110,12 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
                                 title: "Transaction Reminder",
                               );
 
+                              await notificationService
+                                  .executeSavingNotifications(
+                                id: 2,
+                                title: "Saving Reminder",
+                              );
+
                             } else {
                               LocalNotificationService()
                                   .cancelAllNotification();
@@ -130,7 +136,7 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
     );
   }
 
-// for transaction notification
+//SharedPreferences for transaction notification
   Future<void> _loadPreferencestransaction() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {

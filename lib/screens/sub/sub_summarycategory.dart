@@ -55,7 +55,13 @@ class _ReportCategoryScreenState extends State<ReportCategoryScreen> with Single
     }
 
     return categoryTotals.entries
-        .map((entry) => ChartData(entry.key, entry.value, _getCategoryColor(entry.key)))
+        .map((entry){
+          print(">>>>> ${entry.key } ${entry.key.hashCode}");
+
+          return ChartData(entry.key, entry.value,Color((entry.key.hashCode+1000)*0xFFFFFF));}
+                    // return ChartData(entry.key, entry.value, _getCategoryColor(entry.key));}
+// 
+        )
         .toList();
   }
 
@@ -65,6 +71,7 @@ class _ReportCategoryScreenState extends State<ReportCategoryScreen> with Single
       Colors.blue, Colors.green, Colors.red, Colors.orange, Colors.purple, Colors.yellow,
       Colors.teal, Colors.cyan, Colors.indigo, Colors.pink
     ];
+    print("color>>>> ${category.hashCode % colorPalette.length}");
     return colorPalette[category.hashCode % colorPalette.length];
   }
 

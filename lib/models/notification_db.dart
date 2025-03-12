@@ -26,17 +26,28 @@ class NotificationDB {
       onCreate: _onCreate,
     );
   }
+Future<void> _onCreate(Database db, int version) async {
+  await db.execute('''
+    CREATE TABLE Notifications (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      message TEXT NOT NULL,
+      time TEXT NULL,
+      timestamp INTEGER NULL,
+      isRead INTEGER DEFAULT 0  -- New column: 0 = unread, 1 = read
+    )
+  ''');
+}
 
-  Future<void> _onCreate(Database db, int version) async {
-    await db.execute('''
-      CREATE TABLE Notifications (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        message TEXT NOT NULL,
-        time TEXT NULL,
-        timestamp INTEGER NULL
-      )
-    ''');
-  }
+  // Future<void> _onCreate(Database db, int version) async {
+  //   await db.execute('''
+  //     CREATE TABLE Notifications (
+  //       id INTEGER PRIMARY KEY AUTOINCREMENT,
+  //       message TEXT NOT NULL,
+  //       time TEXT NULL,
+  //       timestamp INTEGER NULL
+  //     )
+  //   ''');
+  // }
 
   Future<int> insertNotification(Map<String, dynamic> notification) async {
     final db = await database;
@@ -80,4 +91,31 @@ class NotificationDB {
       orderBy: 'timestamp DESC',
     );
   }
+
+ Future<int> getNotificationCountToday() async {
+  final db = await database;
+
+  // Get timestamps for start and end of today
+  final now = DateTime.now();
+  final startOfDay = DateTime(now.year, now.month, now.day).millisecondsSinceEpoch;
+  final endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59).millisecondsSinceEpoch;
+
+  // Query to count only unread notifications
+  final result = await db.rawQuery(
+    'SELECT COUNT(*) as count FROM Notifications WHERE timestamp >= ? AND timestamp <= ? AND isRead = 0',
+    [startOfDay, endOfDay]
+  );
+
+  return Sqflite.firstIntValue(result) ?? 0;
+}
+Future<void> markAllNotificationsAsRead() async {
+  final db = await database;
+  await db.update(
+    'Notifications',
+    {'isRead': 1},
+    where: 'isRead = 0', // Only update unread notifications
+  );
+}
+
+
 }

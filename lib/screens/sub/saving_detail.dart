@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter_chat_bot/models/saving_goaldb.dart';
 import '../../models/transaction_db.dart';
 
 class SavingDetailScreen extends StatefulWidget {
@@ -38,6 +39,7 @@ class _SavingDetailScreenState extends State<SavingDetailScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // ElevatedButton(onPressed: _fetchSavingGoal, child: Text("data")),
               Center(
                 child: Text(
                   '${widget.category} ',
@@ -146,6 +148,16 @@ class _SavingDetailScreenState extends State<SavingDetailScreen> {
     );
   }
 
+// fetch and print saving goal and amount
+Future<void> _fetchSavingGoal() async {
+  final transactionDB = SavingGoalDB();
+  final savingGoals = await transactionDB.fetchSavingGoals();
+  print(savingGoals);
+}
+
+
+
+
   Future<void> _fetchSavingDetails() async {
     final transactionDB = TransactionDB();
 
@@ -153,9 +165,10 @@ class _SavingDetailScreenState extends State<SavingDetailScreen> {
     final transactions = await transactionDB.getTransactions();
     final categoryTransactions = transactions
         .where((transaction) =>
-            transaction['typeCategory'] == 'Saving' &&
+            transaction['typeCategory'] == 'Saving' && 
             transaction['category'] == widget.category)
         .toList();
+        print(categoryTransactions);
 
     final double total = categoryTransactions.fold(
         0.0, (sum, transaction) => sum + (transaction['amount'] ?? 0.0));

@@ -161,6 +161,7 @@ class TransactionsNotificationService {
         'message': notificationText,
         'time': _formatCurrentTime(),
         'timestamp': DateTime.now().millisecondsSinceEpoch,
+
       });
 
       return notificationText;
@@ -303,14 +304,14 @@ class TransactionsNotificationService {
     print("Notification Scheduled: $title at $hour:$minute");
   }
 
-// fucntion  for  wokring (schacule Notification  local notification and genNotificationTransaction and gNotificationSavingGoal )
+// fucntion  for  wokring (schacule Notification  local notification and genNotificationTransaction)
 
   Future<void> executeTransactionNotifications({
     required int id,
     required String title,
   }) async {
     final now = tz.TZDateTime.now(tz.local);
-    int scheduledHour = 6;
+    int scheduledHour = 12;
     int scheduledMinute = 0;
 
 
@@ -326,6 +327,70 @@ class TransactionsNotificationService {
       try {
         // Generate notification messages
         String transactionNotification = await genNotificationTransaction();
+
+        print("Transaction Notification: $transactionNotification");
+
+        // Schedule notification at the set time
+        var scheduledDate = tz.TZDateTime(tz.local, now.year, now.month,
+            now.day, scheduledHour, scheduledMinute);
+
+        // Schedule the notification
+        await notificationPlugin.zonedSchedule(
+          id,
+          title,
+          transactionNotification,
+          scheduledDate,
+          const NotificationDetails(
+            android: AndroidNotificationDetails(
+              'channel_id',
+              'Financial Updates',
+              importance: Importance.max,
+              priority: Priority.high,
+              playSound: true,
+              enableVibration: true,
+              enableLights: true,
+              styleInformation: BigTextStyleInformation(''),
+            ),
+          ),
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          matchDateTimeComponents: DateTimeComponents.time, // Repeat daily
+        );
+
+        print(
+            "Notification Scheduled: Financial Update at $scheduledHour:$scheduledMinute daily.");
+      } catch (e) {
+        print("Error executing and scheduling notifications: $e");
+      }
+    } else {
+      print(
+          "No notifications for today or it's not yet time. Skipping scheduling.");
+    }
+  }
+
+  // fucntion  for  wokring (schacule Notification  local notification and gNotificationSavingGoal)
+  Future<void> executeSavingNotifications({
+    required int id,
+    required String title,
+  }) async {
+    final now = tz.TZDateTime.now(tz.local);
+    int scheduledHour = 20;
+    int scheduledMinute = 0;
+
+
+
+    final notificationdb = NotificationDB();
+
+    // Fetch today's notifications from the database
+    List<Map<String, dynamic>> notificationstoday =
+        await notificationdb.getTodaysNotifications();
+
+    // Only proceed if there are no notifications for today and it's past the scheduled time
+    if (notificationstoday.isEmpty) {
+      try {
+        // Generate notification messages
+        String transactionNotification = await gNotificationSavingGoal();
 
         print("Transaction Notification: $transactionNotification");
 

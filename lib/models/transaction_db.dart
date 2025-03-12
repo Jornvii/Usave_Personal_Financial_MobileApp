@@ -63,11 +63,25 @@ class TransactionDB {
     );
   }
 
+  
+  
+
+
   Future<List<Map<String, dynamic>>> getTransactions() async {
     final db = await database;
     return await db.query('transactions',
         where: 'deleted = 0', orderBy: 'date DESC');
   }
+  Future<List<Map<String, dynamic>>> getSavingTransactionsByCategory(String category) async {
+  final db = await database;
+  return await db.query(
+    'transactions',
+    where: 'typeCategory = ? AND category = ? AND deleted = 0',
+    whereArgs: [2, category], // 2 represents "Saving"
+    orderBy: 'date DESC',
+  );
+}
+
     Future<List<Map<String, dynamic>>> getTransactionsToday() async {
     final db = await database;
     String today = DateFormat('yyyy-MM-dd').format(DateTime.now());

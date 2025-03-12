@@ -147,7 +147,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   decoration: InputDecoration(
                     labelText: languageProvider.translate('Amount'),
                     hintText: languageProvider.translate('Enteramount'),
-                    prefixIcon: const Icon(Icons.attach_money),
+                    prefixIcon: const Icon(Icons.payment),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),

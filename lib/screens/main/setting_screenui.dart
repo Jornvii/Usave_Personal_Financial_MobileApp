@@ -443,9 +443,13 @@ class _SettingScreenUiState extends State<SettingScreenUi> {
                   context: context,
                   builder: (BuildContext context) {
                     return AlertDialog(
-                      title: Text(languageProvider.translate('warning')),
+                      title: Text(
+                        languageProvider.translate('warning'),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, color: Colors.red),
+                      ),
                       content: Text(
-                          languageProvider.translate('delete_forever_warning')),
+                          languageProvider.translate('reset_forever_warning')),
                       actions: [
                         TextButton(
                           onPressed: () {

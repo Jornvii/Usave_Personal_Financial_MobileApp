@@ -17,7 +17,9 @@ void main() async {
   // Request Notification & Storage permissions
   await _checkAndRequestPermissions();
 
-//  await checkTransactionNotification(); 
+  // Check transaction notification setting
+  await checkTransactionNotification();
+
   // Initialize notification service
   TransactionsNotificationService().initNotification();
   LocalNotificationService().initNotification();
@@ -38,6 +40,25 @@ void main() async {
       child: const MyApp(),
     ),
   );
+}
+
+Future<void> checkTransactionNotification() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  bool isTransactionSwitched = prefs.getBool('isTransactionSwitched') ?? true;
+
+  if (isTransactionSwitched) {
+    final notificationService = TransactionsNotificationService();
+    await notificationService.initNotification();
+
+    await notificationService.executeTransactionNotifications(
+      id: 1,
+      title: "Transaction Reminder",
+    );
+    await notificationService.executeSavingNotifications(
+      id: 2,
+      title: "Saving Reminder",
+    );
+  }
 }
 
 Future<void> _checkAndRequestPermissions() async {
@@ -79,11 +100,7 @@ class MyApp extends StatelessWidget {
       themeMode: themeProvider.isDarkTheme ? ThemeMode.dark : ThemeMode.light,
       home: const SplashScreen(),
       localizationsDelegates: const [],
-      supportedLocales: const [
-        Locale('en'),
-        Locale('th'),
-        Locale('km')
-      ], 
+      supportedLocales: const [Locale('en'), Locale('th'), Locale('km')],
       locale: Locale(languageProvider.selectedLanguage.toLowerCase()),
     );
   }
@@ -98,6 +115,7 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
+  final bool _isTransactionSwitched = true;
 
   final List<Widget> _screens = [
     const MyHomePage(),
