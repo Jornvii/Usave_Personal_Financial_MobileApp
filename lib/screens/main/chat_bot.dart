@@ -233,7 +233,7 @@ void _generateResponse(String category, Map<String, String> inputs) async {
     loading = true;
     chatMessages.add({
       "role": "user",
-      "text": "Your $category with: " + inputs.entries.map((e) => "${e.key}: ${e.value}").join(" "),
+      "text": "Your $category with: ${inputs.entries.map((e) => "${e.key}: ${e.value}").join(" ")}",
     });
   });
 

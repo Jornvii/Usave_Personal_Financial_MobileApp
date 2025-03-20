@@ -6,33 +6,28 @@ class DevPfScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        backgroundColor: Colors.white,
         elevation: 0.5,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(
+            Icons.arrow_back,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'Developer Profile',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          style: TextStyle(
+              color: Colors.blueGrey,
+              fontWeight: FontWeight.bold,
+              fontSize: 18),
         ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
             borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
           ),
           padding: const EdgeInsets.symmetric(vertical: 24),
           child: const Column(
@@ -58,19 +53,25 @@ class ProfessorProfile extends StatelessWidget {
       children: [
         Text(
           'Developed Under The Giudance Of',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+          style: TextStyle(
+              color: Colors.blueGrey,
+              fontWeight: FontWeight.bold,
+              fontSize: 20),
         ),
         SizedBox(height: 12),
         ProfileImage(imagePath: 'assets/images/professor.jpg', radius: 60),
         SizedBox(height: 12),
         Text(
           'Dr. SOMMAI KHANTONG',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
+          style: TextStyle(
+              color: Colors.blueGrey,
+              fontWeight: FontWeight.bold,
+              fontSize: 22),
         ),
         SizedBox(height: 4),
         Text(
           'Director, Computer Center MSU',
-          style: TextStyle(color: Colors.blueGrey, fontSize: 18),
+          style: TextStyle(fontSize: 18),
         ),
       ],
     );
@@ -105,7 +106,8 @@ class ProfileImage extends StatelessWidget {
   final String imagePath;
   final double radius;
 
-  const ProfileImage({super.key, required this.imagePath, required this.radius});
+  const ProfileImage(
+      {super.key, required this.imagePath, required this.radius});
 
   @override
   Widget build(BuildContext context) {
