@@ -101,6 +101,11 @@ class LanguageProvider with ChangeNotifier {
       'data_exported': 'Data exported to',
 
       // bot screen
+      "AdviceBot" : "Advice Bot",
+      "pickChatBot" : "Pick a Chat Bot",
+      "CheckMySaving": "Check My Saving",
+      "GenerateFinanceAdvice": "Generate Finance Advice",
+      'analysisMyTransaction': 'Analyze my transactions',
       'chat_bot_title': 'AI Chat Bot',
       'start_chat': 'Start Chat',
       'submit': 'Submit',
@@ -228,6 +233,11 @@ class LanguageProvider with ChangeNotifier {
       'data_exported': 'ข้อมูลถูกส่งออกไปยัง',
 
       // bot screen
+      "AdviceBot" : "บอทแนะนำ",
+      "pickChatBot" : "เลือกบอท",
+      "CheckMySaving": "ตรวจสอบการออมของฉัน",
+      "GenerateFinanceAdvice": "คำแนะนำทางการเงิน",
+      'analysisMyTransaction': 'วิเคราะห์รายการของฉัน',
       'chat_bot_title': 'บอท AI',
       'start_chat': 'เริ่ม',
       'submit': 'ส่ง',
@@ -356,6 +366,11 @@ class LanguageProvider with ChangeNotifier {
       'data_exported': 'ទិន្នន័យត្រូវបាននាំចេញទៅ',
 
       // bot screen
+      "AdviceBot" : "បូតផ្តល់យោបល់",
+      "pickChatBot" : "ជ្រើសរើស ChatBot",
+      "CheckMySaving": "ពិនិត្យមើលការសន្សំរបស់ខ្ញុំ",
+      "GenerateFinanceAdvice": "ការណែនាំហិរញ្ញវត្ថុ",
+      'analysisMyTransaction': 'វិភាគប្រតិបត្តិការរបស់ខ្ញុំ',
       'chat_bot_title': 'បូត AI',
       'start_chat': 'ចាប់ផ្ដើម',
       'submit': 'បញ្ជូន',

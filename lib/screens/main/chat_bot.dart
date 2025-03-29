@@ -1,8 +1,10 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_bot/models/chat_db.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:provider/provider.dart';
+import '../../models/transaction_db.dart';
+import '../../provider/langguages_provider.dart';
 
 class ChatBotScreen extends StatefulWidget {
   const ChatBotScreen({super.key});
@@ -18,24 +20,29 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
   String selectLanguage = 'English';
   GenerativeModel? _model;
   ChatSession? _chat;
-@override
-void initState() {
-  super.initState();
-  _initializeChat();
-  _loadChatMessages();
-}
+  final TransactionDB transactionDB = TransactionDB();
+  @override
+  void initState() {
+    super.initState();
+    _initializeChat();
+    _loadChatMessages();
+  }
 
-Future<void> _loadChatMessages() async {
-  final messages = await ChatDB.instance.fetchChatMessages();
-  setState(() {
-    chatMessages = messages.map((msg) {
-      return {
-        "role": msg['role'] as String,
-        "text": msg['text'] as String,
-      };
-    }).toList().cast<Map<String, String>>();
-  });
-}
+  Future<void> _loadChatMessages() async {
+    final messages = await ChatDB.instance.fetchChatMessages();
+    setState(() {
+      chatMessages = messages
+          .map((msg) {
+            return {
+              "role": msg['role'] as String,
+              "text": msg['text'] as String,
+            };
+          })
+          .toList()
+          .cast<Map<String, String>>();
+    });
+  }
+
   void _initializeChat() async {
     const apiKey = 'AIzaSyDP9iwhVwLh0_32bdcoQI_obhsyJF9r5oE';
     if (apiKey.isEmpty) {
@@ -172,10 +179,195 @@ Future<void> _loadChatMessages() async {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) => _buildOptionsMenu(),
+      builder: (context) => _showChatSelectionMenu(),
     );
   }
 
+  Widget _showChatSelectionMenu() {
+    final languageProvider = Provider.of<LanguageProvider>(context);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const SizedBox(height: 12),
+        Container(
+          width: 40,
+          height: 5,
+          decoration: BoxDecoration(
+            color: Colors.grey[300],
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          languageProvider.translate("pickChatBot"),
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 12),
+          ListTile(
+          leading:
+              const Icon(Icons.account_balance_wallet, color: Colors.orange),
+          title: Text(languageProvider.translate("analysisMyTransaction")),
+          onTap: () {
+            Navigator.pop(context);
+            _checkMyTransaction();
+          },
+        ),
+        // ListTile(
+        //   leading: const Icon(Icons.chat, color: Colors.green),
+        //   title: const Text("Ai Bot"),
+        //   onTap: () {
+        //     Navigator.pop(context); // Close the selection menu
+        //     transactionchatBot(); 
+        //   },
+        // ),
+        ListTile(
+          leading: const Icon(Icons.lightbulb, color: Colors.blue),
+          title: Text(languageProvider.translate("AdviceBot")),
+          onTap: () {
+            Navigator.pop(context); // Close previous modal
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+              ),
+              builder: (context) => _buildOptionsMenu(),
+            );
+          },
+        ),
+        const SizedBox(height: 22),
+      ],
+    );
+  }
+
+  void transactionchatBot() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => _showTransactionOptions(),
+    );
+  }
+
+  Widget _showTransactionOptions() {
+    final languageProvider = Provider.of<LanguageProvider>(context);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const SizedBox(height: 12),
+        Container(
+          width: 40,
+          height: 5,
+          decoration: BoxDecoration(
+            color: Colors.grey[300],
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          languageProvider.translate("GenerateFinanceAdvice"),
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 12),
+        ListTile(
+          leading:
+              const Icon(Icons.account_balance_wallet, color: Colors.orange),
+          title: Text(languageProvider.translate("analysisMyTransaction")),
+          onTap: () {
+            Navigator.pop(context);
+            _checkMyTransaction();
+          },
+        ),
+        ListTile(
+          leading: const Icon(Icons.savings, color: Colors.green),
+          title: Text(languageProvider.translate("CheckMySaving")),
+          // "CheckMySaving"
+          onTap: () {
+            Navigator.pop(context);
+            _checkMySaving();
+          },
+        ),
+        const SizedBox(height: 22),
+      ],
+    );
+  }
+
+  Future<void> _checkMyTransaction() async {
+    try {
+      final transactions = await transactionDB.getTransactions();
+
+      double totalIncome = 0.0;
+      double totalExpenses = 0.0;
+      double totalSaving = 0.0;
+      Map<String, double> categoryExpenses = {};
+
+      for (var transaction in transactions) {
+        final type = transaction['typeCategory'];
+        final amount =
+            (transaction['amount'] as num).toDouble(); // Ensure double
+        final category = transaction['category'] ?? "Uncategorized";
+
+        if (type == 'Income') {
+          totalIncome += amount;
+        } else if (type == 'Expense') {
+          totalExpenses += amount;
+          categoryExpenses[category] =
+              (categoryExpenses[category] ?? 0) + amount;
+        } else if (type == 'Saving') {
+          totalSaving += amount;
+        }
+      }
+
+      double balance = totalIncome - totalExpenses;
+
+      // Convert categoryExpenses to String format
+      String expenseDetails = categoryExpenses.entries
+          .map((e) => "${e.key} \$${e.value.toStringAsFixed(2)}")
+          .join(" ");
+
+      // Create financial summary inputs
+      Map<String, String> financialData = {
+        "Total Income": "\$${totalIncome.toStringAsFixed(2)}",
+        "Total Expenses": "\$${totalExpenses.toStringAsFixed(2)}",
+        "Total Saving": "\$${totalSaving.toStringAsFixed(2)}",
+        "Balance": "\$${balance.toStringAsFixed(2)}",
+        "Key Expense Categories": expenseDetails,
+      };
+
+      // Call _generateResponse() correctly
+      _generateResponse("Your financial summary", financialData);
+    } catch (e) {
+      print("Error checking transactions: $e");
+    }
+  }
+
+  void _checkMySaving() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Your Savings"),
+          content: const Text("Here is your current savings balance..."),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+// ---------------------------------------
   Widget _buildOptionsMenu() {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -187,6 +379,14 @@ Future<void> _loadChatMessages() async {
           decoration: BoxDecoration(
             color: Colors.grey[300],
             borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        const SizedBox(height: 12),
+        const Text(
+          "General Finance Advice",
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 12),
@@ -228,59 +428,59 @@ Future<void> _loadChatMessages() async {
           _generateResponse(title.toLowerCase(), inputs);
         });
   }
-void _generateResponse(String category, Map<String, String> inputs) async {
-  setState(() {
-    loading = true;
-    chatMessages.add({
-      "role": "user",
-      "text": "Your $category with: ${inputs.entries.map((e) => "${e.key}: ${e.value}").join(" ")}",
-    });
-  });
 
-  final enrichedQuery = """
-  Category: $category
-  Inputs: ${inputs.entries.map((e) => "${e.key}: ${e.value}").join(", ")}
-  Please provide calculations, suggestions, and improvement tips for my $category. Respond in $selectLanguage concisely.
+  void _generateResponse(String category, Map<String, String> inputs) async {
+    setState(() {
+      loading = true;
+      chatMessages.add({
+        "role": "user",
+        "text":
+            " $category with ${inputs.entries.map((e) => "${e.key}: ${e.value}").join(" ")}",
+      });
+    });
+
+    final enrichedQuery = """
+  $category which ${inputs.entries.map((e) => "${e.key}: ${e.value}").join(", ")}. Please provide calculations, suggestions, and improvement tips for my $category. Respond in $selectLanguage concisely.
   """;
 
-  try {
-    final content = Content.text(enrichedQuery);
-    final response = await _chat!.sendMessage(content);
-    final responseText = _sanitizeResponse(response.text ?? "No response");
+    try {
+      final content = Content.text(enrichedQuery);
+      final response = await _chat!.sendMessage(content);
+      final responseText = _sanitizeResponse(response.text ?? "No response");
 
-    // Add the bot response to chatMessages
-    setState(() {
-      loading = false;
-      chatMessages.add({
-        "role": "bot",
-        "text": responseText,
+      // Add the bot response to chatMessages
+      setState(() {
+        loading = false;
+        chatMessages.add({
+          "role": "bot",
+          "text": responseText,
+        });
       });
-    });
 
-    // Save the conversation to the database
-    final currentTime = DateTime.now().millisecondsSinceEpoch;
-    await ChatDB.instance.insertChatMessage({
-      'role': 'user',
-      'text': enrichedQuery,
-      'timestamp': currentTime,
-    });
-    await ChatDB.instance.insertChatMessage({
-      'role': 'bot',
-      'text': responseText,
-      'timestamp': currentTime,
-    });
-  } catch (e) {
-    setState(() {
-      loading = false;
-      chatMessages.add({
-        "role": "bot",
-        "text": "Error: ${e.toString()}",
+      // Save the conversation to the database
+      final currentTime = DateTime.now().millisecondsSinceEpoch;
+      await ChatDB.instance.insertChatMessage({
+        'role': 'user',
+        'text': enrichedQuery,
+        'timestamp': currentTime,
       });
-    });
+      await ChatDB.instance.insertChatMessage({
+        'role': 'bot',
+        'text': responseText,
+        'timestamp': currentTime,
+      });
+    } catch (e) {
+      setState(() {
+        loading = false;
+        chatMessages.add({
+          "role": "bot",
+          "text": "Error: ${e.toString()}",
+        });
+      });
+    }
+
+    _scrollToBottom();
   }
-
-  _scrollToBottom();
-}
 
   String _sanitizeResponse(String text) {
     text = text.replaceAll(RegExp(r'\*+'), '');

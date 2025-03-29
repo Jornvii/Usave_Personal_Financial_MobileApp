@@ -119,7 +119,7 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _screens = [
     const MyHomePage(),
-    const ChatBotScreen(),
+     const ChatBotScreen(),
     const SettingScreenUi(
       transactions: [],
     ),

@@ -25,7 +25,7 @@ class SubHomeScreen extends StatefulWidget {
 }
 
 class _SubHomeScreenState extends State<SubHomeScreen> {
-   DateTime selectedStartDate = DateTime.now();
+  DateTime selectedStartDate = DateTime.now();
   String? _username;
   final UserDB _userDB = UserDB();
   List<Map<String, dynamic>> transactions = [];
@@ -373,14 +373,15 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
           ],
         ),
       ),
-       floatingActionButton: FloatingActionButton(
-        onPressed:_openAddTransactionScreen,
+      floatingActionButton: FloatingActionButton(
+        onPressed: _openAddTransactionScreen,
         backgroundColor: const Color.fromARGB(255, 17, 215, 119),
         child: const Icon(Icons.add),
       ),
     );
   }
- void _openAddTransactionScreen() async {
+
+  void _openAddTransactionScreen() async {
     final newTransaction = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -407,6 +408,7 @@ class _SubHomeScreenState extends State<SubHomeScreen> {
       _loadTransactions();
     }
   }
+
   Future<void> _loadCurrency() async {
     final db = CurrencyDB();
     final defaultCurrency = await db.getDefaultCurrency();

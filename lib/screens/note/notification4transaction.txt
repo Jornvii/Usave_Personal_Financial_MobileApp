@@ -59,7 +59,7 @@ class TransactionsNotificationService {
     return timeFormat.format(DateTime.now());
   }
 
-  // Generate Transaction Notification
+  // Generate Transaction Advice
   Future<String> genNotificationTransaction() async {
     try {
       final transactions = await transactionDB.getTransactions();
