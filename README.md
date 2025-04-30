@@ -1,19 +1,19 @@
-# iSave
+# Usave
 
 ## Personal Financial Management Mobile Application
 
-iSave is a personal financial management mobile application designed to help users track their daily income, expenses, and savings. Users can set savings goals and monitor their progress over time. One of the standout features of iSave is its integration with the Google Gemini API, which provides personalized financial insights and daily notifications based on user transaction data. These AI-generated recommendations help users improve their financial management skills day by day.
+Usave is a personal financial management mobile application designed to help users track their daily income, expenses, and savings. Users can set savings goals and monitor their progress over time. One of the standout features of Usave is its integration with the Google Gemini API, which provides personalized financial insights and daily notifications based on user transaction data. These AI-generated recommendations help users improve their financial management skills day by day.
 
-iSave is built using **Flutter** with the **Dart** programming language. It utilizes **SQLite** for local data storage, ensuring maximum security for personal financial data as all information is stored directly on the user’s device. Unlike cloud-based financial apps, iSave operates entirely offline, reducing the risk of data breaches and unauthorized access. By storing financial data locally, users maintain full control over their sensitive information without the need for an internet connection. This makes iSave an ideal choice for individuals who prioritize privacy and data security while managing their finances efficiently.
+Usave is built using **Flutter** with the **Dart** programming language. It utilizes **SQLite** for local data storage, ensuring maximum security for personal financial data as all information is stored directly on the user’s device. Unlike cloud-based financial apps, Usave operates entirely offline, reducing the risk of data breaches and unauthorized access. By storing financial data locally, users maintain full control over their sensitive information without the need for an internet connection. This makes Usave an ideal choice for individuals who prioritize privacy and data security while managing their finances efficiently.
 
 ---
 
 ## Features & Screens
 
-iSave features a **bottom navigation bar** with three primary sections: **Home, Chatbot, and Settings.**
+Usave features a **bottom navigation bar** with three primary sections: **Home, Chatbot, and Settings.**
 
 ### Home Screen
-The home screen is designed with a clean and user-friendly UI. At the top, it displays the iSave logo and a notification icon, allowing users to read AI-generated financial notifications. Below that, the app greets users based on the time of day (e.g., "Good morning").
+The home screen is designed with a clean and user-friendly UI. At the top, it displays the Usave logo and a notification icon, allowing users to read AI-generated financial notifications. Below that, the app greets users based on the time of day (e.g., "Good morning").
 
 #### Main Menu:
 - **Data Category:** View and organize transactions based on predefined or custom categories to analyze spending habits and track financial patterns.
@@ -51,22 +51,6 @@ The settings screen allows users to customize various aspects of the app. It inc
 - **About Developer:** Displays developer profile and contact information.
 - **Open Source Licenses:** Lists all open-source libraries used in the app.
 
----
-
-## Database Schema
-
-iSave uses **SQLite** for local data storage, ensuring security and fast performance.
-
-### Entity-Relationship Diagram (ERD)
-#### Tables & Attributes:
-- **User:** `user_id`, `user_name`, `timestamp`
-- **Transaction:** `transaction_id`, `category`, `amount`, `type_of_category`, `detail`, `date`, `timestamp`
-- **Type:** `type_id`, `type_of_category`, `timestamp`
-- **Category:** `category_id`, `category`
-- **Saving Goal:** `savinggoal_id`, `saving_goal`, `saving_amount`
-
----
-
 ## Technologies Used
 - **Framework:** Flutter
 - **Language:** Dart
@@ -79,10 +63,5 @@ iSave uses **SQLite** for local data storage, ensuring security and fast perform
 - **Offline-First:** All data is stored locally, ensuring privacy.
 - **No Cloud Storage:** Eliminates risk of data leaks or unauthorized access.
 - **User Control:** Users have full control over their financial data.
-
----
-
-
-**iSave - Manage Your Finances, Securely & Efficiently!**
 
 
