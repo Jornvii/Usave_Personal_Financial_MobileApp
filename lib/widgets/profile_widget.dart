@@ -102,7 +102,7 @@ class _UserProfileWidgetState extends State<UserProfileWidget> {
                   backgroundImage: AssetImage('assets/images/logoapp.png'),
                 ),
               ),
-              Text("iSAVE",style: TextStyle(    fontWeight: FontWeight.w900,fontSize: 24),)
+              Text("Usave",style: TextStyle(    fontWeight: FontWeight.w900,fontSize: 24),)
             ],
           ),
         ),

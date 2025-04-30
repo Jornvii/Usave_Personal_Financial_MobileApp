@@ -94,7 +94,7 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'iSave',
+      title: 'U-save',
       theme: themeProvider.lightTheme,
       darkTheme: themeProvider.darkTheme,
       themeMode: themeProvider.isDarkTheme ? ThemeMode.dark : ThemeMode.light,

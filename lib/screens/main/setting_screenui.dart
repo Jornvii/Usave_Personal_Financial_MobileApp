@@ -318,7 +318,7 @@ class _SettingScreenUiState extends State<SettingScreenUi> {
     return AnimatedTextKit(
       animatedTexts: [
         ColorizeAnimatedText(
-          'iSAVE',
+          'Usave',
           textStyle: colorizeTextStyle.copyWith(fontWeight: FontWeight.bold),
           colors: colorizeColors,
         ),

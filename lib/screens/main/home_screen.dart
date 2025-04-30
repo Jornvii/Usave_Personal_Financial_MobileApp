@@ -129,7 +129,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return AnimatedTextKit(
       animatedTexts: [
         ColorizeAnimatedText(
-          'iSAVE',
+          'Usave',
           textStyle: colorizeTextStyle.copyWith(fontWeight: FontWeight.bold),
           colors: colorizeColors,
         ),

@@ -64,7 +64,7 @@ class _SplashScreenState extends State<SplashScreen>
             Column(
               children: [
                 animationTypeText(
-                  "iSave",
+                  "U-save",
                   50,
                   const Color.fromARGB(255, 17, 215, 119),
                   FontWeight.bold,

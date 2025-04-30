@@ -170,7 +170,7 @@ class ProjectDescription extends StatelessWidget {
               style: TextStyle(color: Colors.grey, fontSize: 14, height: 1.5),
             ),
             TextSpan(
-              text: 'iSAVE',
+              text: 'Usave',
               style: TextStyle(
                   color: Colors.blue,
                   fontSize: 14,
@@ -182,7 +182,7 @@ class ProjectDescription extends StatelessWidget {
               style: TextStyle(color: Colors.grey, fontSize: 14, height: 1.5),
             ),
             TextSpan(
-              text: 'iSAVE',
+              text: 'Usave',
               style: TextStyle(
                   color: Colors.blue,
                   fontSize: 14,

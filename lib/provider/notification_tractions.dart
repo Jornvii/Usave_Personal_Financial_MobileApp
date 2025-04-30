@@ -316,14 +316,11 @@ class TransactionsNotificationService {
 
 
 
-    final notificationdb = NotificationDB();
+    // final notificationdb = NotificationDB();
+    // List<Map<String, dynamic>> notificationstoday =
+    //     await notificationdb.getTodaysNotifications();
 
-    // Fetch today's notifications from the database
-    List<Map<String, dynamic>> notificationstoday =
-        await notificationdb.getTodaysNotifications();
-
-    // Only proceed if there are no notifications for today and it's past the scheduled time
-    if (notificationstoday.isEmpty) {
+    // // if (notificationstoday.isEmpty) {
       try {
         // Generate notification messages
         String transactionNotification = await genNotificationTransaction();
@@ -363,10 +360,7 @@ class TransactionsNotificationService {
       } catch (e) {
         print("Error executing and scheduling notifications: $e");
       }
-    } else {
-      print(
-          "No notifications for today or it's not yet time. Skipping scheduling.");
-    }
+   
   }
 
   // fucntion  for  wokring (schacule Notification  local notification and gNotificationSavingGoal)

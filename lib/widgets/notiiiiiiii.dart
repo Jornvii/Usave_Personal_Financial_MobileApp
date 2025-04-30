@@ -31,7 +31,7 @@ class _TestNotificatioScreenState extends State<TestNotificatioScreen> {
               onPressed: () {
                 // show notification
                 LocalNotificationService().showNotification(
-                  title: "iSAVE",
+                  title: "Usave",
                   body: "Hello Do you have any transaction today?",
                 );
               },
@@ -42,7 +42,7 @@ class _TestNotificatioScreenState extends State<TestNotificatioScreen> {
               ),
               onPressed: () {
                 LocalNotificationService().schaduleNotification(
-                  title: "iSAVE",
+                  title: "Usave",
                   body: "Hello today pek ot?",
                   hour: 09,
                   minute: 00,
@@ -76,7 +76,7 @@ class _TestNotificatioScreenState extends State<TestNotificatioScreen> {
             ),
             onPressed: () {
               LocalNotificationService().schaduleNotification(
-                title: "iSAVE",
+                title: "Usave",
                 body: "Hello! Don't forget your transactions today!",
                 hour: 9,
                 minute: 0,
